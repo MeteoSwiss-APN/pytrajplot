@@ -2,7 +2,7 @@
 pytrajplot
 ==========
 
-Michel Zeller's pytrajplot
+PyTrajPlot is a Python-based tool to visualize trajectories (to be continued)
 
 Features
 --------
