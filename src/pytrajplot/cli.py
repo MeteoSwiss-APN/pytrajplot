@@ -1,12 +1,14 @@
 """Command line interface of pytrajplot."""
 # Standard library
 import logging
+import os
 
 # Third-party
 import click
 
 # Local
 from . import __version__
+from .get_data import *
 from .utils import count_to_log_level
 
 
@@ -31,21 +33,7 @@ from .utils import count_to_log_level
     help="Print version",
 )
 def main(*, dry_run: bool, verbose: int, version: bool) -> None:
-    logging.basicConfig(level=count_to_log_level(verbose))
-
-    logging.warning("This is a warning.")
-    logging.info("This is an info message.")
-    logging.debug("This is a debug message.")
-
-    if version:
-        click.echo(__version__)
-        return
-
-    if dry_run:
-        click.echo("Is dry run")
-        return
-
-    click.echo(
-        "Replace this message by putting your code into test_cli_project.cli.main"
-    )
-    click.echo("See click documentation at http://click.pocoo.org/")
+    plot_steps = True  # TODO: make optional parameter
+    # plot_info = read_plot_info()
+    startf = read_startf()
+    print("--- Done.")
