@@ -33,7 +33,10 @@ from .utils import count_to_log_level
     help="Print version",
 )
 def main(*, dry_run: bool, verbose: int, version: bool) -> None:
-    plot_steps = True  # TODO: make optional parameter
     # plot_info = read_plot_info()
-    startf = read_startf()
+    # startf = read_startf()
+    # plot_info_dict = check_input_dir()
+    # print(f'plot_info_dict: \n {plot_info_dict} \n')
+    read_tra_files()
+
     print("--- Done.")
