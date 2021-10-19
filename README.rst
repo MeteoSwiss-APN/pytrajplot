@@ -2,7 +2,7 @@
 pytrajplot
 ==========
 
-PyTrajPlot is a Python-based tool to visualize trajectories (to be continued)
+PyTrajPlot is a Python-based tool to visualize trajectories. (to be continued)
 
 Features
 --------
