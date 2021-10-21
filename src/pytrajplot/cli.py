@@ -1,5 +1,6 @@
 """Command line interface of pytrajplot."""
 # Standard library
+import json
 import logging
 import os
 
@@ -13,36 +14,38 @@ from .utils import count_to_log_level
 
 
 @click.command()
+@click.argument("dir_path", type=click.Path(exists=True))
 @click.option(
-    "--dry-run",
-    "-n",
-    flag_value="dry_run",
-    default=False,
-    help="Perform a trial run with no changes made",
+    "--start-prefix",
+    default="startf_",
+    type=str,
+    help="Prefix for the start files. Default: startf_",
 )
 @click.option(
-    "--verbose",
-    "-v",
-    count=True,
-    help="Increase verbosity (specify multiple times for more)",
+    "--traj-prefix",
+    default="tra_geom_",
+    type=str,
+    help="Prefix for the start files. Default: tra_geom_",
 )
 @click.option(
-    "--version",
-    "-V",
-    is_flag=True,
-    help="Print version",
+    "--info-prefix",
+    default="plot_info",
+    type=str,
+    help="Prefix for the plot info files. Default: plot_info",
 )
-def main(*, dry_run: bool, verbose: int, version: bool) -> None:
-    # plot_info = read_plot_info(os.getcwd() + "/zmichel/21101100_407/lagranto_c/plot_info")
+def main(*, dir_path, start_prefix: str, traj_prefix: str, info_prefix: str) -> None:
 
-    # plot_info_dict = check_input_dir()
-    # print(f'plot_info_dict: \n {plot_info} \n')
-    start_df = read_startf(
-        os.getcwd() + "/zmichel/21101100_407/lagranto_c/startf_003-033F"
-    )
-    traj_df = read_tra_files(
-        os.getcwd() + "/zmichel/21101100_407/lagranto_c/tra_geom_003-033F",
-        start_df=start_df,
+    path = os.getcwd() + "/zmichel/HRES/lagranto_c/"
+    # these prefixes should be cli !
+
+    prefix_dict = {
+        "start": start_prefix,
+        "trajectory": traj_prefix,
+        "plot_info": info_prefix,
+    }
+
+    plot_info_dict, trajectory_dict, keys = check_input_dir(
+        dir_path=dir_path, prefix_dict=prefix_dict
     )
 
     print("--- Done.")
