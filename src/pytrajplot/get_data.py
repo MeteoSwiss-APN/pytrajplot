@@ -377,7 +377,7 @@ def check_input_dir(
                 files.append(filename)
                 plot_info_dict = read_plot_info(plot_info_path=file_path)
 
-    if True:
+    if False:
         # print('Plot info dict:\n', plot_info_dict)
         print("Trajectory dict:\n", trajectory_dict)
         # print('Keys:\n', keys)
