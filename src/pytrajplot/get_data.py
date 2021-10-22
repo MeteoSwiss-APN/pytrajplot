@@ -8,6 +8,9 @@ import numpy as np
 import pandas as pd
 
 pd.options.mode.chained_assignment = None  # default='warn'
+# Standard library
+import datetime
+from datetime import timedelta
 
 # import pdb  # use: python debugger, i.e. pdb.set_trace()
 
@@ -126,135 +129,32 @@ def traj_helper_fct(case, file_path, firstline, start_df):
     return number_of_trajectories, number_of_times
 
 
-# old version of read_trajectory
-if False:
+def convert_time(plot_info_dict, traj_df, case):
+    init_time = plot_info_dict["mbt"][:16]
+    format = "%Y-%m-%d %H:%M"
+    dt_object = datetime.datetime.strptime(init_time, format)
+    counter = 0
+    for row in traj_df["time"]:
+        if case == "HRES":
+            delta_t = abs(row)
+            if ".3" in str(delta_t):
+                delta_t = delta_t + 0.2
 
-    def read_trajectory(trajectory_file_path, start_df):
-        if plot_steps:
-            print("--- reading trajectory file")
+            date = dt_object - timedelta(hours=delta_t)
 
-        # read first line of trajectory file to check which case it is.
-        with open(trajectory_file_path) as f:
-            firstline = f.readline().rstrip()
-            print(firstline)
+        if case == "COSMO":
+            delta_t = float(row)
+            date = dt_object + timedelta(hours=delta_t)
 
-        if firstline[:8] == "LAGRANTO":  # COSMO trajectory file
-            case = "COSMO"
-
-            number_of_trajectories, number_of_times = traj_helper_fct(
-                case=case,
-                file_path=trajectory_file_path,
-                firstline=firstline,
-                start_df=start_df,
-            )
-
-            # header_line = pd.read_csv(
-            #     trajectory_file_path,
-            #     skiprows=19,
-            #     skipfooter=0,
-            #     nrows=1,
-            #     sep=" ",
-            #     header=None,
-            #     engine="python",
-            #     skipinitialspace=True,
-            # )
-
-            traj_df = pd.read_csv(
-                trajectory_file_path,
-                skiprows=21,
-                skipfooter=0,
-                sep=" ",
-                # names=header_line.values.astype(str)[0, :], # just pre-define the keys, don't take them from the header line in the tra_geom file
-                names=["time", "lon", "lat", "z", "hsurf"],
-                engine="python",
-                skipinitialspace=True,
-            )
-
-            traj_df["z"] = traj_df["z"].clip(
-                lower=0
-            )  # remove negative values in z column
-            traj_df["hsurf"] = traj_df["hsurf"].clip(
-                lower=0
-            )  # remove negative values in hsurf column
-            traj_df.dropna(
-                subset=["lon"], inplace=True
-            )  # remove rows containing only the origin/z_type
-            traj_df["z_type"] = None  # add z_type key to dataframe
-            traj_df["origin"] = None  # add origin key to dataframe
-
-            tmp = 0
-            while tmp < number_of_trajectories:
-                lower_row = tmp * number_of_times
-                upper_row = tmp * number_of_times + number_of_times
-                # print(traj_df['time'][lower_row:upper_row]) # check which rows are being changed
-                z_type = start_df["z_type"][tmp]
-                origin = start_df["origin"][tmp]
-                traj_df["z_type"].iloc[lower_row:upper_row] = z_type
-                traj_df["origin"].iloc[lower_row:upper_row] = origin
-                tmp += 1
-            return traj_df
-
-        if firstline[:9] == "Reference":  # HRES trajectory file
-            case = "HRES"
-
-            number_of_trajectories, number_of_times = traj_helper_fct(
-                case=case,
-                file_path=trajectory_file_path,
-                firstline=firstline,
-                start_df=start_df,
-            )
-
-            # header_line = pd.read_csv(
-            #     trajectory_file_path,
-            #     skiprows=1,
-            #     skipfooter=0,
-            #     nrows=1,
-            #     sep=" ",
-            #     header=None,
-            #     engine="python",
-            #     skipinitialspace=True,
-            # )
-            # header_line.to_csv('header.csv')
-
-            traj_df = pd.read_csv(
-                trajectory_file_path,
-                skiprows=5,
-                skipfooter=0,
-                sep=" ",
-                # names=header_line.values.astype(str)[0, :],
-                names=[
-                    "time",
-                    "lon",
-                    "lat",
-                    "z",
-                    "hsurf",
-                ],  # to make the header uniform for both types of tra_geom files
-                engine="python",
-                skipinitialspace=True,
-            )
-
-            traj_df["z_type"] = "z_type_tmp"  # add z_type key to dataframe
-            traj_df["origin"] = "origin_tmp"  # add origin key to dataframe
-
-            if True:
-                tmp = 0
-                while tmp < number_of_trajectories:
-                    lower_row = tmp * number_of_times
-                    upper_row = tmp * number_of_times + number_of_times
-                    print(
-                        traj_df["time"][lower_row:upper_row]
-                    )  # check which rows are being changed
-                    z_type = start_df["z_type"][tmp]
-                    origin = start_df["origin"][tmp]
-                    traj_df["z_type"].iloc[lower_row:upper_row] = z_type
-                    traj_df["origin"].iloc[lower_row:upper_row] = origin
-                    tmp += 1
-
-            # traj_df.to_csv('trajectory.csv', index=False)
-            return traj_df
+        traj_df.iat[
+            counter, 0
+        ] = date  # replace the elapsed time with the corresponding datetime object
+        counter += 1
+    traj_df.to_csv("src/pytrajplot/plt/traj.csv", index=False)
+    return traj_df
 
 
-def read_trajectory(trajectory_file_path, start_df):
+def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     if plot_steps:
         print("--- reading trajectory file")
 
@@ -311,19 +211,26 @@ def read_trajectory(trajectory_file_path, start_df):
 
     traj_df["z_type"] = None  # add z_type key to dataframe
     traj_df["origin"] = None  # add origin key to dataframe
+    traj_df["#trajectories"] = number_of_trajectories
+    traj_df["block_length"] = number_of_times
 
-    tmp = 0
-    while tmp < number_of_trajectories:
-        lower_row = tmp * number_of_times
-        upper_row = tmp * number_of_times + number_of_times
-        # print(traj_df['time'][lower_row:upper_row]) # check which rows are being changed
-        z_type = start_df["z_type"][tmp]
-        origin = start_df["origin"][tmp]
-        traj_df["z_type"].iloc[lower_row:upper_row] = z_type
-        traj_df["origin"].iloc[lower_row:upper_row] = origin
-        tmp += 1
+    # add z_type and origin columns to trajectory dataframe
+    if True:
+        tmp = 0
+        while tmp < number_of_trajectories:
+            lower_row = tmp * number_of_times
+            upper_row = tmp * number_of_times + number_of_times
+            # print(traj_df['time'][lower_row:upper_row]) # check which rows a
+            # re being changed
+            z_type = start_df["z_type"][tmp]
+            origin = start_df["origin"][tmp]
+            traj_df["z_type"].iloc[lower_row:upper_row] = z_type
+            traj_df["origin"].iloc[lower_row:upper_row] = origin
+            tmp += 1
 
-    return traj_df
+    traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
+
+    return traj_df, number_of_trajectories, number_of_times
 
 
 def check_input_dir(
@@ -333,25 +240,34 @@ def check_input_dir(
         print("--- iterating through input directory")
 
     counter = 0
-    start_dict, trajectory_dict, files, keys = {}, {}, [], []
+    start_dict, trajectory_dict, files, keys, traj_blocks = {}, {}, [], [], {}
 
-    # iterate through the directory, first reading the start files (necessary, to parse the HRES tra_geom files)
+    # iterate through the directory, first reading the start & plot_info files (necessary, to parse the trajectory files afterwards)
     for filename in os.listdir(dir_path):
 
         file_path = os.path.join(dir_path, filename)
-
         if os.path.isfile(file_path):
-
             if filename[: len(prefix_dict["start"])] == prefix_dict["start"]:
                 files.append(filename)
 
                 if filename[len(prefix_dict["start"]) :] not in keys:
-                    keys.append(filename[len(prefix_dict["start"]) :])
+                    keys.append(
+                        filename[len(prefix_dict["start"]) :]
+                    )  # append keys of trajectory_df to a list for later use
+
+                    traj_blocks[filename[len(prefix_dict["start"]) :]] = {
+                        "number_of_times": 0,
+                        "number_of_trajectories": 0,
+                    }  # create for each start/traj pair a dict, containing the length of a trajectory block
 
                 counter += 1
                 start_dict[filename[len(prefix_dict["start"]) :]] = read_startf(
                     startf_path=file_path
                 )
+
+            if filename[: len(prefix_dict["plot_info"])] == prefix_dict["plot_info"]:
+                files.append(filename)
+                plot_info_dict = read_plot_info(plot_info_path=file_path)
 
     # iterate through the directory, reading the trajectory and plot_info file after having read the start file
     for filename in os.listdir(dir_path):
@@ -365,21 +281,26 @@ def check_input_dir(
                 # if filename[len(prefix_dict['trajectory']):] not in keys:
                 #     keys.append(filename[len(prefix_dict['trajectory']):])
 
-                trajectory_dict[
-                    filename[len(prefix_dict["trajectory"]) :]
-                ] = read_trajectory(
+                (
+                    trajectory_dict[filename[len(prefix_dict["trajectory"]) :]],
+                    number_of_trajectories,
+                    number_of_times,
+                ) = read_trajectory(
                     trajectory_file_path=file_path,
                     start_df=start_dict[filename[len(prefix_dict["trajectory"]) :]],
+                    plot_info_dict=plot_info_dict,
                 )
 
-        if os.path.isfile(file_path):
-            if filename[: len(prefix_dict["plot_info"])] == prefix_dict["plot_info"]:
-                files.append(filename)
-                plot_info_dict = read_plot_info(plot_info_path=file_path)
+                traj_blocks[filename[len(prefix_dict["trajectory"]) :]][
+                    "number_of_times"
+                ] = number_of_times
+                traj_blocks[filename[len(prefix_dict["trajectory"]) :]][
+                    "number_of_trajectories"
+                ] = number_of_trajectories
 
     if False:
-        # print('Plot info dict:\n', plot_info_dict)
+        print("Plot info dict:\n", plot_info_dict)
         print("Trajectory dict:\n", trajectory_dict)
-        # print('Keys:\n', keys)
+        print("Keys:\n", keys)
 
-    return plot_info_dict, trajectory_dict, keys
+    return plot_info_dict, trajectory_dict, keys, traj_blocks
