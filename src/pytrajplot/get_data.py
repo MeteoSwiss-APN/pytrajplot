@@ -43,24 +43,6 @@ def read_plot_info(plot_info_path):
     return plot_info_dict
 
 
-# not sure if needed in the future, thus just commented out
-if False:
-    # TODO: rewrite functions, s.t. it doesnt alter the start_df dataframe
-    def count_unique_origins(data):
-        # print(data["origin"])
-        i = 0
-        for str in data["origin"]:
-            # print(str)
-            if "~" in str:
-                data["origin"].iloc[i] = str[
-                    : (len(str) - 2)
-                ]  # data["origin"][i] = str[: (len(str) - 2)]
-            i += 1
-        # print(data["origin"])
-        unique_origins = data["origin"].nunique()
-        return unique_origins
-
-
 def read_startf(startf_path):
     if plot_steps:
         print("--- reading startf file")
@@ -76,12 +58,33 @@ def read_startf(startf_path):
         skipinitialspace=True,
     )
 
-    # start_df_tmp = start_df
-    # this function call also alters the origins column in the start_df, which it shouldn't!
-    # unique_origins = count_unique_origins(data=start_df_tmp)
-    # print(f'number of unique origins: {unique_origins}')
+    start_df["side_traj"] = None  # 1 if there are side trajectories, else 0
+    start_df["altitude_levels"] = None
+    i = 0
+    unique_origins_list = []
+    while i < len(start_df):
+        if i < len(start_df) - 1:
+            if (
+                "~" in start_df["origin"].loc[i + 1]
+            ):  # TODO: the separator '~' should be CLI!
+                start_df["side_traj"].loc[i : i + 4] = 1
+                if start_df["origin"].loc[i] not in unique_origins_list:
+                    unique_origins_list.append(start_df["origin"].loc[i])
+                start_df["altitude_levels"].loc[i : i + 4] = start_df.loc[
+                    start_df.origin == start_df["origin"].loc[i], "origin"
+                ].count()
+                i += 5
+            else:
+                start_df["side_traj"].loc[i : i + 3] = 0
+                if start_df["origin"].loc[i] not in unique_origins_list:
+                    unique_origins_list.append(start_df["origin"].loc[i])
+                start_df["altitude_levels"].loc[i : i + 3] = start_df.loc[
+                    start_df.origin == start_df["origin"].loc[i], "origin"
+                ].count()
 
-    # start_df.to_csv("start.csv", index=False)
+                i += 4
+    # print(unique_origins_list)
+    # start_df.to_csv('src/pytrajplot/plt/startf.csv', index=False)
 
     return start_df
 
@@ -134,6 +137,7 @@ def convert_time(plot_info_dict, traj_df, case):
     format = "%Y-%m-%d %H:%M"
     dt_object = datetime.datetime.strptime(init_time, format)
     counter = 0
+    traj_df["datetime"] = None
     for row in traj_df["time"]:
         if case == "HRES":
             delta_t = abs(row)
@@ -146,11 +150,13 @@ def convert_time(plot_info_dict, traj_df, case):
             delta_t = float(row)
             date = dt_object + timedelta(hours=delta_t)
 
-        traj_df.iat[
-            counter, 0
-        ] = date  # replace the elapsed time with the corresponding datetime object
+        traj_df["datetime"].loc[counter] = date
+
+        # traj_df.iat[
+        #     counter, 0
+        # ] = date  # replace the elapsed time with the corresponding datetime object
         counter += 1
-    traj_df.to_csv("src/pytrajplot/plt/traj.csv", index=False)
+
     return traj_df
 
 
@@ -209,33 +215,48 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
             subset=["lon"], inplace=True
         )  # remove rows containing only the origin/z_type
 
+    if (
+        case == "HRES"
+    ):  # clean up the df in case its generated from a HRES trajectory file
+
+        traj_df.loc[(traj_df["lon"] == -999.00), "lon"] = np.NaN
+        traj_df.loc[(traj_df["lat"] == -999.00), "lat"] = np.NaN
+        traj_df.loc[(traj_df["z"] == -999), "z"] = np.NaN
+
+        # traj_df["z"] = traj_df["z"].clip(lower=0)  # remove negative values in z column
+        # traj_df["hsurf"] = traj_df["hsurf"].clip(lower=0)  # remove negative values in hsurf column
+        # traj_df.dropna(subset=['lon'], inplace=True)  # remove rows containing only the origin/z_type
+
     traj_df["z_type"] = None  # add z_type key to dataframe
     traj_df["origin"] = None  # add origin key to dataframe
+    traj_df["side_traj"] = None  # add side trajectory key dataframe
+    traj_df["altitude_levels"] = None
     traj_df["#trajectories"] = number_of_trajectories
     traj_df["block_length"] = number_of_times
 
-    # add z_type and origin columns to trajectory dataframe
-    if True:
-        tmp = 0
-        while tmp < number_of_trajectories:
-            lower_row = tmp * number_of_times
-            upper_row = tmp * number_of_times + number_of_times
-            # print(traj_df['time'][lower_row:upper_row]) # check which rows a
-            # re being changed
-            z_type = start_df["z_type"][tmp]
-            origin = start_df["origin"][tmp]
-            traj_df["z_type"].iloc[lower_row:upper_row] = z_type
-            traj_df["origin"].iloc[lower_row:upper_row] = origin
-            tmp += 1
+    # add z_type, origin, side_traj (bool) and alt_levels columns to trajectory dataframe
+    tmp = 0
+    while tmp < number_of_trajectories:
+        lower_row = tmp * number_of_times
+        upper_row = tmp * number_of_times + number_of_times
+        # print(traj_df['time'][lower_row:upper_row]) # check which rows are being changed
+        z_type = start_df["z_type"][tmp]
+        origin = start_df["origin"][tmp]
+        side_traj = start_df["side_traj"][tmp]
+        altitude_levels = start_df["altitude_levels"][tmp]
+        traj_df["z_type"].iloc[lower_row:upper_row] = z_type
+        traj_df["origin"].iloc[lower_row:upper_row] = origin
+        traj_df["side_traj"].iloc[lower_row:upper_row] = side_traj
+        traj_df["altitude_levels"].iloc[lower_row:upper_row] = altitude_levels
+        tmp += 1
 
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
-
     return traj_df, number_of_trajectories, number_of_times
 
 
 def check_input_dir(
-    dir_path, prefix_dict
-):  # iterate through the input folder containing the trajectorie coordinates
+    input_dir, prefix_dict
+):  # iterate through the input folder containing the trajectory files
     if plot_steps:
         print("--- iterating through input directory")
 
@@ -243,9 +264,9 @@ def check_input_dir(
     start_dict, trajectory_dict, files, keys, traj_blocks = {}, {}, [], [], {}
 
     # iterate through the directory, first reading the start & plot_info files (necessary, to parse the trajectory files afterwards)
-    for filename in os.listdir(dir_path):
+    for filename in os.listdir(input_dir):
 
-        file_path = os.path.join(dir_path, filename)
+        file_path = os.path.join(input_dir, filename)
         if os.path.isfile(file_path):
             if filename[: len(prefix_dict["start"])] == prefix_dict["start"]:
                 files.append(filename)
@@ -270,9 +291,9 @@ def check_input_dir(
                 plot_info_dict = read_plot_info(plot_info_path=file_path)
 
     # iterate through the directory, reading the trajectory and plot_info file after having read the start file
-    for filename in os.listdir(dir_path):
+    for filename in os.listdir(input_dir):
 
-        file_path = os.path.join(dir_path, filename)
+        file_path = os.path.join(input_dir, filename)
 
         if os.path.isfile(file_path):
             if filename[: len(prefix_dict["trajectory"])] == prefix_dict["trajectory"]:
@@ -303,4 +324,4 @@ def check_input_dir(
         print("Trajectory dict:\n", trajectory_dict)
         print("Keys:\n", keys)
 
-    return plot_info_dict, trajectory_dict, keys, traj_blocks
+    return trajectory_dict
