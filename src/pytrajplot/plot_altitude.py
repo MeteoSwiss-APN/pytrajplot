@@ -297,6 +297,8 @@ def plot_altitude(trajectory_dict, output_dir):
 def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
     language = "en"
 
+    # print(y)
+
     converter = mdates.ConciseDateConverter()
     munits.registry[np.datetime64] = converter
     munits.registry[datetime.date] = converter
@@ -443,68 +445,32 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
                 ax.legend()
 
     if unit == "m":
+        print(f"plotting COSMO trajectories")
+
         if side_traj:
-            # alt_level = [1,2,3,4]
             traj_index = [0, 1, 2, 3, 4]
 
             for nn, ax in enumerate(axs):
                 alt = alt_dict[nn]
                 ax.grid(color="grey", linestyle="--", linewidth=1)
 
-                ax.fill_between(
-                    x,
-                    [custom_ylim[0]] * len(x),
-                    np.flip(y["altitude_" + str(alt)]["y_surf"]),
-                    color="brown",
-                    alpha=0.5,
-                )
-                for traj in traj_index:
-                    textstr = str(y["altitude_" + str(alt)]["alt_level"]) + " " + unit
-                    # print(f'plotting trajectory {traj} on altitude level {alt} in subplot {nn}')
-                    ax.plot(
-                        x,  # define x-axis
-                        np.flip(
-                            y["altitude_" + str(alt)]["y" + str(traj)]["z"]
-                        ),  # define y-axis
-                        y["altitude_" + str(alt)]["y" + str(traj)][
-                            "line"
-                        ],  # define linestyle
-                        alpha=y["altitude_" + str(alt)]["y" + str(traj)][
-                            "alpha"
-                        ],  # define line opacity
-                        label=textstr,
-                    )
+                print(f"len(x) = {len(x)} & x =\n{x}")
+                lower_boundary = [custom_ylim[0]] * len(x)
+                upper_boundary = [custom_ylim[0] + 1000] * len(x)
 
-                    if (
-                        y["altitude_" + str(alt)]["y" + str(traj)]["alpha"] == 1
-                    ):  # only add legend for the main trajectories
-                        ax.legend()
-
-        else:  # no side traj
-            for nn, ax in enumerate(axs):
-                alt = alt_dict[nn]
-                ax.grid(color="grey", linestyle="--", linewidth=1)
-                textstr = str(y["altitude_" + str(alt)]["alt_level"]) + " " + unit
-                # print(f'plotting main trajectory on altitude level {alt} in subplot {nn}')
-                ax.plot(
-                    x,  # define x-axis
-                    np.flip(y["altitude_" + str(alt)]["y0"]["z"]),  # define y-axis
-                    y["altitude_" + str(alt)]["y0"]["line"],  # define linestyle
-                    alpha=y["altitude_" + str(alt)]["y0"][
-                        "alpha"
-                    ],  # define line opacity
-                    label=textstr,
+                print(
+                    f"lower_boundary =\n{lower_boundary}\n upper_boundary =\n{upper_boundary}"
                 )
 
                 ax.fill_between(
                     x,
-                    [custom_ylim[0]] * len(x),
-                    np.flip(y["altitude_" + str(alt)]["y_surf"]),
+                    lower_boundary,
+                    upper_boundary,
                     color="brown",
                     alpha=0.5,
                 )
 
-                ax.legend()
+        ### TODO: non-side-traj COSMO case (forward & backward trajectory)
 
     outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
 
