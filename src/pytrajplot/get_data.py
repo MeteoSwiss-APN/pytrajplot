@@ -207,10 +207,10 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     if (
         case == "COSMO"
     ):  # clean up the df in case its generated from a COSMO trajectory file
-        traj_df["z"] = traj_df["z"].clip(lower=0)  # remove negative values in z column
-        traj_df["hsurf"] = traj_df["hsurf"].clip(
-            lower=0
-        )  # remove negative values in hsurf column
+        traj_df.loc[(traj_df["z"] < 0), "z"] = np.NaN
+        traj_df.loc[(traj_df["hsurf"] < 0), "hsurf"] = np.NaN
+        # traj_df["z"] = traj_df["z"].clip(lower=0)  # remove negative values in z column
+        # traj_df["hsurf"] = traj_df["hsurf"].clip(lower=0)  # remove negative values in hsurf column
         traj_df.dropna(
             subset=["lon"], inplace=True
         )  # remove rows containing only the origin/z_type
@@ -222,10 +222,6 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         traj_df.loc[(traj_df["lon"] == -999.00), "lon"] = np.NaN
         traj_df.loc[(traj_df["lat"] == -999.00), "lat"] = np.NaN
         traj_df.loc[(traj_df["z"] == -999), "z"] = np.NaN
-
-        # traj_df["z"] = traj_df["z"].clip(lower=0)  # remove negative values in z column
-        # traj_df["hsurf"] = traj_df["hsurf"].clip(lower=0)  # remove negative values in hsurf column
-        # traj_df.dropna(subset=['lon'], inplace=True)  # remove rows containing only the origin/z_type
 
     traj_df["z_type"] = None  # add z_type key to dataframe
     traj_df["origin"] = None  # add origin key to dataframe
@@ -251,6 +247,9 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         tmp += 1
 
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
+
+    traj_df.reset_index(drop=True, inplace=True)
+
     return traj_df, number_of_trajectories, number_of_times
 
 
