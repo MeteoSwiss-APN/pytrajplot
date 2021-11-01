@@ -1,6 +1,4 @@
 """Generate Altitude Figure."""
-
-
 # Standard library
 import locale
 import os
