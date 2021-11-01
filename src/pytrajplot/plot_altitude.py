@@ -295,7 +295,10 @@ def plot_altitude(trajectory_dict, output_dir):
 def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
     language = "en"
 
-    # print(y)
+    # TEMPORARY SOLUTION for the single subplot problem
+    if altitude_levels == 1:
+        altitude_levels = 2
+        y["altitude_2"] = y["altitude_1"]
 
     converter = mdates.ConciseDateConverter()
     munits.registry[np.datetime64] = converter

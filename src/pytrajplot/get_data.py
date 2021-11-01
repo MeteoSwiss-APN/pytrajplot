@@ -62,27 +62,37 @@ def read_startf(startf_path):
     start_df["altitude_levels"] = None
     i = 0
     unique_origins_list = []
-    while i < len(start_df):
-        if i < len(start_df) - 1:
-            if (
-                "~" in start_df["origin"].loc[i + 1]
-            ):  # TODO: the separator '~' should be CLI!
-                start_df["side_traj"].loc[i : i + 4] = 1
-                if start_df["origin"].loc[i] not in unique_origins_list:
-                    unique_origins_list.append(start_df["origin"].loc[i])
-                start_df["altitude_levels"].loc[i : i + 4] = start_df.loc[
-                    start_df.origin == start_df["origin"].loc[i], "origin"
-                ].count()
-                i += 5
-            else:
-                start_df["side_traj"].loc[i : i + 3] = 0
-                if start_df["origin"].loc[i] not in unique_origins_list:
-                    unique_origins_list.append(start_df["origin"].loc[i])
-                start_df["altitude_levels"].loc[i : i + 3] = start_df.loc[
-                    start_df.origin == start_df["origin"].loc[i], "origin"
-                ].count()
 
-                i += 4
+    # if there is only one altitude, plot this one twice (to ensure, no error occurs; TEMPORARY SOLUTION)
+    if len(start_df) == 1:
+        unique_origins_list.append(start_df["origin"].loc[0])
+        start_df["side_traj"].loc[i : i + 3] = 0
+        start_df["altitude_levels"].loc[i : i + 3] = start_df.loc[
+            start_df.origin == start_df["origin"].loc[i], "origin"
+        ].count()
+
+    else:
+        while i < len(start_df):
+            if i < len(start_df) - 1:
+                if (
+                    "~" in start_df["origin"].loc[i + 1]
+                ):  # TODO: the separator '~' should be CLI!
+                    start_df["side_traj"].loc[i : i + 4] = 1
+                    if start_df["origin"].loc[i] not in unique_origins_list:
+                        unique_origins_list.append(start_df["origin"].loc[i])
+                    start_df["altitude_levels"].loc[i : i + 4] = start_df.loc[
+                        start_df.origin == start_df["origin"].loc[i], "origin"
+                    ].count()
+                    i += 5
+                else:
+                    start_df["side_traj"].loc[i : i + 3] = 0
+                    if start_df["origin"].loc[i] not in unique_origins_list:
+                        unique_origins_list.append(start_df["origin"].loc[i])
+                    start_df["altitude_levels"].loc[i : i + 3] = start_df.loc[
+                        start_df.origin == start_df["origin"].loc[i], "origin"
+                    ].count()
+
+                    i += 4
     # print(unique_origins_list)
     return start_df
 
