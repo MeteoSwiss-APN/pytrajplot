@@ -557,3 +557,6 @@ src/pytrajplot/cli_working_copy.py
 src/pytrajplot/get_data_working_copy.py
 src/pytrajplot/plot_altitude_working_copy.py
 src/various/tmp_class_001.py
+zmichel/COSMO/test_case/startf_000-033F
+zmichel/COSMO/test_case/tra_geom_000-033F
+zmichel/COSMO/test_case/plots/000-033F/Geneve.png
