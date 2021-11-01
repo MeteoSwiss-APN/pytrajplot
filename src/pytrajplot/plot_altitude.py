@@ -224,9 +224,9 @@ def plot_altitude(trajectory_dict, output_dir):
                 y["altitude_" + str(alt_index)]["y_type"] = trajectory_df["z_type"][
                     lower_row
                 ]
-                y["altitude_" + str(alt_index)]["alt_level"] = trajectory_df["z"][
-                    lower_row
-                ]
+                y["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
+                    "start_altitude"
+                ][lower_row]
                 y["altitude_" + str(alt_index)]["y" + str(traj_index)][
                     "z"
                 ] = trajectory_df["z"][lower_row:upper_row]
@@ -261,9 +261,9 @@ def plot_altitude(trajectory_dict, output_dir):
                 y["altitude_" + str(alt_index)]["y_type"] = trajectory_df["z_type"][
                     lower_row
                 ]
-                y["altitude_" + str(alt_index)]["alt_level"] = trajectory_df["z"][
-                    lower_row
-                ]
+                y["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
+                    "start_altitude"
+                ][lower_row]
                 y["altitude_" + str(alt_index)]["y0"]["z"] = trajectory_df["z"][
                     lower_row:upper_row
                 ]
@@ -307,8 +307,6 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
     origin = y["altitude_1"]["origin"]
 
     print(f"--- generating altitude plot for {origin}")
-
-    # print(f'start_date = {x[0]} to end_date = {x[len(x)-1]}')
 
     if y["altitude_1"]["y0"]["z_type"] == "hpa":
         unit = "hPa"  # unit for the HRES case
@@ -445,8 +443,6 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
                 ax.legend()
 
     if unit == "m":
-        print(f"plotting COSMO trajectories")
-
         if side_traj:
             traj_index = [0, 1, 2, 3, 4]
 
@@ -454,13 +450,13 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
                 alt = alt_dict[nn]
                 ax.grid(color="grey", linestyle="--", linewidth=1)
 
-                print(f"len(x) = {len(x)} & x =\n{x}")
-                lower_boundary = [custom_ylim[0]] * len(x)
-                upper_boundary = [custom_ylim[0] + 1000] * len(x)
+                if key[-1] == "B":
+                    y_surf = np.flip(y["altitude_" + str(alt)]["y_surf"])
+                else:
+                    y_surf = y["altitude_" + str(alt)]["y_surf"]
 
-                print(
-                    f"lower_boundary =\n{lower_boundary}\n upper_boundary =\n{upper_boundary}"
-                )
+                lower_boundary = [custom_ylim[0]] * len(x)
+                upper_boundary = y_surf
 
                 ax.fill_between(
                     x,
@@ -470,7 +466,113 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
                     alpha=0.5,
                 )
 
-        ### TODO: non-side-traj COSMO case (forward & backward trajectory)
+                for traj in traj_index:
+
+                    textstr = (
+                        str(y["altitude_" + str(alt)]["alt_level"])
+                        + " "
+                        + unit
+                        + " ("
+                        + y["altitude_" + str(alt)]["y" + str(traj)]["z_type"]
+                        + ")"
+                    )
+
+                    if (
+                        key[-1] == "B"
+                    ):  # if Backward trajectory; plot from right to left
+                        yaxis = np.flip(y["altitude_" + str(alt)]["y" + str(traj)]["z"])
+                        ystart = yaxis.iloc[-1]
+                        xstart = x[len(x) - 1]
+                    else:
+                        yaxis = y["altitude_" + str(alt)]["y" + str(traj)]["z"]
+                        ystart = yaxis.iloc[0]
+                        xstart = x[0]
+
+                    linestyle = y["altitude_" + str(alt)]["y" + str(traj)]["line"]
+                    alpha = y["altitude_" + str(alt)]["y" + str(traj)]["alpha"]
+
+                    ax.plot(
+                        x,  # define x-axis
+                        yaxis,  # define y-axis
+                        linestyle,  # define linestyle
+                        alpha=alpha,  # define line opacity
+                        label=textstr,
+                    )
+
+                    if (
+                        y["altitude_" + str(alt)]["y" + str(traj)]["alpha"] == 1
+                    ):  # only add legend & startpoint for the main trajectories
+                        ax.plot(
+                            xstart,
+                            ystart,
+                            marker="^",
+                            markersize=10,
+                            markeredgecolor="red",
+                            markerfacecolor="white",
+                        )
+                        ax.legend()
+
+        else:  # no side traj
+            for nn, ax in enumerate(axs):
+                alt = alt_dict[nn]
+                ax.grid(color="grey", linestyle="--", linewidth=1)
+
+                if key[-1] == "B":
+                    y_surf = np.flip(y["altitude_" + str(alt)]["y_surf"])
+                else:
+                    y_surf = y["altitude_" + str(alt)]["y_surf"]
+
+                lower_boundary = [custom_ylim[0]] * len(x)
+                upper_boundary = y_surf
+
+                ax.fill_between(
+                    x,
+                    lower_boundary,
+                    upper_boundary,
+                    color="brown",
+                    alpha=0.5,
+                )
+
+                textstr = (
+                    str(y["altitude_" + str(alt)]["alt_level"])
+                    + " "
+                    + unit
+                    + " ("
+                    + y["altitude_" + str(alt)]["y0"]["z_type"]
+                    + ")"
+                )
+
+                if key[-1] == "B":  # if Backward trajectory; plot from right to left
+                    yaxis = np.flip(y["altitude_" + str(alt)]["y0"]["z"])
+                    ystart = yaxis.iloc[-1]
+                    xstart = x[len(x) - 1]
+                else:
+                    yaxis = y["altitude_" + str(alt)]["y0"]["z"]
+                    ystart = yaxis.iloc[0]
+                    xstart = x[0]
+
+                linestyle = y["altitude_" + str(alt)]["y0"]["line"]
+                alpha = y["altitude_" + str(alt)]["y0"]["alpha"]
+
+                # plot altitude profile
+                ax.plot(
+                    x,  # define x-axis
+                    yaxis,  # define y-axis
+                    linestyle,  # define linestyle
+                    alpha=alpha,  # define line opacity
+                    label=textstr,
+                )
+
+                # plot starting marker
+                ax.plot(
+                    xstart,
+                    ystart,
+                    marker="^",
+                    markersize=10,
+                    markeredgecolor="red",
+                    markerfacecolor="white",
+                )
+                ax.legend()
 
     outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
 

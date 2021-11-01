@@ -57,6 +57,9 @@ def main(
     # (it also exactly the same keys as the trajectory_dict, therefore the entries correspond to oneanother)
 
     trajectory_dict = check_input_dir(input_dir=input_dir, prefix_dict=prefix_dict)
+
+    # TODO: Make sure, the trajectory dataframe is 100% correct before proceeding with the plotting of the COSMO data
+
     plot_altitude(trajectory_dict=trajectory_dict, output_dir=output_dir)
 
     print("--- Done.")

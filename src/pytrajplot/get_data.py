@@ -84,8 +84,6 @@ def read_startf(startf_path):
 
                 i += 4
     # print(unique_origins_list)
-    # start_df.to_csv('src/pytrajplot/plt/startf.csv', index=False)
-
     return start_df
 
 
@@ -136,7 +134,11 @@ def convert_time(plot_info_dict, traj_df, case):
     init_time = plot_info_dict["mbt"][:16]
     format = "%Y-%m-%d %H:%M"
     dt_object = datetime.datetime.strptime(init_time, format)
-    counter = 0
+    if case == "HRES":
+        counter = 0
+    else:
+        counter = 2
+
     traj_df["datetime"] = None
     for row in traj_df["time"]:
         if case == "HRES":
@@ -226,6 +228,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     traj_df["z_type"] = None  # add z_type key to dataframe
     traj_df["origin"] = None  # add origin key to dataframe
     traj_df["side_traj"] = None  # add side trajectory key dataframe
+    traj_df["start_altitude"] = np.NaN
     traj_df["altitude_levels"] = None
     traj_df["#trajectories"] = number_of_trajectories
     traj_df["block_length"] = number_of_times
@@ -238,17 +241,22 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         # print(traj_df['time'][lower_row:upper_row]) # check which rows are being changed
         z_type = start_df["z_type"][tmp]
         origin = start_df["origin"][tmp]
+        start_altitude = start_df["z"][tmp]
         side_traj = start_df["side_traj"][tmp]
         altitude_levels = start_df["altitude_levels"][tmp]
         traj_df["z_type"].iloc[lower_row:upper_row] = z_type
         traj_df["origin"].iloc[lower_row:upper_row] = origin
         traj_df["side_traj"].iloc[lower_row:upper_row] = side_traj
         traj_df["altitude_levels"].iloc[lower_row:upper_row] = altitude_levels
+        traj_df["start_altitude"].iloc[lower_row:upper_row] = start_altitude
         tmp += 1
 
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
-
     traj_df.reset_index(drop=True, inplace=True)
+
+    if False:
+        traj_df.to_csv("trajdf.csv", index=False)
+        start_df.to_csv("startf.csv", index=False)
 
     return traj_df, number_of_trajectories, number_of_times
 
