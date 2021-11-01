@@ -553,3 +553,6 @@ zmichel/COSMO/lagranto_c/plots/003-033F/Goesgen.png
 zmichel/COSMO/lagranto_c/plots/003-033F/Leibstadt.png
 zmichel/COSMO/lagranto_c/plots/003-033F/Muehleberg.png
 zmichel/COSMO/cosmo_case.zip
+src/pytrajplot/cli_working_copy.py
+src/pytrajplot/get_data_working_copy.py
+src/pytrajplot/plot_altitude_working_copy.py
