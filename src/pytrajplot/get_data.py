@@ -43,7 +43,7 @@ def read_plot_info(plot_info_path):
     return plot_info_dict
 
 
-def read_startf(startf_path):
+def read_startf(startf_path, separator):
     if plot_steps:
         print("--- reading startf file")
 
@@ -75,7 +75,7 @@ def read_startf(startf_path):
         while i < len(start_df):
             if i < len(start_df) - 1:
                 if (
-                    "~" in start_df["origin"].loc[i + 1]
+                    separator in start_df["origin"].loc[i + 1]
                 ):  # TODO: the separator '~' should be CLI!
                     start_df["side_traj"].loc[i : i + 4] = 1
                     if start_df["origin"].loc[i] not in unique_origins_list:
@@ -272,7 +272,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
 
 
 def check_input_dir(
-    input_dir, prefix_dict
+    input_dir, prefix_dict, separator
 ):  # iterate through the input folder containing the trajectory files
     if plot_steps:
         print("--- iterating through input directory")
@@ -300,7 +300,7 @@ def check_input_dir(
 
                 counter += 1
                 start_dict[filename[len(prefix_dict["start"]) :]] = read_startf(
-                    startf_path=file_path
+                    startf_path=file_path, separator=separator
                 )
 
             if filename[: len(prefix_dict["plot_info"])] == prefix_dict["plot_info"]:
@@ -341,4 +341,4 @@ def check_input_dir(
         print("Trajectory dict:\n", trajectory_dict)
         print("Keys:\n", keys)
 
-    return trajectory_dict
+    return trajectory_dict, plot_info_dict

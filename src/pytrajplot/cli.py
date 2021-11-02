@@ -1,5 +1,6 @@
 """Command line interface of pytrajplot."""
 # Standard library
+import csv
 import datetime
 import json
 import logging
@@ -12,9 +13,26 @@ import click
 from . import __version__
 from .get_data import *
 from .plot_altitude import *
+from .plot_map import *
 from .utils import count_to_log_level
 
 
+def interpret_options(start_prefix, traj_prefix, info_prefix, language):
+    prefix_dict = {
+        "start": start_prefix,
+        "trajectory": traj_prefix,
+        "plot_info": info_prefix,
+    }
+
+    if language[0] == "e":
+        language = "en"
+    else:
+        language = "de"
+
+    return prefix_dict, language
+
+
+### DEFINE COMMAND LINE INPUTS
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True))
 @click.argument("output_dir", type=click.Path(exists=False))
@@ -36,6 +54,29 @@ from .utils import count_to_log_level
     type=str,
     help="Prefix for the plot info files. Default: plot_info",
 )
+@click.option(
+    "--separator",
+    default="~",
+    type=str,
+    help="Separator str between origin of trajectory and side trajectory index. Default: ~",
+)
+@click.option(
+    "--language",
+    type=click.Choice(
+        [
+            "en",
+            "english",
+            "de",
+            "ger",
+            "german",
+            "Deutsch",
+        ],
+        case_sensitive=False,
+    ),
+    multiple=False,
+    default=("en"),
+    help="Choose language. Default: en",
+)
 def main(
     *,
     info_prefix: str,
@@ -43,23 +84,25 @@ def main(
     traj_prefix: str,
     input_dir: str,
     output_dir: str,
+    separator: str,
+    language: str,
 ) -> None:
-    prefix_dict = {
-        "start": start_prefix,
-        "trajectory": traj_prefix,
-        "plot_info": info_prefix,
-    }
 
-    # plot_info_dict --> contains all the information of the plot_info file
-    # trajectory_dict --> dict of dataframes, contining the combined information of all start&trajectory files.
-    # keys (list) --> contains all keys that occur in the trajectory dict (for each start/traj pair one key)
-    # traj_block (dict) --> contains for each start/traj pair, number of trajectories and the number of rows that make up one individual trajectory
-    # (it also exactly the same keys as the trajectory_dict, therefore the entries correspond to oneanother)
+    prefix_dict, language = interpret_options(
+        start_prefix=start_prefix,
+        traj_prefix=traj_prefix,
+        info_prefix=info_prefix,
+        language=language,
+    )
+    trajectory_dict, plot_info_dict = check_input_dir(
+        input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
+    )
 
-    trajectory_dict = check_input_dir(input_dir=input_dir, prefix_dict=prefix_dict)
-
-    # TODO: Make sure, the trajectory dataframe is 100% correct before proceeding with the plotting of the COSMO data
-
-    plot_altitude(trajectory_dict=trajectory_dict, output_dir=output_dir)
+    plot_altitude(
+        trajectory_dict=trajectory_dict,
+        output_dir=output_dir,
+        separator=separator,
+        language=language,
+    )
 
     print("--- Done.")

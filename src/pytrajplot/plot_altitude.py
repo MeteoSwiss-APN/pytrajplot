@@ -22,161 +22,83 @@ import datetime
 import numpy as np
 
 
-def plot_altitude(trajectory_dict, output_dir):
+def create_y_dict(altitude_levels):
+    assert (
+        altitude_levels <= 10
+    ), "It is not possible, to generate altitude plots for more than 10 different starting altitudes."
+
+    y = {}
+
+    key_name = "altitude_"
+
+    i = 1
+    # I chose 10 to be the maximum number of altitude plots
+    color_dict = {
+        1: "r-",
+        2: "b-",
+        3: "g-",
+        4: "k-",
+        5: "c-",
+        6: "m-",
+        7: "y-",
+        8: "deepskyblue-",
+        9: "crimson-",
+        10: "lightgreen-",
+    }
+
+    while i < altitude_levels + 1:
+        altitude_dict = {
+            "origin": None,
+            "y_surf": None,
+            "y_type": None,
+            "alt_level": None,
+            "y0": {
+                "z": [],
+                "z_type": None,
+                "line": color_dict[i],
+                "alpha": 1,
+            },  # main trajectory
+            "y1": {
+                "z": [],
+                "z_type": None,
+                "line": color_dict[i],
+                "alpha": 0.5,
+            },  # side trajectory 1
+            "y2": {
+                "z": [],
+                "z_type": None,
+                "line": color_dict[i],
+                "alpha": 0.5,
+            },  # side trajectory 2
+            "y3": {
+                "z": [],
+                "z_type": None,
+                "line": color_dict[i],
+                "alpha": 0.5,
+            },  # side trajectory 3
+            "y4": {
+                "z": [],
+                "z_type": None,
+                "line": color_dict[i],
+                "alpha": 0.5,
+            },  # side trajectory 4
+        }
+        y[key_name + str(i)] = altitude_dict
+        i += 1
+
+    return y
+
+
+def plot_altitude(trajectory_dict, output_dir, separator, language):
     for key in trajectory_dict:  # iterate through the trajectory dict
         print(f"--- defining plot properties for {key}")
 
-        y = {
-            "altitude_1": {
-                "origin": None,
-                "y_surf": None,
-                "y_type": None,
-                "alt_level": None,
-                "y0": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "-r",
-                    "alpha": 1,
-                },  # main trajectory
-                "y1": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "-r",
-                    "alpha": 0.5,
-                },  # side trajectory 1
-                "y2": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "-r",
-                    "alpha": 0.5,
-                },  # side trajectory 2
-                "y3": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "-r",
-                    "alpha": 0.5,
-                },  # side trajectory 3
-                "y4": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "-r",
-                    "alpha": 0.5,
-                },  # side trajectory 4
-            },
-            "altitude_2": {
-                "origin": None,
-                "y_surf": None,
-                "y_type": None,
-                "alt_level": None,
-                "y0": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "b-",
-                    "alpha": 1,
-                },  # main trajectory
-                "y1": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "b-",
-                    "alpha": 0.5,
-                },  # side trajectory 1
-                "y2": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "b-",
-                    "alpha": 0.5,
-                },  # side trajectory 2
-                "y3": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "b-",
-                    "alpha": 0.5,
-                },  # side trajectory 3
-                "y4": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "b-",
-                    "alpha": 0.5,
-                },  # side trajectory 4
-            },
-            "altitude_3": {
-                "origin": None,
-                "y_surf": None,
-                "y_type": None,
-                "alt_level": None,
-                "y0": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "g-",
-                    "alpha": 1,
-                },  # main trajectory
-                "y1": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "g-",
-                    "alpha": 0.5,
-                },  # side trajectory 1
-                "y2": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "g-",
-                    "alpha": 0.5,
-                },  # side trajectory 2
-                "y3": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "g-",
-                    "alpha": 0.5,
-                },  # side trajectory 3
-                "y4": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "g-",
-                    "alpha": 0.5,
-                },  # side trajectory 4
-            },
-            "altitude_4": {
-                "origin": None,
-                "y_surf": None,
-                "y_type": None,
-                "alt_level": None,
-                "y0": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "k-",
-                    "alpha": 1,
-                },  # main trajectory
-                "y1": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "k-",
-                    "alpha": 0.5,
-                },  # side trajectory 1
-                "y2": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "k-",
-                    "alpha": 0.5,
-                },  # side trajectory 2
-                "y3": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "k-",
-                    "alpha": 0.5,
-                },  # side trajectory 3
-                "y4": {
-                    "z": [],
-                    "z_type": None,
-                    "line": "k-",
-                    "alpha": 0.5,
-                },  # side trajectory 4
-            },
-        }
+        y = create_y_dict(
+            altitude_levels=trajectory_dict[key]["altitude_levels"].loc[0]
+        )
 
         trajectory_df = trajectory_dict[key]  # extract df for given key
-        # print(trajectory_df)
 
-        # trajectory_df.to_csv("trajectory_" + key + ".csv", index=False)
         number_of_times = trajectory_df["block_length"].iloc[
             0
         ]  # block length is constant, because it depends on the runtime of the model and the timestep, which both are constant for a given traj file
@@ -210,7 +132,7 @@ def plot_altitude(trajectory_dict, output_dir):
 
             if side_traj:
                 if (
-                    "~" not in origin
+                    separator not in origin  # replaced '~' with separator
                 ):  # the y_surf information, is only taken from the main trajectories (not side trajectories)
                     # print(f'row_index = {row_index} corresponds to origin {origin}')
                     y["altitude_" + str(alt_index)]["origin"] = origin
@@ -248,6 +170,7 @@ def plot_altitude(trajectory_dict, output_dir):
                         side_traj=side_traj,
                         output_dir=output_dir,
                         altitude_levels=altitude_levels,
+                        language=language,
                     )
 
             else:
@@ -288,13 +211,12 @@ def plot_altitude(trajectory_dict, output_dir):
                         side_traj=side_traj,
                         output_dir=output_dir,
                         altitude_levels=altitude_levels,
+                        language=language,
                     )
     return
 
 
-def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
-    language = "en"
-
+def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels, language):
     # TEMPORARY SOLUTION for the single subplot problem
     if altitude_levels == 1:
         altitude_levels = 2
@@ -330,7 +252,11 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
     fig, axs = plt.subplots(altitude_levels, 1, tight_layout=True, sharex=True)
     # Setting the values for all y-axes.
     plt.setp(axs, ylim=custom_ylim)
-    plt.setp(axs, ylabel="Altitude [" + str(unit) + "]")
+
+    if language == "en":
+        plt.setp(axs, ylabel="Altitude [" + str(unit) + "]")
+    if language == "de":
+        plt.setp(axs, ylabel="Höhe [" + str(unit) + "]")
 
     if unit == "hPa":
         if side_traj:
@@ -451,10 +377,7 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
                 alt = alt_dict[nn]
                 ax.grid(color="grey", linestyle="--", linewidth=1)
 
-                if key[-1] == "B":
-                    y_surf = np.flip(y["altitude_" + str(alt)]["y_surf"])
-                else:
-                    y_surf = y["altitude_" + str(alt)]["y_surf"]
+                y_surf = y["altitude_" + str(alt)]["y_surf"]
 
                 lower_boundary = [custom_ylim[0]] * len(x)
                 upper_boundary = y_surf
@@ -478,16 +401,9 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
                         + ")"
                     )
 
-                    if (
-                        key[-1] == "B"
-                    ):  # if Backward trajectory; plot from right to left
-                        yaxis = np.flip(y["altitude_" + str(alt)]["y" + str(traj)]["z"])
-                        ystart = yaxis.iloc[-1]
-                        xstart = x[len(x) - 1]
-                    else:
-                        yaxis = y["altitude_" + str(alt)]["y" + str(traj)]["z"]
-                        ystart = yaxis.iloc[0]
-                        xstart = x[0]
+                    yaxis = y["altitude_" + str(alt)]["y" + str(traj)]["z"]
+                    ystart = yaxis.iloc[0]
+                    xstart = x[0]
 
                     linestyle = y["altitude_" + str(alt)]["y" + str(traj)]["line"]
                     alpha = y["altitude_" + str(alt)]["y" + str(traj)]["alpha"]
@@ -543,14 +459,9 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
                     + ")"
                 )
 
-                if key[-1] == "B":  # if Backward trajectory; plot from right to left
-                    yaxis = np.flip(y["altitude_" + str(alt)]["y0"]["z"])
-                    ystart = yaxis.iloc[-1]
-                    xstart = x[len(x) - 1]
-                else:
-                    yaxis = y["altitude_" + str(alt)]["y0"]["z"]
-                    ystart = yaxis.iloc[0]
-                    xstart = x[0]
+                yaxis = y["altitude_" + str(alt)]["y0"]["z"]
+                ystart = yaxis.iloc[0]
+                xstart = x[0]
 
                 linestyle = y["altitude_" + str(alt)]["y0"]["line"]
                 alpha = y["altitude_" + str(alt)]["y0"]["alpha"]
@@ -584,6 +495,8 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels):
     if language == "en":
         locale.setlocale(locale.LC_ALL, "en_GB")
         fig.suptitle("Altitude Plot for " + origin)
+    if language == "de":
+        fig.suptitle("Höhenplot für " + origin)
 
     plt.savefig(outpath + origin + ".png")
     plt.close(fig)
