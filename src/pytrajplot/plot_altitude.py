@@ -99,6 +99,8 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
 
         trajectory_df = trajectory_dict[key]  # extract df for given key
 
+        print(trajectory_df["start_altitude"].unique())
+
         number_of_times = trajectory_df["block_length"].iloc[
             0
         ]  # block length is constant, because it depends on the runtime of the model and the timestep, which both are constant for a given traj file
