@@ -107,47 +107,33 @@ venv_*/
 
 # VS Code
 .vscode
-zmichel/21101100_407/lagranto_c/c1e_al_Beznau_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_al_Beznau_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_al_Bugey_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_al_Bugey_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_al_Fessenheim_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_al_Fessenheim_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_al_Geneve_00F.gif
-zmichel/21101100_407/lagranto_c/c1e_al_Geneve_00F.ps
-zmichel/21101100_407/lagranto_c/c1e_al_Goesgen_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_al_Goesgen_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_al_Leibstadt_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_al_Leibstadt_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_al_Muehleberg_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_al_Muehleberg_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_ch_Beznau_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_ch_Beznau_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_ch_Bugey_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_ch_Bugey_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_ch_Fessenheim_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_ch_Fessenheim_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_ch_Geneve_00F.gif
-zmichel/21101100_407/lagranto_c/c1e_ch_Geneve_00F.ps
-zmichel/21101100_407/lagranto_c/c1e_ch_Goesgen_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_ch_Goesgen_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_ch_Leibstadt_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_ch_Leibstadt_03F.ps
-zmichel/21101100_407/lagranto_c/c1e_ch_Muehleberg_03F.gif
-zmichel/21101100_407/lagranto_c/c1e_ch_Muehleberg_03F.ps
-zmichel/21101100_407/lagranto_c/plot_info
-zmichel/21101100_407/lagranto_c/startf_000-033F
-zmichel/21101100_407/lagranto_c/startf_003-033F
-zmichel/21101100_407/lagranto_c/tra_geom_000-033F
-zmichel/21101100_407/lagranto_c/tra_geom_003-033F
-zmichel/header.csv
-zmichel/start.csv
-zmichel/trajectory.csv
+zmichel/COSMO/example_plots/c1e_al_Beznau_03F.gif
+zmichel/COSMO/example_plots/c1e_al_Bugey_03F.gif
+zmichel/COSMO/example_plots/c1e_al_Fessenheim_03F.gif
+zmichel/COSMO/example_plots/c1e_al_Geneve_00F.gif
+zmichel/COSMO/example_plots/c1e_al_Goesgen_03F.gif
+zmichel/COSMO/example_plots/c1e_al_Leibstadt_03F.gif
+zmichel/COSMO/example_plots/c1e_al_Muehleberg_03F.gif
+zmichel/COSMO/example_plots/c1e_ch_Beznau_03F.gif
+zmichel/COSMO/example_plots/c1e_ch_Bugey_03F.gif
+zmichel/COSMO/example_plots/c1e_ch_Fessenheim_03F.gif
+zmichel/COSMO/example_plots/c1e_ch_Geneve_00F.gif
+zmichel/COSMO/example_plots/c1e_ch_Goesgen_03F.gif
+zmichel/COSMO/example_plots/c1e_ch_Leibstadt_03F.gif
+zmichel/COSMO/example_plots/c1e_ch_Muehleberg_03F.gif
+zmichel/COSMO/example_plots/plot_info
+zmichel/COSMO/example_plots/startf_000-033F
+zmichel/COSMO/example_plots/startf_003-033F
+zmichel/COSMO/example_plots/tra_geom_000-033F
+zmichel/COSMO/example_plots/tra_geom_003-033F
 zmichel/COSMO/lagranto_c/plot_info
 zmichel/COSMO/lagranto_c/startf_000-033F
 zmichel/COSMO/lagranto_c/startf_003-033F
 zmichel/COSMO/lagranto_c/tra_geom_000-033F
 zmichel/COSMO/lagranto_c/tra_geom_003-033F
+zmichel/COSMO/test_case/plot_info
+zmichel/COSMO/test_case/startf_000-033F
+zmichel/COSMO/test_case/tra_geom_000-033F
 zmichel/HRES/lagranto_c/plot_info
 zmichel/HRES/lagranto_c/startf_000-144F
 zmichel/HRES/lagranto_c/startf_006-144F
@@ -196,371 +182,26 @@ zmichel/HRES/lagranto_f/tra_geom_042-000B
 zmichel/HRES/lagranto_f/tra_geom_044-000B
 zmichel/HRES/lagranto_f/tra_geom_048-000B
 zmichel/HRES/lagranto_f/tra_geom_072-000B
-custom_classes_tutorial.py
-zmichel/COSMO/example_plots/c1e_al_Beznau_03F.gif
-zmichel/COSMO/example_plots/c1e_al_Bugey_03F.gif
-zmichel/COSMO/example_plots/c1e_al_Fessenheim_03F.gif
-zmichel/COSMO/example_plots/c1e_al_Geneve_00F.gif
-zmichel/COSMO/example_plots/c1e_al_Goesgen_03F.gif
-zmichel/COSMO/example_plots/c1e_al_Leibstadt_03F.gif
-zmichel/COSMO/example_plots/c1e_al_Muehleberg_03F.gif
-zmichel/COSMO/example_plots/c1e_ch_Beznau_03F.gif
-zmichel/COSMO/example_plots/c1e_ch_Bugey_03F.gif
-zmichel/COSMO/example_plots/c1e_ch_Fessenheim_03F.gif
-zmichel/COSMO/example_plots/c1e_ch_Geneve_00F.gif
-zmichel/COSMO/example_plots/c1e_ch_Goesgen_03F.gif
-zmichel/COSMO/example_plots/c1e_ch_Leibstadt_03F.gif
-zmichel/COSMO/example_plots/c1e_ch_Muehleberg_03F.gif
-zmichel/COSMO/example_plots/plot_info
-zmichel/COSMO/example_plots/startf_000-033F
-zmichel/COSMO/example_plots/startf_003-033F
-zmichel/COSMO/example_plots/tra_geom_000-033F
-zmichel/COSMO/example_plots/tra_geom_003-033F
-zmichel/COSMO/lagranto_c copy/plot_info
-zmichel/COSMO/lagranto_c copy/startf_000-033F
-zmichel/COSMO/lagranto_c copy/startf_003-033F
-zmichel/COSMO/lagranto_c copy/tra_geom_000-033F
-zmichel/COSMO/lagranto_c copy/tra_geom_003-033F
-zmichel/HRES/lagranto_f copy/plot_info
-zmichel/HRES/lagranto_f copy/startf_000-048F
-zmichel/HRES/lagranto_f copy/startf_000-072F
-zmichel/HRES/lagranto_f copy/startf_006-054F
-zmichel/HRES/lagranto_f copy/startf_012-000B
-zmichel/HRES/lagranto_f copy/startf_012-060F
-zmichel/HRES/lagranto_f copy/startf_018-000B
-zmichel/HRES/lagranto_f copy/startf_018-066F
-zmichel/HRES/lagranto_f copy/startf_024-000B
-zmichel/HRES/lagranto_f copy/startf_024-072F
-zmichel/HRES/lagranto_f copy/startf_030-000B
-zmichel/HRES/lagranto_f copy/startf_030-078F
-zmichel/HRES/lagranto_f copy/startf_036-000B
-zmichel/HRES/lagranto_f copy/startf_036-084F
-zmichel/HRES/lagranto_f copy/startf_040-000B
-zmichel/HRES/lagranto_f copy/startf_042-000B
-zmichel/HRES/lagranto_f copy/startf_044-000B
-zmichel/HRES/lagranto_f copy/startf_048-000B
-zmichel/HRES/lagranto_f copy/startf_072-000B
-zmichel/HRES/lagranto_f copy/tra_geom_000-048F
-zmichel/HRES/lagranto_f copy/tra_geom_000-072F
-zmichel/HRES/lagranto_f copy/tra_geom_006-054F
-zmichel/HRES/lagranto_f copy/tra_geom_012-000B
-zmichel/HRES/lagranto_f copy/tra_geom_012-060F
-zmichel/HRES/lagranto_f copy/tra_geom_018-000B
-zmichel/HRES/lagranto_f copy/tra_geom_018-066F
-zmichel/HRES/lagranto_f copy/tra_geom_024-000B
-zmichel/HRES/lagranto_f copy/tra_geom_024-072F
-zmichel/HRES/lagranto_f copy/tra_geom_030-000B
-zmichel/HRES/lagranto_f copy/tra_geom_030-078F
-zmichel/HRES/lagranto_f copy/tra_geom_036-000B
-zmichel/HRES/lagranto_f copy/tra_geom_036-084F
-zmichel/HRES/lagranto_f copy/tra_geom_040-000B
-zmichel/HRES/lagranto_f copy/tra_geom_042-000B
-zmichel/HRES/lagranto_f copy/tra_geom_044-000B
-zmichel/HRES/lagranto_f copy/tra_geom_048-000B
-zmichel/HRES/lagranto_f copy/tra_geom_072-000B
-src/pytrajplot/plt/000-048F_BaselBinnigen.png
-src/pytrajplot/plt/000-048F_Beznau.png
-src/pytrajplot/plt/000-048F_Bugey.png
-src/pytrajplot/plt/000-048F_Fessenheim.png
-src/pytrajplot/plt/000-048F_Goesgen.png
-src/pytrajplot/plt/000-048F_Leibstadt.png
-src/pytrajplot/plt/000-048F_Linate.png
-src/pytrajplot/plt/000-048F_Muehleberg.png
-src/pytrajplot/plt/000-072F_Biblis.png
-src/pytrajplot/plt/000-072F_Chinon.png
-src/pytrajplot/plt/000-072F_Doel.png
-src/pytrajplot/plt/000-072F_Isar.png
-src/pytrajplot/plt/000-072F_La_Hague.png
-src/pytrajplot/plt/000-072F_Marcoule.png
-src/pytrajplot/plt/000-072F_Temelin.png
-zmichel/HRES/lagranto_c/plots/000-144F/Bagdad.png
-zmichel/HRES/lagranto_c/plots/000-144F/Bushehr.png
-zmichel/HRES/lagranto_c/plots/000-144F/Punggye-ri.png
-zmichel/HRES/lagranto_c/plots/000-144F/Teheran.png
-zmichel/HRES/lagranto_c/plots/006-144F/Bagdad.png
-zmichel/HRES/lagranto_c/plots/006-144F/Bushehr.png
-zmichel/HRES/lagranto_c/plots/006-144F/Punggye-ri.png
-zmichel/HRES/lagranto_c/plots/006-144F/Teheran.png
-zmichel/HRES/lagranto_c/plots/012-144F/Bagdad.png
-zmichel/HRES/lagranto_c/plots/012-144F/Bushehr.png
-zmichel/HRES/lagranto_c/plots/012-144F/Punggye-ri.png
-zmichel/HRES/lagranto_c/plots/012-144F/Teheran.png
-zmichel/HRES/lagranto_c/plots/018-144F/Bagdad.png
-zmichel/HRES/lagranto_c/plots/018-144F/Bushehr.png
-zmichel/HRES/lagranto_c/plots/018-144F/Punggye-ri.png
-zmichel/HRES/lagranto_c/plots/018-144F/Teheran.png
-zmichel/HRES/lagranto_c/plots/144-000B/BaselBinnigen.png
-zmichel/HRES/lagranto_c/plots/144-000B/Geneve.png
-zmichel/HRES/lagranto_c/plots/144-000B/Jungfraujoch.png
-zmichel/HRES/lagranto_c/plots/144-000B/Lugano.png
-zmichel/HRES/lagranto_c/plots/144-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots.zip
-zmichel/HRES/lagranto_f/plots/000-048F/Amriswil.png
-zmichel/HRES/lagranto_f/plots/000-048F/Attisholz.png
-zmichel/HRES/lagranto_f/plots/000-048F/BadToelz.png
-zmichel/HRES/lagranto_f/plots/000-048F/Basel.png
-zmichel/HRES/lagranto_f/plots/000-048F/BaselBinnigen.png
-zmichel/HRES/lagranto_f/plots/000-048F/Bern.png
-zmichel/HRES/lagranto_f/plots/000-048F/Beznau.png
-zmichel/HRES/lagranto_f/plots/000-048F/Bugey.png
-zmichel/HRES/lagranto_f/plots/000-048F/Burgkirchen.png
-zmichel/HRES/lagranto_f/plots/000-048F/Chateau_dOex.png
-zmichel/HRES/lagranto_f/plots/000-048F/Fessenheim.png
-zmichel/HRES/lagranto_f/plots/000-048F/Geneve.png
-zmichel/HRES/lagranto_f/plots/000-048F/Gersthofen.png
-zmichel/HRES/lagranto_f/plots/000-048F/Goesgen.png
-zmichel/HRES/lagranto_f/plots/000-048F/Hirt.png
-zmichel/HRES/lagranto_f/plots/000-048F/Hochdorf.png
-zmichel/HRES/lagranto_f/plots/000-048F/Leibstadt.png
-zmichel/HRES/lagranto_f/plots/000-048F/Linate.png
-zmichel/HRES/lagranto_f/plots/000-048F/Lugano.png
-zmichel/HRES/lagranto_f/plots/000-048F/Mattsee.png
-zmichel/HRES/lagranto_f/plots/000-048F/Muehleberg.png
-zmichel/HRES/lagranto_f/plots/000-048F/Ruhpolding.png
-zmichel/HRES/lagranto_f/plots/000-048F/Sonthofen.png
-zmichel/HRES/lagranto_f/plots/000-048F/StGallen.png
-zmichel/HRES/lagranto_f/plots/000-048F/StJohann_Tirol.png
-zmichel/HRES/lagranto_f/plots/000-048F/Stubenbergsee.png
-zmichel/HRES/lagranto_f/plots/000-048F/Stuttgart.png
-zmichel/HRES/lagranto_f/plots/000-048F/Wels.png
-zmichel/HRES/lagranto_f/plots/000-048F/WienerHuette.png
-zmichel/HRES/lagranto_f/plots/000-048F/Zuerich.png
-zmichel/HRES/lagranto_f/plots/000-048F/Zurzach.png
-zmichel/HRES/lagranto_f/plots/000-048F/Zwettl.png
-zmichel/HRES/lagranto_f/plots/000-072F/Biblis.png
-zmichel/HRES/lagranto_f/plots/000-072F/Chinon.png
-zmichel/HRES/lagranto_f/plots/000-072F/Doel.png
-zmichel/HRES/lagranto_f/plots/000-072F/Isar.png
-zmichel/HRES/lagranto_f/plots/000-072F/La_Hague.png
-zmichel/HRES/lagranto_f/plots/000-072F/Marcoule.png
-zmichel/HRES/lagranto_f/plots/000-072F/Temelin.png
-zmichel/HRES/lagranto_f/plots/006-054F/Amriswil.png
-zmichel/HRES/lagranto_f/plots/006-054F/Attisholz.png
-zmichel/HRES/lagranto_f/plots/006-054F/BadToelz.png
-zmichel/HRES/lagranto_f/plots/006-054F/Basel.png
-zmichel/HRES/lagranto_f/plots/006-054F/Bern.png
-zmichel/HRES/lagranto_f/plots/006-054F/Burgkirchen.png
-zmichel/HRES/lagranto_f/plots/006-054F/Chateau_dOex.png
-zmichel/HRES/lagranto_f/plots/006-054F/Geneve.png
-zmichel/HRES/lagranto_f/plots/006-054F/Gersthofen.png
-zmichel/HRES/lagranto_f/plots/006-054F/Hirt.png
-zmichel/HRES/lagranto_f/plots/006-054F/Hochdorf.png
-zmichel/HRES/lagranto_f/plots/006-054F/Linate.png
-zmichel/HRES/lagranto_f/plots/006-054F/Lugano.png
-zmichel/HRES/lagranto_f/plots/006-054F/Mattsee.png
-zmichel/HRES/lagranto_f/plots/006-054F/Ruhpolding.png
-zmichel/HRES/lagranto_f/plots/006-054F/Sonthofen.png
-zmichel/HRES/lagranto_f/plots/006-054F/StJohann_Tirol.png
-zmichel/HRES/lagranto_f/plots/006-054F/Stubenbergsee.png
-zmichel/HRES/lagranto_f/plots/006-054F/Stuttgart.png
-zmichel/HRES/lagranto_f/plots/006-054F/Wels.png
-zmichel/HRES/lagranto_f/plots/006-054F/WienerHuette.png
-zmichel/HRES/lagranto_f/plots/006-054F/Zuerich.png
-zmichel/HRES/lagranto_f/plots/006-054F/Zurzach.png
-zmichel/HRES/lagranto_f/plots/006-054F/Zwettl.png
-zmichel/HRES/lagranto_f/plots/012-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots/012-060F/Amriswil.png
-zmichel/HRES/lagranto_f/plots/012-060F/Attisholz.png
-zmichel/HRES/lagranto_f/plots/012-060F/BadToelz.png
-zmichel/HRES/lagranto_f/plots/012-060F/Basel.png
-zmichel/HRES/lagranto_f/plots/012-060F/Bern.png
-zmichel/HRES/lagranto_f/plots/012-060F/Burgkirchen.png
-zmichel/HRES/lagranto_f/plots/012-060F/Chateau_dOex.png
-zmichel/HRES/lagranto_f/plots/012-060F/Geneve.png
-zmichel/HRES/lagranto_f/plots/012-060F/Gersthofen.png
-zmichel/HRES/lagranto_f/plots/012-060F/Hirt.png
-zmichel/HRES/lagranto_f/plots/012-060F/Hochdorf.png
-zmichel/HRES/lagranto_f/plots/012-060F/Lugano.png
-zmichel/HRES/lagranto_f/plots/012-060F/Mattsee.png
-zmichel/HRES/lagranto_f/plots/012-060F/Ruhpolding.png
-zmichel/HRES/lagranto_f/plots/012-060F/Sonthofen.png
-zmichel/HRES/lagranto_f/plots/012-060F/StGallen.png
-zmichel/HRES/lagranto_f/plots/012-060F/StJohann_Tirol.png
-zmichel/HRES/lagranto_f/plots/012-060F/Stubenbergsee.png
-zmichel/HRES/lagranto_f/plots/012-060F/Stuttgart.png
-zmichel/HRES/lagranto_f/plots/012-060F/Wels.png
-zmichel/HRES/lagranto_f/plots/012-060F/WienerHuette.png
-zmichel/HRES/lagranto_f/plots/012-060F/Zuerich.png
-zmichel/HRES/lagranto_f/plots/012-060F/Zurzach.png
-zmichel/HRES/lagranto_f/plots/012-060F/Zwettl.png
-zmichel/HRES/lagranto_f/plots/018-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots/018-066F/Amriswil.png
-zmichel/HRES/lagranto_f/plots/018-066F/Attisholz.png
-zmichel/HRES/lagranto_f/plots/018-066F/BadToelz.png
-zmichel/HRES/lagranto_f/plots/018-066F/Basel.png
-zmichel/HRES/lagranto_f/plots/018-066F/Bern.png
-zmichel/HRES/lagranto_f/plots/018-066F/Burgkirchen.png
-zmichel/HRES/lagranto_f/plots/018-066F/Chateau_dOex.png
-zmichel/HRES/lagranto_f/plots/018-066F/Geneve.png
-zmichel/HRES/lagranto_f/plots/018-066F/Gersthofen.png
-zmichel/HRES/lagranto_f/plots/018-066F/Hirt.png
-zmichel/HRES/lagranto_f/plots/018-066F/Hochdorf.png
-zmichel/HRES/lagranto_f/plots/018-066F/Lugano.png
-zmichel/HRES/lagranto_f/plots/018-066F/Mattsee.png
-zmichel/HRES/lagranto_f/plots/018-066F/Ruhpolding.png
-zmichel/HRES/lagranto_f/plots/018-066F/Sonthofen.png
-zmichel/HRES/lagranto_f/plots/018-066F/StJohann_Tirol.png
-zmichel/HRES/lagranto_f/plots/018-066F/Stubenbergsee.png
-zmichel/HRES/lagranto_f/plots/018-066F/Stuttgart.png
-zmichel/HRES/lagranto_f/plots/018-066F/Wels.png
-zmichel/HRES/lagranto_f/plots/018-066F/WienerHuette.png
-zmichel/HRES/lagranto_f/plots/018-066F/Zuerich.png
-zmichel/HRES/lagranto_f/plots/018-066F/Zurzach.png
-zmichel/HRES/lagranto_f/plots/018-066F/Zwettl.png
-zmichel/HRES/lagranto_f/plots/024-000B/Geneve.png
-zmichel/HRES/lagranto_f/plots/024-000B/LocarnoMonti.png
-zmichel/HRES/lagranto_f/plots/024-000B/Robiei.png
-zmichel/HRES/lagranto_f/plots/024-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots/024-072F/Amriswil.png
-zmichel/HRES/lagranto_f/plots/024-072F/Attisholz.png
-zmichel/HRES/lagranto_f/plots/024-072F/BadToelz.png
-zmichel/HRES/lagranto_f/plots/024-072F/Basel.png
-zmichel/HRES/lagranto_f/plots/024-072F/Bern.png
-zmichel/HRES/lagranto_f/plots/024-072F/Burgkirchen.png
-zmichel/HRES/lagranto_f/plots/024-072F/Chateau_dOex.png
-zmichel/HRES/lagranto_f/plots/024-072F/Geneve.png
-zmichel/HRES/lagranto_f/plots/024-072F/Gersthofen.png
-zmichel/HRES/lagranto_f/plots/024-072F/Hirt.png
-zmichel/HRES/lagranto_f/plots/024-072F/Hochdorf.png
-zmichel/HRES/lagranto_f/plots/024-072F/Lugano.png
-zmichel/HRES/lagranto_f/plots/024-072F/Mattsee.png
-zmichel/HRES/lagranto_f/plots/024-072F/Ruhpolding.png
-zmichel/HRES/lagranto_f/plots/024-072F/Sonthofen.png
-zmichel/HRES/lagranto_f/plots/024-072F/StGallen.png
-zmichel/HRES/lagranto_f/plots/024-072F/StJohann_Tirol.png
-zmichel/HRES/lagranto_f/plots/024-072F/Stubenbergsee.png
-zmichel/HRES/lagranto_f/plots/024-072F/Stuttgart.png
-zmichel/HRES/lagranto_f/plots/024-072F/Wels.png
-zmichel/HRES/lagranto_f/plots/024-072F/WienerHuette.png
-zmichel/HRES/lagranto_f/plots/024-072F/Zuerich.png
-zmichel/HRES/lagranto_f/plots/024-072F/Zurzach.png
-zmichel/HRES/lagranto_f/plots/024-072F/Zwettl.png
-zmichel/HRES/lagranto_f/plots/030-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots/030-078F/Amriswil.png
-zmichel/HRES/lagranto_f/plots/030-078F/Attisholz.png
-zmichel/HRES/lagranto_f/plots/030-078F/BadToelz.png
-zmichel/HRES/lagranto_f/plots/030-078F/Basel.png
-zmichel/HRES/lagranto_f/plots/030-078F/Bern.png
-zmichel/HRES/lagranto_f/plots/030-078F/Burgkirchen.png
-zmichel/HRES/lagranto_f/plots/030-078F/Chateau_dOex.png
-zmichel/HRES/lagranto_f/plots/030-078F/Geneve.png
-zmichel/HRES/lagranto_f/plots/030-078F/Gersthofen.png
-zmichel/HRES/lagranto_f/plots/030-078F/Hirt.png
-zmichel/HRES/lagranto_f/plots/030-078F/Hochdorf.png
-zmichel/HRES/lagranto_f/plots/030-078F/Lugano.png
-zmichel/HRES/lagranto_f/plots/030-078F/Mattsee.png
-zmichel/HRES/lagranto_f/plots/030-078F/Ruhpolding.png
-zmichel/HRES/lagranto_f/plots/030-078F/Sonthofen.png
-zmichel/HRES/lagranto_f/plots/030-078F/StJohann_Tirol.png
-zmichel/HRES/lagranto_f/plots/030-078F/Stubenbergsee.png
-zmichel/HRES/lagranto_f/plots/030-078F/Stuttgart.png
-zmichel/HRES/lagranto_f/plots/030-078F/Wels.png
-zmichel/HRES/lagranto_f/plots/030-078F/WienerHuette.png
-zmichel/HRES/lagranto_f/plots/030-078F/Zuerich.png
-zmichel/HRES/lagranto_f/plots/030-078F/Zurzach.png
-zmichel/HRES/lagranto_f/plots/030-078F/Zwettl.png
-zmichel/HRES/lagranto_f/plots/036-000B/Geneve.png
-zmichel/HRES/lagranto_f/plots/036-000B/LocarnoMonti.png
-zmichel/HRES/lagranto_f/plots/036-000B/Payerne.png
-zmichel/HRES/lagranto_f/plots/036-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots/036-084F/Amriswil.png
-zmichel/HRES/lagranto_f/plots/036-084F/Attisholz.png
-zmichel/HRES/lagranto_f/plots/036-084F/BadToelz.png
-zmichel/HRES/lagranto_f/plots/036-084F/Basel.png
-zmichel/HRES/lagranto_f/plots/036-084F/Bern.png
-zmichel/HRES/lagranto_f/plots/036-084F/Burgkirchen.png
-zmichel/HRES/lagranto_f/plots/036-084F/Chateau_dOex.png
-zmichel/HRES/lagranto_f/plots/036-084F/Geneve.png
-zmichel/HRES/lagranto_f/plots/036-084F/Gersthofen.png
-zmichel/HRES/lagranto_f/plots/036-084F/Hirt.png
-zmichel/HRES/lagranto_f/plots/036-084F/Hochdorf.png
-zmichel/HRES/lagranto_f/plots/036-084F/Lugano.png
-zmichel/HRES/lagranto_f/plots/036-084F/Mattsee.png
-zmichel/HRES/lagranto_f/plots/036-084F/Ruhpolding.png
-zmichel/HRES/lagranto_f/plots/036-084F/Sonthofen.png
-zmichel/HRES/lagranto_f/plots/036-084F/StGallen.png
-zmichel/HRES/lagranto_f/plots/036-084F/StJohann_Tirol.png
-zmichel/HRES/lagranto_f/plots/036-084F/Stubenbergsee.png
-zmichel/HRES/lagranto_f/plots/036-084F/Stuttgart.png
-zmichel/HRES/lagranto_f/plots/036-084F/Wels.png
-zmichel/HRES/lagranto_f/plots/036-084F/WienerHuette.png
-zmichel/HRES/lagranto_f/plots/036-084F/Zuerich.png
-zmichel/HRES/lagranto_f/plots/036-084F/Zurzach.png
-zmichel/HRES/lagranto_f/plots/036-084F/Zwettl.png
-zmichel/HRES/lagranto_f/plots/040-000B/Chaumont.png
-zmichel/HRES/lagranto_f/plots/040-000B/Jungfraujoch.png
-zmichel/HRES/lagranto_f/plots/040-000B/Mace_Head.png
-zmichel/HRES/lagranto_f/plots/040-000B/Payerne.png
-zmichel/HRES/lagranto_f/plots/040-000B/Rigi.png
-zmichel/HRES/lagranto_f/plots/042-000B/Bern.png
-zmichel/HRES/lagranto_f/plots/042-000B/Buchs.png
-zmichel/HRES/lagranto_f/plots/042-000B/ChauxdeFonds.png
-zmichel/HRES/lagranto_f/plots/042-000B/Davos.png
-zmichel/HRES/lagranto_f/plots/042-000B/Lausanne.png
-zmichel/HRES/lagranto_f/plots/042-000B/Lugano.png
-zmichel/HRES/lagranto_f/plots/042-000B/Luzern.png
-zmichel/HRES/lagranto_f/plots/042-000B/Munsterlingen.png
-zmichel/HRES/lagranto_f/plots/042-000B/Neuchatel.png
-zmichel/HRES/lagranto_f/plots/042-000B/Payerne.png
-zmichel/HRES/lagranto_f/plots/042-000B/Vaduz.png
-zmichel/HRES/lagranto_f/plots/042-000B/Visp.png
-zmichel/HRES/lagranto_f/plots/042-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots/044-000B/Chaumont.png
-zmichel/HRES/lagranto_f/plots/044-000B/Jungfraujoch.png
-zmichel/HRES/lagranto_f/plots/044-000B/Mace_Head.png
-zmichel/HRES/lagranto_f/plots/044-000B/Payerne.png
-zmichel/HRES/lagranto_f/plots/044-000B/Rigi.png
-zmichel/HRES/lagranto_f/plots/048-000B/BaselBinnigen.png
-zmichel/HRES/lagranto_f/plots/048-000B/Bern.png
-zmichel/HRES/lagranto_f/plots/048-000B/Buchs.png
-zmichel/HRES/lagranto_f/plots/048-000B/Chaumont.png
-zmichel/HRES/lagranto_f/plots/048-000B/ChauxdeFonds.png
-zmichel/HRES/lagranto_f/plots/048-000B/ChurEms.png
-zmichel/HRES/lagranto_f/plots/048-000B/Davos.png
-zmichel/HRES/lagranto_f/plots/048-000B/Geneve.png
-zmichel/HRES/lagranto_f/plots/048-000B/Jungfraujoch.png
-zmichel/HRES/lagranto_f/plots/048-000B/Lausanne.png
-zmichel/HRES/lagranto_f/plots/048-000B/LocarnoMonti.png
-zmichel/HRES/lagranto_f/plots/048-000B/Lugano.png
-zmichel/HRES/lagranto_f/plots/048-000B/Luzern.png
-zmichel/HRES/lagranto_f/plots/048-000B/Mace_Head.png
-zmichel/HRES/lagranto_f/plots/048-000B/Munsterlingen.png
-zmichel/HRES/lagranto_f/plots/048-000B/Neuchatel.png
-zmichel/HRES/lagranto_f/plots/048-000B/Payerne.png
-zmichel/HRES/lagranto_f/plots/048-000B/Rigi.png
-zmichel/HRES/lagranto_f/plots/048-000B/Vaduz.png
-zmichel/HRES/lagranto_f/plots/048-000B/Visp.png
-zmichel/HRES/lagranto_f/plots/048-000B/Zuerich.png
-zmichel/HRES/lagranto_f/plots/072-000B/BaselBinnigen.png
-zmichel/HRES/lagranto_f/plots/072-000B/Geneve.png
-zmichel/HRES/lagranto_f/plots/072-000B/Jungfraujoch.png
-zmichel/HRES/lagranto_f/plots/072-000B/Lugano.png
-zmichel/HRES/lagranto_f/plots/072-000B/Zuerich.png
-zmichel/COSMO/lagranto_c_copy/plot_info
-zmichel/COSMO/lagranto_c_copy/startf_000-033F
-zmichel/COSMO/lagranto_c_copy/startf_003-033F
-zmichel/COSMO/lagranto_c_copy/tra_geom_000-033F
-zmichel/COSMO/lagranto_c_copy/tra_geom_003-033F
-zmichel/COSMO/test_case/plot_info
-zmichel/COSMO/test_case/startf_003-033F
-zmichel/COSMO/test_case/tra_geom_003-033F
-zmichel/COSMO/test_case/plots/003-033F/Beznau.png
-zmichel/COSMO/lagranto_c/plots/000-033F/Geneve.png
-zmichel/COSMO/lagranto_c/plots/003-033F/Beznau.png
-zmichel/COSMO/lagranto_c/plots/003-033F/Bugey.png
-zmichel/COSMO/lagranto_c/plots/003-033F/Fessenheim.png
-zmichel/COSMO/lagranto_c/plots/003-033F/Goesgen.png
-zmichel/COSMO/lagranto_c/plots/003-033F/Leibstadt.png
-zmichel/COSMO/lagranto_c/plots/003-033F/Muehleberg.png
-zmichel/COSMO/cosmo_case.zip
-src/pytrajplot/cli_working_copy.py
-src/pytrajplot/get_data_working_copy.py
-src/pytrajplot/plot_altitude_working_copy.py
-src/various/tmp_class_001.py
-zmichel/COSMO/test_case/startf_000-033F
-zmichel/COSMO/test_case/tra_geom_000-033F
-zmichel/COSMO/test_case/plots/000-033F/Geneve.png
-zmichel/HRES/test_case/maptest.png
 zmichel/HRES/test_case/plot_info
 zmichel/HRES/test_case/startf_000-048F
 zmichel/HRES/test_case/tra_geom_000-048F
+zmichel/test_altitude_plot/000-033F_traj.csv
+zmichel/test_altitude_plot/startf.csv
+zmichel/test_altitude_plot/test_altitude_plot_cases.sh
+zmichel/test_altitude_plot/trajdf.csv
+zmichel/test_altitude_plot/COSMO_backward/033-000B_traj.csv
+zmichel/test_altitude_plot/COSMO_backward/plot_info
+zmichel/test_altitude_plot/COSMO_backward/startf_033-000B
+zmichel/test_altitude_plot/COSMO_backward/tra_geom_033-000B
+zmichel/test_altitude_plot/COSMO_forward/000-033F_traj.csv
+zmichel/test_altitude_plot/COSMO_forward/plot_info
+zmichel/test_altitude_plot/COSMO_forward/startf_000-033F
+zmichel/test_altitude_plot/COSMO_forward/tra_geom_000-033F
+zmichel/test_altitude_plot/HRES_backward/042-000B_traj.csv
+zmichel/test_altitude_plot/HRES_backward/plot_info
+zmichel/test_altitude_plot/HRES_backward/startf_042-000B
+zmichel/test_altitude_plot/HRES_backward/tra_geom_042-000B
+zmichel/test_altitude_plot/HRES_forward/006-144F_traj.csv
+zmichel/test_altitude_plot/HRES_forward/plot_info
+zmichel/test_altitude_plot/HRES_forward/startf_006-144F
+zmichel/test_altitude_plot/HRES_forward/tra_geom_006-144F
