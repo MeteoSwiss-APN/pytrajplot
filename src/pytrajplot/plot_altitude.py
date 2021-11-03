@@ -98,9 +98,6 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
         )
 
         trajectory_df = trajectory_dict[key]  # extract df for given key
-
-        print(trajectory_df["start_altitude"].unique())
-
         number_of_times = trajectory_df["block_length"].iloc[
             0
         ]  # block length is constant, because it depends on the runtime of the model and the timestep, which both are constant for a given traj file
@@ -219,6 +216,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
 
 
 def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels, language):
+
     # TEMPORARY SOLUTION for the single subplot problem
     if altitude_levels == 1:
         altitude_levels = 2
@@ -233,23 +231,27 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels, la
 
     print(f"--- generating altitude plot for {origin}")
 
+    alt_levels_tmp = altitude_levels
+    alt_dict = {}
+    tmp = 0
+
     if y["altitude_1"]["y0"]["z_type"] == "hpa":
         unit = "hPa"  # unit for the HRES case
+        while tmp < altitude_levels:
+            alt_dict[tmp] = alt_levels_tmp
+            tmp += 1
+            alt_levels_tmp -= 1
+
         if np.min(y["altitude_" + str(altitude_levels)]["y0"]["z"]) < 500:
             custom_ylim = (300, 1000)
         else:
             custom_ylim = (500, 1000)
     else:
+        while tmp < altitude_levels:
+            alt_dict[tmp] = tmp + 1
+            tmp += 1
         unit = "m"
         custom_ylim = (0, 5000)
-
-    alt_levels_tmp = altitude_levels
-    alt_dict = {}
-    tmp = 0
-    while tmp < altitude_levels:
-        alt_dict[tmp] = alt_levels_tmp
-        tmp += 1
-        alt_levels_tmp -= 1
 
     fig, axs = plt.subplots(altitude_levels, 1, tight_layout=True, sharex=True)
     # Setting the values for all y-axes.
@@ -269,10 +271,7 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels, la
                 ax.invert_yaxis()
                 ax.grid(color="grey", linestyle="--", linewidth=1)
 
-                if key[-1] == "B":
-                    y_surf = y["altitude_" + str(alt)]["y_surf"]
-                else:
-                    y_surf = np.flip(y["altitude_" + str(alt)]["y_surf"])
+                y_surf = y["altitude_" + str(alt)]["y_surf"]
 
                 ax.fill_between(
                     x,
@@ -285,16 +284,10 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels, la
                 for traj in traj_index:
                     textstr = str(y["altitude_" + str(alt)]["alt_level"]) + " " + unit
                     xstart = x[0]
-                    if (
-                        key[-1] == "B"
-                    ):  # if Backward trajectory; plot from right to left
-                        yaxis = y["altitude_" + str(alt)]["y" + str(traj)]["z"]
-                        ystart = yaxis.iloc[0]
-                        xstart = x[0]
-                    else:
-                        yaxis = np.flip(y["altitude_" + str(alt)]["y" + str(traj)]["z"])
-                        ystart = yaxis.iloc[-1]
-                        xstart = x[len(x) - 1]
+
+                    yaxis = y["altitude_" + str(alt)]["y" + str(traj)]["z"]
+                    ystart = yaxis.iloc[0]
+                    xstart = x[0]
 
                     linestyle = y["altitude_" + str(alt)]["y" + str(traj)]["line"]
                     alpha = y["altitude_" + str(alt)]["y" + str(traj)]["alpha"]
@@ -330,16 +323,10 @@ def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels, la
                 textstr = str(y["altitude_" + str(alt)]["alt_level"]) + " " + unit
                 # print(f'plotting main trajectory on altitude level {alt} in subplot {nn}')
 
-                if key[-1] == "B":  # if Backward trajectory; plot from right to left
-                    yaxis = y["altitude_" + str(alt)]["y0"]["z"]
-                    ystart = yaxis.iloc[0]
-                    xstart = x[0]
-                    y_surf = y["altitude_" + str(alt)]["y_surf"]
-                else:
-                    yaxis = np.flip(y["altitude_" + str(alt)]["y0"]["z"])
-                    ystart = yaxis.iloc[-1]
-                    xstart = x[len(x) - 1]
-                    y_surf = np.flip(y["altitude_" + str(alt)]["y_surf"])
+                yaxis = y["altitude_" + str(alt)]["y0"]["z"]
+                ystart = yaxis.iloc[0]
+                xstart = x[0]
+                y_surf = y["altitude_" + str(alt)]["y_surf"]
 
                 linestyle = y["altitude_" + str(alt)]["y0"]["line"]
                 alpha = y["altitude_" + str(alt)]["y0"]["alpha"]

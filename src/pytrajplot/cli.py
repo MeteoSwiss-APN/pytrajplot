@@ -94,15 +94,19 @@ def main(
         info_prefix=info_prefix,
         language=language,
     )
-    trajectory_dict, plot_info_dict = check_input_dir(
+    trajectory_dict, plot_info_dict, keys = check_input_dir(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
 
-    plot_altitude(
-        trajectory_dict=trajectory_dict,
-        output_dir=output_dir,
-        separator=separator,
-        language=language,
-    )
+    # trajectory_dict[keys[0]].to_csv(output_dir + '/' + keys[0]+'_traj.csv', index=True)
+
+    # plot_altitude(
+    #     trajectory_dict=trajectory_dict,
+    #     output_dir=output_dir,
+    #     separator=separator,
+    #     language=language,
+    # )
+
+    # plot_map(outpath=output_dir)
 
     print("--- Done.")
