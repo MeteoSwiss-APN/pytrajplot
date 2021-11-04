@@ -98,9 +98,9 @@ def main(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
 
-    trajectory_dict[keys[0]].to_csv(
-        output_dir + "/" + keys[0] + "_traj.csv", index=True
-    )
+    # trajectory_dict[keys[0]].to_csv(
+    #     output_dir + "/" + keys[0] + "_traj.csv", index=True
+    # )
 
     plot_altitude(
         trajectory_dict=trajectory_dict,

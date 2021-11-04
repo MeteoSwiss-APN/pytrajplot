@@ -44,6 +44,7 @@ def read_plot_info(plot_info_path):
 
 
 def map_altitudes_and_subplots(unit, unique_start_altitudes, current_altitude):
+
     altitude_levels = len(unique_start_altitudes)
     # map altitudes to subplots. i.e. w/ 4 start altitudes > alt1:sp3, alt2:sp2, alt3:sp1, alt4:sp0
     altitude_mapping_dict = {}
@@ -102,18 +103,20 @@ def read_startf(startf_path, separator):
         "altitude_levels"
     ] = None  # #altitude levels for certain origin; variable within start file
     start_df["subplot_index"] = None
+    start_df["max_start_altitude"] = None
 
     i = 0
     unique_origins_list = []
     unique_altitude_levels_dict = {}
 
-    # if there is only one altitude, plot this one twice (to ensure, no error occurs; TEMPORARY SOLUTION)
+    # TODO
     if len(start_df) == 1:
-        unique_origins_list.append(start_df["origin"].loc[0])
-        start_df["side_traj"].loc[i : i + 3] = 0
-        start_df["altitude_levels"].loc[i : i + 3] = start_df.loc[
-            start_df.origin == start_df["origin"].loc[i], "origin"
-        ].count()
+        start_df["side_traj"] = 0  # 1 if there are side trajectories, else 0
+        start_df[
+            "altitude_levels"
+        ] = 1  # #altitude levels for certain origin; variable within start file
+        start_df["subplot_index"] = 0
+        start_df["max_start_altitude"] = start_df["z"].loc[0]
 
     else:
         while i < len(
@@ -134,27 +137,39 @@ def read_startf(startf_path, separator):
 
                     if start_df["origin"].loc[i] not in unique_origins_list:
                         unique_origins_list.append(start_df["origin"].loc[i])
-                        # NEW FROM HERE
                         origin = start_df["origin"].loc[i]
                         altitude_levels = start_df["altitude_levels"].loc[
                             i
                         ]  # altitude levels for given location
                         altitude = start_df["z"].loc[i]
                         # add information to unique_altitude_levels_dict
-                        # print(f'{origin}: rows {i} - {i + 5*altitude_levels} correspond to altitude level {altitude} {unit}')
+                        # print(f'{origin}: rows {i} - {i + 5*altitude_levels - 1} correspond to altitude level {altitude} {unit}')
                         unique_altitude_levels_dict[start_df["origin"].loc[i]] = (
-                            start_df["z"].loc[i : (i + 5 * altitude_levels)].unique()
+                            start_df["z"]
+                            .loc[i : (i + 5 * altitude_levels) - 1]
+                            .unique()
                         )
 
                     # print(f'{origin}: rows {i} - {i + 5} correspond to altitude level {start_df["z"].loc[i]} {unit}')
+                    # print(f'Calling map_alt_&_suplots for {origin} w/ unit = {unit}, unique start alts = {unique_altitude_levels_dict[origin]} & current_alt = {start_df["z"].loc[i]}')
 
                     start_df["subplot_index"].loc[
-                        i : i + 5
+                        i : i + 4
                     ] = map_altitudes_and_subplots(
                         unit=unit,
                         unique_start_altitudes=unique_altitude_levels_dict[origin],
                         current_altitude=start_df["z"].loc[i],
                     )
+
+                    if unit == "hPa":
+                        start_df["max_start_altitude"].loc[i : i + 4] = np.min(
+                            unique_altitude_levels_dict[origin]
+                        )
+                    if unit == "m":
+                        start_df["max_start_altitude"].loc[i : i + 4] = np.max(
+                            unique_altitude_levels_dict[origin]
+                        )
+
                     i += 5
 
                 else:
@@ -166,22 +181,29 @@ def read_startf(startf_path, separator):
 
                     if start_df["origin"].loc[i] not in unique_origins_list:
                         unique_origins_list.append(start_df["origin"].loc[i])
-
-                        # NEW FROM HERE
                         origin = start_df["origin"].loc[i]
                         altitude_levels = start_df["altitude_levels"].loc[
                             i
                         ]  # altitude levels for given location
                         # add information to unique_altitude_levels_dict
-                        print(f"{origin}: rows {i} - {i + altitude_levels}")
+                        # print(f"{origin}: rows {i} - {i + altitude_levels}")
                         unique_altitude_levels_dict[start_df["origin"].loc[i]] = (
                             start_df["z"].loc[i : (i + altitude_levels)].unique()
                         )
 
                     # print(f'{origin}: row {i} corresponds to altitude level {start_df["z"].loc[i]} {unit}')
+                    if unit == "hPa":
+                        start_df["max_start_altitude"].loc[i : i + 3] = np.min(
+                            unique_altitude_levels_dict[origin]
+                        )
+                    if unit == "m":
+                        start_df["max_start_altitude"].loc[i : i + 3] = np.max(
+                            unique_altitude_levels_dict[origin]
+                        )
 
                     tmp = i
                     while tmp < i + 4:
+                        # print(f'Calling map_alt_&_suplots for {origin} w/ unit = {unit}, unique start alts = {unique_altitude_levels_dict[origin]} & current_alt = {start_df["z"].loc[tmp]}')
                         start_df["subplot_index"].loc[tmp] = map_altitudes_and_subplots(
                             unit=unit,
                             unique_start_altitudes=unique_altitude_levels_dict[origin],
@@ -228,11 +250,6 @@ def traj_helper_fct(case, file_path, firstline, start_df):
 
         # number_of_times = 1/dt * T + 1
         number_of_times = int(T / dt + 1)
-
-    if False:
-        print(
-            f"#Trajectories = {number_of_trajectories} \n#Points/Trajectory = {number_of_times}"
-        )
 
     return number_of_trajectories, number_of_times
 
@@ -339,6 +356,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     traj_df["#trajectories"] = number_of_trajectories
     traj_df["block_length"] = number_of_times
     traj_df["subplot_index"] = np.NaN
+    traj_df["max_start_altitude"] = np.NaN
 
     # add z_type, origin, side_traj (bool) and alt_levels columns to trajectory dataframe
     tmp = 0
@@ -352,12 +370,14 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         side_traj = start_df["side_traj"][tmp]
         altitude_levels = start_df["altitude_levels"][tmp]
         subplot_index = int(start_df["subplot_index"][tmp])
+        max_start_altitude = start_df["max_start_altitude"][tmp]
         traj_df["z_type"].iloc[lower_row:upper_row] = z_type
         traj_df["origin"].iloc[lower_row:upper_row] = origin
         traj_df["side_traj"].iloc[lower_row:upper_row] = side_traj
         traj_df["altitude_levels"].iloc[lower_row:upper_row] = altitude_levels
         traj_df["start_altitude"].iloc[lower_row:upper_row] = start_altitude
         traj_df["subplot_index"].iloc[lower_row:upper_row] = subplot_index
+        traj_df["max_start_altitude"].iloc[lower_row:upper_row] = max_start_altitude
         tmp += 1
 
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
