@@ -205,3 +205,8 @@ zmichel/test_altitude_plot/HRES_forward/006-144F_traj.csv
 zmichel/test_altitude_plot/HRES_forward/plot_info
 zmichel/test_altitude_plot/HRES_forward/startf_006-144F
 zmichel/test_altitude_plot/HRES_forward/tra_geom_006-144F
+zmichel/test_altitude_plot/COSMO_backward/plots/033-000B/Basel-Binningen.png
+zmichel/test_altitude_plot/COSMO_backward/plots/033-000B/Geneve.png
+zmichel/test_altitude_plot/COSMO_backward/plots/033-000B/Jungfraujoch.png
+zmichel/test_altitude_plot/COSMO_backward/plots/033-000B/Lugano.png
+zmichel/test_altitude_plot/COSMO_backward/plots/033-000B/Zuerich.png

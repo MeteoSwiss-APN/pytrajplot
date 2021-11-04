@@ -52,6 +52,7 @@ def create_y_dict(altitude_levels):
             "y_surf": None,
             "y_type": None,
             "alt_level": None,
+            "subplot_index": None,
             "y0": {
                 "z": [],
                 "z_type": None,
@@ -109,7 +110,9 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
         ]  # shared x-axis is the time axis, which is constant for a given traj file
 
         row_index = 0
-        alt_index = 1  # altitude 1,2,3,4
+        alt_index = (
+            1  # altitude 1,2,3,4,... (however many starting altitudes there are)
+        )
         traj_index = 0  # 0=main, 1=east, 2=north, 3=west, 4=south
 
         while row_index < number_of_trajectories:
@@ -119,6 +122,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
 
             origin = trajectory_df["origin"].loc[lower_row]
             altitude_levels = trajectory_df["altitude_levels"].loc[lower_row]
+            subplot_index = trajectory_df["subplot_index"].loc[lower_row]
 
             if trajectory_df["side_traj"].loc[
                 lower_row
@@ -139,6 +143,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
                     y["altitude_" + str(alt_index)]["y_surf"] = trajectory_df["hsurf"][
                         lower_row:upper_row
                     ]
+                    y["altitude_" + str(alt_index)]["subplot_index"] = subplot_index
 
                 y["altitude_" + str(alt_index)]["y_type"] = trajectory_df["z_type"][
                     lower_row
@@ -175,6 +180,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
             else:
                 # print(f'row_index = {row_index} corresponds to origin {origin}')
                 y["altitude_" + str(alt_index)]["origin"] = origin
+                y["altitude_" + str(alt_index)]["subplot_index"] = subplot_index
                 y["altitude_" + str(alt_index)]["y_surf"] = trajectory_df["hsurf"][
                     lower_row:upper_row
                 ]
@@ -216,6 +222,8 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
 
 
 def generate_altitude_plot(x, y, key, side_traj, output_dir, altitude_levels, language):
+
+    print(y)
 
     # TEMPORARY SOLUTION for the single subplot problem
     if altitude_levels == 1:

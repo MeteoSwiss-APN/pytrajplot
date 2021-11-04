@@ -363,7 +363,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
     traj_df.reset_index(drop=True, inplace=True)
 
-    if True:
+    if False:
         traj_df.to_csv("trajdf.csv", index=True)
         start_df.to_csv("startf.csv", index=True)
 
