@@ -116,6 +116,7 @@ def main(
     language: str,
     altitude: bool,
     map: bool,
+    domain: str,
 ) -> None:
 
     prefix_dict, language = interpret_options(
@@ -142,6 +143,7 @@ def main(
             output_dir=output_dir,
             separator=separator,
             language=language,
+            domain=domain,
         )
 
     print("--- Done.")
