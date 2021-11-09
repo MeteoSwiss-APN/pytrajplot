@@ -61,6 +61,18 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
     help="Separator str between origin of trajectory and side trajectory index. Default: ~",
 )
 @click.option(
+    "--altitude",
+    type=bool,
+    is_flag=True,
+    help="Choose, to create altitude plots. isFlag: True",
+)
+@click.option(
+    "--map",
+    type=bool,
+    is_flag=True,
+    help="Choose, to create map plots. isFlag: True",
+)
+@click.option(
     "--language",
     type=click.Choice(
         [
@@ -77,6 +89,22 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
     default=("en"),
     help="Choose language. Default: en",
 )
+@click.option(
+    "--domain",
+    type=click.Choice(
+        [
+            "ch_hd",
+            "ch",
+            "europe",
+            "centraleurope",
+            "alps",
+        ],
+        case_sensitive=False,
+    ),
+    multiple=False,
+    default=("centraleurope"),
+    help="Choose domain for map plot. Default: centraleurope",
+)
 def main(
     *,
     info_prefix: str,
@@ -86,6 +114,8 @@ def main(
     output_dir: str,
     separator: str,
     language: str,
+    altitude: bool,
+    map: bool,
 ) -> None:
 
     prefix_dict, language = interpret_options(
@@ -98,17 +128,20 @@ def main(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
 
-    # trajectory_dict[keys[0]].to_csv(
-    #     output_dir + "/" + keys[0] + "_traj.csv", index=True
-    # )
+    if altitude:
+        plot_altitude(
+            trajectory_dict=trajectory_dict,
+            output_dir=output_dir,
+            separator=separator,
+            language=language,
+        )
 
-    plot_altitude(
-        trajectory_dict=trajectory_dict,
-        output_dir=output_dir,
-        separator=separator,
-        language=language,
-    )
-
-    # plot_map(outpath=output_dir)
+    if map:
+        plot_map(
+            trajectory_dict=trajectory_dict,
+            output_dir=output_dir,
+            separator=separator,
+            language=language,
+        )
 
     print("--- Done.")
