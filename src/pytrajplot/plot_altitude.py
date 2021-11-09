@@ -231,6 +231,44 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
     return
 
 
+# add y-top for cosmo & hres dependent on values
+
+
+def altitude_limits(y, max_start_altitude, altitude_levels):
+    # print('--- defining the altitude limits')
+
+    i = 1
+    max_altitude_array = []
+
+    if y["altitude_1"]["y0"]["z_type"] == "hpa":
+        unit = "hPa"  # unit for the HRES case
+
+        while i <= altitude_levels:
+            max_altitude_array.append(np.min(y["altitude_" + str(i)]["y0"]["z"]))
+            i += 1
+
+        # (lower y-limit, upper y-limit); lower y-limit > upper y-limit to invert the y-axis for pressure altitude
+
+        if np.min(max_altitude_array) >= max_start_altitude:
+            custom_ylim = (1020, 0.8 * max_start_altitude)  # 20% margin on top
+        else:
+            custom_ylim = (1020, 0.8 * np.min(max_altitude_array))
+
+    else:
+        unit = "m"
+        while i <= altitude_levels:
+            max_altitude_array.append(np.max(y["altitude_" + str(i)]["y1"]["z"]))
+            print(f"i = {i}")
+            i += 1
+
+        if np.max(max_altitude_array) <= max_start_altitude:
+            custom_ylim = (0, max_start_altitude + 1000)
+        else:
+            custom_ylim = (0, np.max(max_altitude_array) + 500)
+
+    return unit, custom_ylim
+
+
 def generate_altitude_plot(
     x, y, key, side_traj, output_dir, altitude_levels, language, max_start_altitude
 ):
@@ -241,10 +279,10 @@ def generate_altitude_plot(
     #     y["altitude_2"] = y["altitude_1"]
 
     subplot_properties_dict = {
-        0: "r-",
-        1: "b-",
-        2: "g-",
-        3: "k-",
+        0: "k-",
+        1: "g-",
+        2: "b-",
+        3: "r-",
         4: "c-",
         5: "m-",
         6: "y-",
@@ -262,20 +300,36 @@ def generate_altitude_plot(
 
     print(f"--- generating altitude plot for {origin}")
 
-    if y["altitude_1"]["y0"]["z_type"] == "hpa":
-        unit = "hPa"  # unit for the HRES case
-        # (lower y-limit, upper y-limit); lower y-limit > upper y-limit to invert the y-axis for pressure altitude
-        custom_ylim = (1000, 0.8 * max_start_altitude)  # 20% margin on top
-    else:
-        unit = "m"
-        custom_ylim = (0, max_start_altitude + 1000)  # 20% margin on top
+    unit, custom_ylim = altitude_limits(
+        y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
+    )
+
+    # if y["altitude_1"]["y0"]["z_type"] == "hpa":
+    #     unit = "hPa"  # unit for the HRES case
+    #     # (lower y-limit, upper y-limit); lower y-limit > upper y-limit to invert the y-axis for pressure altitude
+    #     custom_ylim = (1020, 0.8 * max_start_altitude)  # 20% margin on top
+    # else:
+    #     unit = "m"
+    #     custom_ylim = (0, max_start_altitude + 1000)  # 20% margin on top
 
     if altitude_levels == 1:
         # figsize=(width, height)
-        fig, axs = plt.subplots(altitude_levels, 1, tight_layout=True, figsize=(9, 6))
+        fig, axs = plt.subplots(
+            altitude_levels,
+            1,
+            tight_layout=True,
+            figsize=(9, 6),
+            dpi=500,
+        )
 
     else:
-        fig, axs = plt.subplots(altitude_levels, 1, tight_layout=True, sharex=True)
+        fig, axs = plt.subplots(
+            altitude_levels,
+            1,
+            tight_layout=True,
+            sharex=True,
+            dpi=500,
+        )
 
     # Setting the values for all y-axes.
     plt.setp(axs, ylim=custom_ylim)
