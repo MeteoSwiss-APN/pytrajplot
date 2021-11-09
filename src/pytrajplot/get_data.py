@@ -14,13 +14,10 @@ from datetime import timedelta
 
 # import pdb  # use: python debugger, i.e. pdb.set_trace()
 
-plot_steps = True
-
 
 def read_plot_info(plot_info_path):
     """Read the pure txt file containing the plot_info to variables for later purposes."""
-    if plot_steps:
-        print("--- reading plot_info into dict")
+    # print("--- reading plot_info into dict")
 
     with open(plot_info_path, "r") as f:
         plot_info_tmp = [line.strip() for line in f.readlines()]
@@ -78,8 +75,7 @@ def map_altitudes_and_subplots(unit, unique_start_altitudes, current_altitude):
 
 
 def read_startf(startf_path, separator):
-    if plot_steps:
-        print("--- reading startf file")
+    # print("--- reading startf file")
 
     start_df = pd.read_csv(
         startf_path,
@@ -286,8 +282,7 @@ def convert_time(plot_info_dict, traj_df, case):
 
 
 def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
-    if plot_steps:
-        print("--- reading trajectory file")
+    # print("--- reading trajectory file")
 
     # read first line of trajectory file to check which case it is.
     with open(trajectory_file_path) as f:
@@ -393,8 +388,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
 def check_input_dir(
     input_dir, prefix_dict, separator
 ):  # iterate through the input folder containing the trajectory files
-    if plot_steps:
-        print("--- iterating through input directory")
+    print("--- iterating through input directory")
 
     counter = 0
     start_dict, trajectory_dict, files, keys, traj_blocks = {}, {}, [], [], {}
