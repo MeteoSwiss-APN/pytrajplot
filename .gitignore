@@ -300,3 +300,11 @@ zmichel/HRES/test_case_side_traj/plots/000-048F/BaselBinnigen.png
 zmichel/HRES/test_case_side_traj/plots/000-048F/Linate_centraleurope.png
 zmichel/HRES/test_case_side_traj/plots/000-048F/Linate.png
 .gitignore
+test_hres_map_plots.sh
+zmichel/COSMO/test_case_forward_w_sidetraj/plot_info
+zmichel/COSMO/test_case_forward_w_sidetraj/startf_003-033F
+zmichel/COSMO/test_case_forward_w_sidetraj/tra_geom_003-033F
+zmichel/COSMO/test_case_forward_wo_side_traj/plot_info
+zmichel/COSMO/test_case_forward_wo_side_traj/startf_000-033F
+zmichel/COSMO/test_case_forward_wo_side_traj/tra_geom_000-033F
+zmichel/HRES/hres_maps.zip
