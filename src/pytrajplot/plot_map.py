@@ -19,8 +19,6 @@ from cartopy.mpl.gridliner import LATITUDE_FORMATTER
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-# plt.rcParams["figure.autolayout"] = True
-
 
 def create_coord_dict(altitude_levels):
     assert (
@@ -92,10 +90,10 @@ def plot_map(trajectory_dict, output_dir, separator, language, domain):
         trajectory_df = trajectory_dict[key]  # extract df for given key
 
         # not sure if necessary for anything...
-        dt = abs(trajectory_df["time"].loc[0] - trajectory_df["time"].loc[1])
+        # dt = abs(trajectory_df["time"].loc[0] - trajectory_df["time"].loc[1])
 
-        if str(dt)[-2:] == ".3":
-            dt += 0.2
+        # if str(dt)[-2:] == ".3":
+        #     dt += 0.2
 
         number_of_times = trajectory_df["block_length"].iloc[
             0
@@ -183,7 +181,6 @@ def plot_map(trajectory_dict, output_dir, separator, language, domain):
                         altitude_levels=altitude_levels,
                         language=language,
                         domain=domain,
-                        dt=dt,
                     )
 
             else:
@@ -242,13 +239,12 @@ def plot_map(trajectory_dict, output_dir, separator, language, domain):
                         altitude_levels=altitude_levels,
                         language=language,
                         domain=domain,
-                        dt=dt,
                     )
     return
 
 
 def add_features(map):
-    map.coastlines()
+    map.coastlines(resolution="10m")
     map.add_feature(cfeature.LAND)
     map.add_feature(cfeature.COASTLINE)
     map.add_feature(cfeature.BORDERS, linestyle="--")
@@ -351,76 +347,95 @@ def retrieve_interval_points(coord_dict, i):
     return lon_important, lat_important
 
 
-def is_visible(city) -> bool:
-    return True
+def is_visible(name, lat, lon, domain_boundaries) -> bool:
     """Check if a point is inside the domain."""
-    px_geo: float = city.geometry.x
-    py_geo: float = city.geometry.y
-    # pylint: disable=E0633  # unpacking-non-sequence
-    px_ax, py_ax = self.trans.geo_to_axes(px_geo, py_geo)
-    in_domain = 0.0 <= px_ax <= 1.0 and 0.0 <= py_ax <= 1.0
-    if not in_domain:
-        return False
-    if self.ref_dist_box is None:
-        behind_ref_dist_box = False
+    in_domain = (
+        domain_boundaries[0] <= lon <= domain_boundaries[1]
+        and domain_boundaries[2] <= lat <= domain_boundaries[3]
+    )
+
+    if in_domain:
+        return True
     else:
-        behind_ref_dist_box = (
-            self.ref_dist_box.x0_box <= px_ax <= self.ref_dist_box.x1_box
-            and self.ref_dist_box.y0_box <= py_ax <= self.ref_dist_box.y1_box
-        )
-    return not behind_ref_dist_box
+        return False
 
 
-def is_of_interest(city) -> bool:
+def is_of_interest(name, capital_type, population) -> bool:
     """Check if a city fulfils certain importance criteria."""
-    is_capital = city.attributes["FEATURECLA"].startswith("Admin-0 capital")
-    is_large = city.attributes["GN_POP"] > 5000000
+    is_capital = capital_type == "primary"
+    is_large = (
+        population > 400000
+    )  # the filtering step happens already, when reading the csv-file. There, the population threshold is set to 400k.
+    # print(f'{name} has capital_type {capital_type} and thus is_capital is {is_capital}')
+
     excluded_cities = [
         "Incheon",
     ]
-    is_excluded = city.attributes["name_en"] in excluded_cities
+
+    is_excluded = name in excluded_cities
+
+    print(f"name {is_capital}")
+    print(f"name {is_large}")
+    print(f"name {is_excluded}")
+
+    print(f"name: {(is_capital or is_large) and not is_excluded}")
+
     return (is_capital or is_large) and not is_excluded
 
 
-def get_name(city) -> str:
-    """Fetch city name in current language, hand-correcting some."""
-    name = city.attributes[f"name_en"]
-    if name.startswith("Freiburg im ") and name.endswith("echtland"):
-        name = "Freiburg"
-    return name
-
-
 def add_cities(map, domain_boundaries):
-    # retrieve cities from shapefile
-    cities: Sequence[Record] = shpreader.Reader(
-        shpreader.natural_earth(
-            resolution="110m", category="cultural", name="populated_places"
-        )
-    ).records()
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    cities_df = pd.read_csv(
+        "src/pytrajplot/cities/worldcities.csv"
+    )  # len(cities_df) = 41001
+    cities_df = (
+        cities_df.dropna()
+    )  # remove less important cities to reduce size of dataframe --> # len(cities_df) = 8695
 
-    cities_by_name = {get_name(city): city for city in cities}
-    for name, city in sorted(cities_by_name.items()):
-        lon, lat = city.geometry.x, city.geometry.y
-        if is_visible(city) and is_of_interest(city):
-            print(f'{name} has roughly {city.attributes["GN_POP"]} population')
+    for i, row in cities_df.iterrows():
+        city = row["city_ascii"]
+        lon = row["lng"]
+        lat = row["lat"]
+        capital_type = row["capital"]
+        population = row["population"]
+
+        if is_visible(
+            name=city, lat=lat, lon=lon, domain_boundaries=domain_boundaries
+        ) and is_of_interest(
+            name=city, capital_type=capital_type, population=population
+        ):
+            print(f"{city} is visible and of interest")
+            print(f"{city} has roughly {population} inhabitants")
             plt.scatter(
                 x=lon,
                 y=lat,
                 marker="o",
                 color="black",
             )
-            # Note: `clip_on=True` doesn't work in cartopy v0.18
-        #     text.set_clip_path(plot_domain)
+            map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05))
 
 
 def generate_map_plot(
-    coord_dict, key, side_traj, output_dir, altitude_levels, language, domain, dt
+    coord_dict, key, side_traj, output_dir, altitude_levels, language, domain
 ):
     origin = coord_dict["altitude_1"]["origin"]
     print(f"--- generating map plot for {origin}")
 
-    # this dict defines the subplot position and figure size for the different domains,
-    # which all have different aspect ratios
+    if coord_dict["altitude_1"]["y_type"] == "hpa":
+        case = "HRES"
+        projection = ccrs.PlateCarree()
+    else:
+        case = "COSMO"
+        projection = ccrs.RotatedPole(
+            pole_longitude=-170,
+            pole_latitude=43,
+            central_rotated_longitude=0.0,
+            globe=None,
+        )
+
+    # this dict defines the subplot position and figure size for the different domains, which all have different aspect ratios
     figsize_dict = {
         "centraleurope": {
             "figsize": (16, 10),
@@ -455,26 +470,35 @@ def generate_map_plot(
 
     fig = plt.figure(
         figsize=figsize_dict[domain]["figsize"],
-        # constrained_layout=False,  # enable, s.t. everything fits nicely on the figure --> incompatible w/ cartopy
+        constrained_layout=False,  # enable, s.t. everything fits nicely on the figure --> incompatible w/ cartopy
     )
 
-    map = fig.add_subplot(
-        1,
-        1,
-        1,
-        projection=ccrs.PlateCarree(),  # choose projection
-        frameon=True,  # add/remove frame of map. I think it looks better w/o a frame
-    )
+    map = plt.axes(projection=projection, frameon=True)
+
+    map.set_aspect("auto")  # adapt the aspect ratio of the figure
+
+    # map = fig.add_subplot(
+    #     1,
+    #     1,
+    #     1,
+    #     projection=ccrs.PlateCarree(),  # choose projection
+    #     frameon=True,  # add/remove frame of map. I think it looks better w/o a frame
+    # )
+
+    # l, b, w, h = map.get_position().bounds
+    # print(f'l = {l}, b = {b}, w = {w}, h = {h}')
+    # map.set_position([0.8, 0.8, 0.8, 0.8])
 
     # position subplot on figure, depending on aspect ratio of domain
-    fig.subplots_adjust(
-        left=figsize_dict[domain]["left"],
-        bottom=figsize_dict[domain]["bottom"],
-        right=figsize_dict[domain]["right"],
-        top=figsize_dict[domain]["top"],
-    )
+    # fig.subplots_adjust(
+    #     left=figsize_dict[domain]["left"],
+    #     bottom=figsize_dict[domain]["bottom"],
+    #     right=figsize_dict[domain]["right"],
+    #     top=figsize_dict[domain]["top"],
+    # )
+
     domain_boundaries = crop_map(map=map, domain=domain)
-    print(domain_boundaries)
+    # print(domain_boundaries)
 
     gl = map.gridlines(
         crs=ccrs.PlateCarree(),
@@ -500,10 +524,50 @@ def generate_map_plot(
         8: "crimson-",
         9: "lightgreen-",
     }
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # HERE, THE ACTUAL PLOTTING HAPPENS FOR CASE: HRES
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    if case == "HRES":
+        plot_hres_trajectories(
+            coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
+        )
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # HERE, THE ACTUAL PLOTTING HAPPENS FOR CASE: COSMO
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    if case == "COSMO":
+        print("--- COSMO")
+        plot_cosmo_trajectories(
+            coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
+        )
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    add_features(map=map)  # add features: coastlines,lakes,...
+    add_cities(map=map, domain_boundaries=domain_boundaries)
+    map.legend()  # add legend
+    title = False  # don't want title for map plot as of now
+    if title:
+        if language == "en":
+            locale.setlocale(locale.LC_ALL, "en_GB")
+            fig.suptitle("Air trajectories originating from " + origin)
+        if language == "de":
+            fig.suptitle("Luft-Trajektorien Karte für " + origin)
 
+    # perhaps useful: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.itertuples.html
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # HERE, THE ACTUAL PLOTTING HAPPENS.
+    # CREATE OUTPUT FOLDER AND SAVE MAP
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
+    os.makedirs(
+        outpath, exist_ok=True
+    )  # create plot folder if it doesn't already exist
+    plt.savefig(outpath + origin + "_" + domain + ".png", dpi=100)
+    plt.close(fig)
+
+    return
+
+
+def plot_hres_trajectories(
+    coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
+):
     i = 1
     while i <= altitude_levels:
         alt_level = coord_dict["altitude_" + str(i)]["alt_level"]
@@ -520,13 +584,11 @@ def generate_map_plot(
             traj_index = [0, 1, 2, 3, 4]
 
             for traj in traj_index:
-
                 # textstr = (
                 #     str(coord_dict["altitude_" + str(i)]["alt_level"])
                 #     + " "
                 #     + coord_dict["altitude_" + str(i)]["y_type"]
                 # )
-
                 latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
 
@@ -540,7 +602,6 @@ def generate_map_plot(
                 if (
                     coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
                 ):  # only add legend & startpoint for the main trajectories
-
                     # plot main trajectory
                     map.plot(
                         longitude,  # define x-axis
@@ -571,7 +632,6 @@ def generate_map_plot(
                     )
 
         else:  # no side traj
-
             latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
             longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
 
@@ -581,6 +641,9 @@ def generate_map_plot(
             linestyle = subplot_properties_dict[sub_index]
             # print(f'linestyle for subplot {sub_index}: {linestyle}')
             alpha = coord_dict["altitude_" + str(i)]["traj_0"]["alpha"]
+
+            print(f"longitude = {longitude}")
+            print(f"latitude = {latitude}")
 
             # plot main trajectory
             map.plot(
@@ -605,31 +668,108 @@ def generate_map_plot(
                 markerfacecolor="white",
             )
 
-            # coord_dict[sub_index].legend()
-
         i += 1
 
-    add_features(map=map)  # add features: coastlines,lakes,...
-    map.legend()  # add legend
-    add_cities(map=map, domain_boundaries=domain_boundaries)
-    # TODO: add cities to the map
-    # perhaps useful: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.itertuples.html
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
-    os.makedirs(
-        outpath, exist_ok=True
-    )  # create plot folder if it doesn't already exist
+def plot_cosmo_trajectories(
+    coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
+):
+    i = 1
+    while i <= altitude_levels:
+        print(f"Altitude Level {i}")
+        alt_level = coord_dict["altitude_" + str(i)]["alt_level"]
+        sub_index = int(coord_dict["altitude_" + str(i)]["subplot_index"])
+        textstr = (
+            str(coord_dict["altitude_" + str(i)]["alt_level"])
+            + " "
+            + coord_dict["altitude_" + str(i)]["y_type"]
+        )
 
-    title = False  # don't want title for map plot as of now
-    if title:
-        if language == "en":
-            locale.setlocale(locale.LC_ALL, "en_GB")
-            fig.suptitle("Air trajectories originating from " + origin)
-        if language == "de":
-            fig.suptitle("Luft-Trajektorien Karte für " + origin)
+        print(
+            f"altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)"
+        )
 
-    plt.savefig(outpath + origin + "_" + domain + ".png", dpi=100)
-    plt.close(fig)
+        if side_traj:
+            traj_index = [0, 1, 2, 3, 4]
 
-    return
+            for traj in traj_index:
+                latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
+                longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
+
+                ystart = latitude.iloc[0]
+                xstart = longitude.iloc[0]
+
+                linestyle = subplot_properties_dict[sub_index]
+                alpha = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
+
+                if (
+                    coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
+                ):  # only add legend & startpoint for the main trajectories
+
+                    # plot main trajectory
+                    map.plot(
+                        longitude,  # define x-axis
+                        latitude,  # define y-axis
+                        linestyle,  # define linestyle
+                        alpha=alpha,  # define line opacity
+                        label=textstr,
+                    )
+
+                    # add_time_interval_points(coord_dict, map, i, linestyle)
+
+                    # add start point triangle
+                    map.plot(
+                        xstart,
+                        ystart,
+                        marker="^",
+                        markersize=10,
+                        markeredgecolor="red",
+                        markerfacecolor="white",
+                    )
+
+                else:
+                    map.plot(
+                        longitude,  # define x-axis
+                        latitude,  # define y-axis
+                        linestyle,  # define linestyle
+                        alpha=alpha,  # define line opacity
+                    )
+
+        else:  # no side traj
+            latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
+            longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
+
+            ystart = latitude.iloc[0]
+            xstart = longitude.iloc[0]
+
+            linestyle = subplot_properties_dict[sub_index]
+            # print(f'linestyle for subplot {sub_index}: {linestyle}')
+            alpha = coord_dict["altitude_" + str(i)]["traj_0"]["alpha"]
+
+            print(f"longitude = {longitude}")
+            print(f"latitude = {latitude}")
+
+            # plot main trajectory
+            map.plot(
+                longitude,  # define x-axis
+                latitude,  # define y-axis
+                linestyle,  # define linestyle
+                alpha=alpha,  # define line opacity
+                label=textstr,
+            )
+
+            # add_time_interval_points(
+            #         coord_dict=coord_dict, map=map, i=i, linestyle=linestyle
+            #     )
+
+            # add start point triangle
+            map.plot(
+                xstart,
+                ystart,
+                marker="^",
+                markersize=10,
+                markeredgecolor="red",
+                markerfacecolor="white",
+            )
+
+        i += 1
