@@ -257,8 +257,7 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
     else:
         unit = "m"
         while i <= altitude_levels:
-            max_altitude_array.append(np.max(y["altitude_" + str(i)]["y1"]["z"]))
-            print(f"i = {i}")
+            max_altitude_array.append(np.max(y["altitude_" + str(i)]["y0"]["z"]))
             i += 1
 
         if np.max(max_altitude_array) <= max_start_altitude:
