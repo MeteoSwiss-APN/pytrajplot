@@ -252,6 +252,12 @@ def add_features(map):
     map.add_feature(cfeature.LAKES)
     map.add_feature(cfeature.RIVERS)
     # map.add_feature(cfeature.STATES)
+    # additional lakes & rivers on a smaller scale
+    rivers_10m = cfeature.NaturalEarthFeature(
+        "physical", "rivers_lake_centerlines", "10m"
+    )
+    map.add_feature(rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5)
+
     return
 
 
@@ -318,9 +324,16 @@ def add_time_interval_points(coord_dict, map, i, linestyle):
             marker="d",
             color=linestyle[:-1],
             label="6,12,...h",
+            transform=ccrs.PlateCarree(),
         )
     else:
-        map.scatter(lon_important, lat_important, marker="d", color=linestyle[:-1])
+        map.scatter(
+            lon_important,
+            lat_important,
+            marker="d",
+            color=linestyle[:-1],
+            transform=ccrs.PlateCarree(),
+        )
 
 
 def retrieve_interval_points(coord_dict, i):
@@ -329,6 +342,7 @@ def retrieve_interval_points(coord_dict, i):
     time_df_tmp = pd.DataFrame(
         coord_dict["altitude_" + str(i)]["traj_0"]["time"].items()
     )
+
     # delete index columns
     del lon_df_tmp[0]
     del lat_df_tmp[0]
@@ -339,9 +353,15 @@ def retrieve_interval_points(coord_dict, i):
     time_df = time_df_tmp.rename(columns={1: "time"})
     # combine columns to one df
     comb_df = pd.concat([lat_df, lon_df, time_df], axis=1, join="inner")
+    comb_df["time"] = comb_df["time"].astype(
+        float
+    )  # ensure correct type for time column (difference w/ HRES & COSMO)
+
     # extract position every 6 hours into important_points dataframe
     important_points_tmp = comb_df[comb_df["time"] % 6 == 0]
-    important_points = important_points_tmp.iloc[1:]
+    important_points = important_points_tmp.iloc[
+        1:
+    ]  # remove start point --> want triangle there
     lon_important = important_points["lon"]
     lat_important = important_points["lat"]
     return lon_important, lat_important
@@ -374,12 +394,6 @@ def is_of_interest(name, capital_type, population) -> bool:
 
     is_excluded = name in excluded_cities
 
-    print(f"name {is_capital}")
-    print(f"name {is_large}")
-    print(f"name {is_excluded}")
-
-    print(f"name: {(is_capital or is_large) and not is_excluded}")
-
     return (is_capital or is_large) and not is_excluded
 
 
@@ -406,15 +420,15 @@ def add_cities(map, domain_boundaries):
         ) and is_of_interest(
             name=city, capital_type=capital_type, population=population
         ):
-            print(f"{city} is visible and of interest")
-            print(f"{city} has roughly {population} inhabitants")
+            # print(f"{city} is visible and of interest")
+            # print(f"{city} has roughly {population} inhabitants")
             plt.scatter(
-                x=lon,
-                y=lat,
-                marker="o",
-                color="black",
+                x=lon, y=lat, marker="o", color="black", transform=ccrs.PlateCarree()
             )
-            map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05))
+
+            map.text(x=lon + 0.05, y=lat + 0.05, s=city, transform=ccrs.PlateCarree())
+
+            # map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05), transform=ccrs.PlateCarree())
 
 
 def generate_map_plot(
@@ -525,21 +539,11 @@ def generate_map_plot(
         9: "lightgreen-",
     }
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # HERE, THE ACTUAL PLOTTING HAPPENS FOR CASE: HRES
+    # HERE, THE ACTUAL PLOTTING HAPPENS
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    if case == "HRES":
-        plot_hres_trajectories(
-            coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
-        )
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # HERE, THE ACTUAL PLOTTING HAPPENS FOR CASE: COSMO
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    if case == "COSMO":
-        print("--- COSMO")
-        plot_cosmo_trajectories(
-            coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
-        )
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    add_trajectories(
+        coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
+    )
     add_features(map=map)  # add features: coastlines,lakes,...
     add_cities(map=map, domain_boundaries=domain_boundaries)
     map.legend()  # add legend
@@ -550,8 +554,6 @@ def generate_map_plot(
             fig.suptitle("Air trajectories originating from " + origin)
         if language == "de":
             fig.suptitle("Luft-Trajektorien Karte für " + origin)
-
-    # perhaps useful: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.itertuples.html
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # CREATE OUTPUT FOLDER AND SAVE MAP
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -565,7 +567,7 @@ def generate_map_plot(
     return
 
 
-def plot_hres_trajectories(
+def add_trajectories(
     coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
 ):
     i = 1
@@ -609,6 +611,7 @@ def plot_hres_trajectories(
                         linestyle,  # define linestyle
                         alpha=alpha,  # define line opacity
                         label=textstr,
+                        transform=ccrs.PlateCarree(),
                     )
 
                     add_time_interval_points(coord_dict, map, i, linestyle)
@@ -621,6 +624,7 @@ def plot_hres_trajectories(
                         markersize=10,
                         markeredgecolor="red",
                         markerfacecolor="white",
+                        transform=ccrs.PlateCarree(),
                     )
 
                 else:
@@ -629,6 +633,7 @@ def plot_hres_trajectories(
                         latitude,  # define y-axis
                         linestyle,  # define linestyle
                         alpha=alpha,  # define line opacity
+                        transform=ccrs.PlateCarree(),
                     )
 
         else:  # no side traj
@@ -642,8 +647,8 @@ def plot_hres_trajectories(
             # print(f'linestyle for subplot {sub_index}: {linestyle}')
             alpha = coord_dict["altitude_" + str(i)]["traj_0"]["alpha"]
 
-            print(f"longitude = {longitude}")
-            print(f"latitude = {latitude}")
+            # print(f"longitude = {longitude}")
+            # print(f"latitude = {latitude}")
 
             # plot main trajectory
             map.plot(
@@ -652,6 +657,7 @@ def plot_hres_trajectories(
                 linestyle,  # define linestyle
                 alpha=alpha,  # define line opacity
                 label=textstr,
+                transform=ccrs.PlateCarree(),
             )
 
             add_time_interval_points(
@@ -666,110 +672,7 @@ def plot_hres_trajectories(
                 markersize=10,
                 markeredgecolor="red",
                 markerfacecolor="white",
-            )
-
-        i += 1
-
-
-def plot_cosmo_trajectories(
-    coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
-):
-    i = 1
-    while i <= altitude_levels:
-        print(f"Altitude Level {i}")
-        alt_level = coord_dict["altitude_" + str(i)]["alt_level"]
-        sub_index = int(coord_dict["altitude_" + str(i)]["subplot_index"])
-        textstr = (
-            str(coord_dict["altitude_" + str(i)]["alt_level"])
-            + " "
-            + coord_dict["altitude_" + str(i)]["y_type"]
-        )
-
-        print(
-            f"altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)"
-        )
-
-        if side_traj:
-            traj_index = [0, 1, 2, 3, 4]
-
-            for traj in traj_index:
-                latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
-                longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
-
-                ystart = latitude.iloc[0]
-                xstart = longitude.iloc[0]
-
-                linestyle = subplot_properties_dict[sub_index]
-                alpha = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
-
-                if (
-                    coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
-                ):  # only add legend & startpoint for the main trajectories
-
-                    # plot main trajectory
-                    map.plot(
-                        longitude,  # define x-axis
-                        latitude,  # define y-axis
-                        linestyle,  # define linestyle
-                        alpha=alpha,  # define line opacity
-                        label=textstr,
-                    )
-
-                    # add_time_interval_points(coord_dict, map, i, linestyle)
-
-                    # add start point triangle
-                    map.plot(
-                        xstart,
-                        ystart,
-                        marker="^",
-                        markersize=10,
-                        markeredgecolor="red",
-                        markerfacecolor="white",
-                    )
-
-                else:
-                    map.plot(
-                        longitude,  # define x-axis
-                        latitude,  # define y-axis
-                        linestyle,  # define linestyle
-                        alpha=alpha,  # define line opacity
-                    )
-
-        else:  # no side traj
-            latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
-            longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
-
-            ystart = latitude.iloc[0]
-            xstart = longitude.iloc[0]
-
-            linestyle = subplot_properties_dict[sub_index]
-            # print(f'linestyle for subplot {sub_index}: {linestyle}')
-            alpha = coord_dict["altitude_" + str(i)]["traj_0"]["alpha"]
-
-            print(f"longitude = {longitude}")
-            print(f"latitude = {latitude}")
-
-            # plot main trajectory
-            map.plot(
-                longitude,  # define x-axis
-                latitude,  # define y-axis
-                linestyle,  # define linestyle
-                alpha=alpha,  # define line opacity
-                label=textstr,
-            )
-
-            # add_time_interval_points(
-            #         coord_dict=coord_dict, map=map, i=i, linestyle=linestyle
-            #     )
-
-            # add start point triangle
-            map.plot(
-                xstart,
-                ystart,
-                marker="^",
-                markersize=10,
-                markeredgecolor="red",
-                markerfacecolor="white",
+                transform=ccrs.PlateCarree(),
             )
 
         i += 1
