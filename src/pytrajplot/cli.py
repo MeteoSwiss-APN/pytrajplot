@@ -13,6 +13,7 @@ import click
 from . import __version__
 from .get_data import check_input_dir
 from .plot_altitude import plot_altitude
+from .scratch import create_coord_dict
 from .scratch import mimic_plot_map
 from .utils import count_to_log_level
 
