@@ -388,7 +388,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
 def check_input_dir(
     input_dir, prefix_dict, separator
 ):  # iterate through the input folder containing the trajectory files
-    print("--- iterating through input directory")
+    # print("--- iterating through input directory")
 
     counter = 0
     start_dict, trajectory_dict, files, keys, traj_blocks = {}, {}, [], [], {}

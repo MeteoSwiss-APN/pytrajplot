@@ -215,14 +215,17 @@ def add_cities(map, domain_boundaries):
                 y=lat,
                 marker="o",
                 color="black",
+                transform=ccrs.PlateCarree(),
             )
-            map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05))
+
+            map.text(x=lon + 0.05, y=lat + 0.05, s=city, transform=ccrs.PlateCarree())
+            # map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05))
 
 
-def plot_map(trajectory_dict, separator, output_dir, domain, language):
+def plot_map(trajectory_dict, separator, output_dir, domains, language):
 
     for key in trajectory_dict:  # iterate through the trajectory dict
-        print(f"--- defining trajectory plot properties for {key}")
+        # print(f"--- defining trajectory plot properties for {key}")
 
         coord_dict = create_coord_dict(
             altitude_levels=trajectory_dict[key]["altitude_levels"].loc[0]
@@ -310,15 +313,17 @@ def plot_map(trajectory_dict, separator, output_dir, domain, language):
 
                 if alt_index > altitude_levels:
                     alt_index = 1
-                    generate_map_plot(
-                        coord_dict,
-                        side_traj,
-                        altitude_levels,
-                        domain=domain,
-                        output_dir=output_dir,
-                        language=language,
-                        key=key,
-                    )
+
+                    for domain in domains:
+                        generate_map_plot(
+                            coord_dict,
+                            side_traj,
+                            altitude_levels,
+                            domain=domain,
+                            output_dir=output_dir,
+                            language=language,
+                            key=key,
+                        )
 
             # complete the non-side-trajectory case, after having completed the side trajectory case
             else:
@@ -369,15 +374,16 @@ def plot_map(trajectory_dict, separator, output_dir, domain, language):
                 alt_index += 1
                 if alt_index > altitude_levels:
                     alt_index = 1
-                    generate_map_plot(
-                        coord_dict,
-                        side_traj,
-                        altitude_levels,
-                        domain=domain,
-                        output_dir=output_dir,
-                        language=language,
-                        key=key,
-                    )
+                    for domain in domains:
+                        generate_map_plot(
+                            coord_dict,
+                            side_traj,
+                            altitude_levels,
+                            domain=domain,
+                            output_dir=output_dir,
+                            language=language,
+                            key=key,
+                        )
 
 
 def add_trajectories(
@@ -664,7 +670,7 @@ def generate_map_plot(
     # projection = ccrs.PlateCarree()
 
     origin = coord_dict["altitude_1"]["origin"]
-    print(f"--- generating map plot for {origin}")
+    print(f"--- {key} / {origin} > map plot ({domain})")
 
     if coord_dict["altitude_1"]["y_type"] == "hpa":
         case = "HRES"

@@ -84,7 +84,7 @@ def create_y_dict(altitude_levels):
 
 def plot_altitude(trajectory_dict, output_dir, separator, language):
     for key in trajectory_dict:  # iterate through the trajectory dict
-        print(f"--- defining plot properties for {key}")
+        # print(f"--- defining altitude plot properties for {key}")
 
         y = create_y_dict(
             altitude_levels=trajectory_dict[key]["altitude_levels"].loc[0]
@@ -280,7 +280,7 @@ def generate_altitude_plot(
 
     origin = y["altitude_1"]["origin"]
 
-    print(f"--- generating altitude plot for {origin}")
+    print(f"--- {key} / {origin} > altitude plot")
 
     unit, custom_ylim = altitude_limits(
         y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
@@ -538,7 +538,7 @@ def generate_altitude_plot(
     if language == "de":
         fig.suptitle("Höhenplot für " + origin)
 
-    plt.savefig(outpath + origin + ".png")
+    plt.savefig(outpath + origin + "_altitude.png")
     plt.close(fig)
     # print('Saved plot: ', outpath + origin + '.png') # prints location of saved figure for further processing
 

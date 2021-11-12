@@ -137,11 +137,14 @@ def main(
             language=language,
         )
     if map:
+
+        domains = ["europe", "centraleurope", "alps", "ch"]
+
         plot_map(
             trajectory_dict=trajectory_dict,
             separator=separator,
             output_dir=output_dir,
-            domain=domain,
+            domains=domains,
             language=language,
         )
 
