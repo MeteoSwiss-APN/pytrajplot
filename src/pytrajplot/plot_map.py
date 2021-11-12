@@ -1,23 +1,16 @@
 """Generate Map Plot Figure."""
+# follwing this guide: https://earth-env-data-science.github.io/lectures/mapping_cartopy.html
 # Standard library
 import locale
 import os
-from datetime import time
-from typing import Sequence
 
 # Third-party
-# map plotting packages
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import cartopy.io.img_tiles as cimgt
-import cartopy.io.shapereader as shpreader
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from cartopy.io.shapereader import Record  # type: ignore
-from cartopy.mpl.gridliner import LATITUDE_FORMATTER
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+# import ipdb as pdb
 
 
 def create_coord_dict(altitude_levels):
@@ -79,7 +72,155 @@ def create_coord_dict(altitude_levels):
     return coord_dict
 
 
-def plot_map(trajectory_dict, output_dir, separator, language, domain):
+def add_features(ax):
+    # ax.gridlines() # add grid lines
+    gl = ax.gridlines(
+        crs=ccrs.PlateCarree(),
+        draw_labels=True,
+        linewidth=0.5,
+        color="k",
+        alpha=0.3,
+        linestyle="-.",
+    )  # define grid line properties
+    gl.top_labels = False
+    gl.right_labels = False
+
+    ax.coastlines(resolution="10m")
+    ax.add_feature(cfeature.LAND)
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS, linestyle="--")
+    ax.add_feature(cfeature.OCEAN)
+    ax.add_feature(cfeature.LAKES)
+    ax.add_feature(cfeature.RIVERS)
+    # additional lakes & rivers on a smaller scale
+    rivers_10m = cfeature.NaturalEarthFeature(
+        "physical", "rivers_lake_centerlines", "10m"
+    )
+    ax.add_feature(rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5)
+
+    # ax.add_feature(cfeature.STATES)
+    return
+
+
+def crop_map(ax, domain):
+
+    # got these pre-defined domain boundaries from: https://github.com/MeteoSwiss-APN/oprtools/blob/master/dispersion/lib/get_domain.pro
+
+    domain_dict = {
+        "centraleurope": {
+            "lat_0": 2,  # x_0
+            "lat_1": 18,  # x_1
+            "lon_0": 42,  # y_0
+            "lon_1": 52,  # y_1
+            "domain": [2, 18, 42, 52],  # [lat0,lat1,lon0,lon1]
+        },
+        "ch": {  # zoom domain Switzerland
+            "lat_0": 5.8,  # x_0
+            "lat_1": 10.6,  # x_1
+            "lon_0": 45.4,  # y_0
+            "lon_1": 48.2,  # y_1
+            "domain": [5.8, 10.6, 45.4, 48.2],  # [lat0,lat1,lon0,lon1]
+        },
+        "alps": {  # zoom domain alps for IFS-HRES
+            "lat_0": 2,  # x_0
+            "lat_1": 14,  # x_1
+            "lon_0": 43,  # y_0
+            "lon_1": 50,  # y_1
+            "domain": [2, 14, 43, 50],  # [lat0,lat1,lon0,lon1]
+        },
+        "europe": {  # zoom domain Europe (for IFS-HRES)
+            "lat_0": -10,  # x_0
+            "lat_1": 47,  # x_1
+            "lon_0": 35,  # y_0
+            "lon_1": 65,  # y_1
+            "domain": [-10, 47, 35, 65],  # [lat0,lat1,lon0,lon1]
+        },
+        "ch_hd": {  # zoom domain larger Siwtzerlad area for COSMO-7
+            "lat_0": 3.5,  # x_0
+            "lat_1": 12.6,  # x_1
+            "lon_0": 44.1,  # y_0
+            "lon_1": 49.4,  # y_1
+            "domain": [3.5, 12.6, 44.1, 49.4],  # [lat0,lat1,lon0,lon1]
+        },
+    }
+
+    domain_boundaries = domain_dict[domain]["domain"]
+
+    # ax.set_ylim(domain_dict[domain]['lon_0'], domain_dict[domain]['lon_1'])
+    # ax.set_xlim(domain_dict[domain]['lat_0'], domain_dict[domain]['lat_1'])
+
+    ax.set_extent(
+        domain_boundaries, crs=ccrs.PlateCarree()
+    )  # Central Europe for IFS-HRES
+
+    return domain_boundaries
+
+
+def is_visible(name, lat, lon, domain_boundaries) -> bool:
+    """Check if a point is inside the domain."""
+    in_domain = (
+        domain_boundaries[0] <= lon <= domain_boundaries[1]
+        and domain_boundaries[2] <= lat <= domain_boundaries[3]
+    )
+
+    if in_domain:
+        return True
+    else:
+        return False
+
+
+def is_of_interest(name, capital_type, population) -> bool:
+    """Check if a city fulfils certain importance criteria."""
+    is_capital = capital_type == "primary"
+    is_large = (
+        population > 400000
+    )  # the filtering step happens already, when reading the csv-file. There, the population threshold is set to 400k.
+    # print(f'{name} has capital_type {capital_type} and thus is_capital is {is_capital}')
+
+    excluded_cities = ["Incheon", "Duisburg", "Essen", "Dortmund"]
+
+    is_excluded = name in excluded_cities
+
+    return (is_capital or is_large) and not is_excluded
+
+
+def add_cities(map, domain_boundaries):
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    cities_df = pd.read_csv(
+        "src/pytrajplot/cities/worldcities.csv"
+    )  # len(cities_df) = 41001
+    cities_df = (
+        cities_df.dropna()
+    )  # remove less important cities to reduce size of dataframe --> # len(cities_df) = 8695
+
+    for i, row in cities_df.iterrows():
+        city = row["city_ascii"]
+        lon = row["lng"]
+        lat = row["lat"]
+        capital_type = row["capital"]
+        population = row["population"]
+
+        if is_visible(
+            name=city, lat=lat, lon=lon, domain_boundaries=domain_boundaries
+        ) and is_of_interest(
+            name=city, capital_type=capital_type, population=population
+        ):
+            # print cities, that are present in the domain
+            # print(f"{city} is visible and of interest")
+            # print(f"{city} has roughly {population} inhabitants")
+            plt.scatter(
+                x=lon,
+                y=lat,
+                marker="o",
+                color="black",
+            )
+            map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05))
+
+
+def plot_map(trajectory_dict, separator, output_dir, domain, language):
+
     for key in trajectory_dict:  # iterate through the trajectory dict
         print(f"--- defining trajectory plot properties for {key}")
 
@@ -89,18 +230,14 @@ def plot_map(trajectory_dict, output_dir, separator, language, domain):
 
         trajectory_df = trajectory_dict[key]  # extract df for given key
 
-        # not sure if necessary for anything...
-        # dt = abs(trajectory_df["time"].loc[0] - trajectory_df["time"].loc[1])
-
-        # if str(dt)[-2:] == ".3":
-        #     dt += 0.2
-
         number_of_times = trajectory_df["block_length"].iloc[
             0
         ]  # block length is constant, because it depends on the runtime of the model and the timestep, which both are constant for a given traj file
+
         number_of_trajectories = trajectory_df["#trajectories"].iloc[
             0
         ]  # this parameter, corresponds to the number of rows, present in the start file, thus also constant
+
         x = trajectory_df["datetime"].iloc[
             0:number_of_times
         ]  # shared x-axis is the time axis, which is constant for a given traj file
@@ -174,15 +311,16 @@ def plot_map(trajectory_dict, output_dir, separator, language, domain):
                 if alt_index > altitude_levels:
                     alt_index = 1
                     generate_map_plot(
-                        coord_dict=coord_dict,
-                        key=key,
-                        side_traj=side_traj,
-                        output_dir=output_dir,
-                        altitude_levels=altitude_levels,
-                        language=language,
+                        coord_dict,
+                        side_traj,
+                        altitude_levels,
                         domain=domain,
+                        output_dir=output_dir,
+                        language=language,
+                        key=key,
                     )
 
+            # complete the non-side-trajectory case, after having completed the side trajectory case
             else:
                 # print(f'row_index = {row_index} corresponds to origin {origin}')
                 coord_dict["altitude_" + str(alt_index)]["origin"] = origin
@@ -232,84 +370,125 @@ def plot_map(trajectory_dict, output_dir, separator, language, domain):
                 if alt_index > altitude_levels:
                     alt_index = 1
                     generate_map_plot(
-                        coord_dict=coord_dict,
-                        key=key,
-                        side_traj=side_traj,
-                        output_dir=output_dir,
-                        altitude_levels=altitude_levels,
-                        language=language,
+                        coord_dict,
+                        side_traj,
+                        altitude_levels,
                         domain=domain,
+                        output_dir=output_dir,
+                        language=language,
+                        key=key,
                     )
-    return
 
 
-def add_features(map):
-    map.coastlines(resolution="10m")
-    map.add_feature(cfeature.LAND)
-    map.add_feature(cfeature.COASTLINE)
-    map.add_feature(cfeature.BORDERS, linestyle="--")
-    map.add_feature(cfeature.OCEAN)
-    map.add_feature(cfeature.LAKES)
-    map.add_feature(cfeature.RIVERS)
-    # map.add_feature(cfeature.STATES)
-    # additional lakes & rivers on a smaller scale
-    rivers_10m = cfeature.NaturalEarthFeature(
-        "physical", "rivers_lake_centerlines", "10m"
-    )
-    map.add_feature(rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5)
+def add_trajectories(
+    coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
+):
+    i = 1
+    while i <= altitude_levels:
+        alt_level = coord_dict["altitude_" + str(i)]["alt_level"]
+        sub_index = int(coord_dict["altitude_" + str(i)]["subplot_index"])
+        textstr = (
+            str(coord_dict["altitude_" + str(i)]["alt_level"])
+            + " "
+            + coord_dict["altitude_" + str(i)]["y_type"]
+        )
 
-    return
+        # print(f'altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
 
+        if side_traj:
+            traj_index = [0, 1, 2, 3, 4]
 
-def crop_map(map, domain):
+            for traj in traj_index:
+                # textstr = (
+                #     str(coord_dict["altitude_" + str(i)]["alt_level"])
+                #     + " "
+                #     + coord_dict["altitude_" + str(i)]["y_type"]
+                # )
+                latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
+                longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
 
-    # got these pre-defined domain boundaries from: https://github.com/MeteoSwiss-APN/oprtools/blob/master/dispersion/lib/get_domain.pro
+                ystart = latitude.iloc[0]
+                xstart = longitude.iloc[0]
 
-    domain_dict = {
-        "centraleurope": {
-            "lat_0": 2,  # x_0
-            "lat_1": 18,  # x_1
-            "lon_0": 42,  # y_0
-            "lon_2": 52,  # y_1
-            "domain": [2, 18, 42, 52],  # [lat0,lat1,lon0,lon1]
-        },
-        "ch": {  # zoom domain Switzerland
-            "lat_0": 5.8,  # x_0
-            "lat_1": 10.6,  # x_1
-            "lon_0": 45.4,  # y_0
-            "lon_2": 48.2,  # y_1
-            "domain": [5.8, 10.6, 45.4, 48.2],  # [lat0,lat1,lon0,lon1]
-        },
-        "alps": {  # zoom domain alps for IFS-HRES
-            "lat_0": 2,  # x_0
-            "lat_1": 14,  # x_1
-            "lon_0": 43,  # y_0
-            "lon_2": 50,  # y_1
-            "domain": [2, 14, 43, 50],  # [lat0,lat1,lon0,lon1]
-        },
-        "europe": {  # zoom domain Europe (for IFS-HRES)
-            "lat_0": -10,  # x_0
-            "lat_1": 47,  # x_1
-            "lon_0": 35,  # y_0
-            "lon_2": 65,  # y_1
-            "domain": [-10, 47, 35, 65],  # [lat0,lat1,lon0,lon1]
-        },
-        "ch_hd": {  # zoom domain larger Siwtzerlad area for COSMO-7
-            "lat_0": 3.5,  # x_0
-            "lat_1": 12.6,  # x_1
-            "lon_0": 44.1,  # y_0
-            "lon_2": 49.4,  # y_1
-            "domain": [3.5, 12.6, 44.1, 49.4],  # [lat0,lat1,lon0,lon1]
-        },
-    }
+                linestyle = subplot_properties_dict[sub_index]
+                # print(f'linestyle for subplot {sub_index}: {linestyle}')
+                alpha = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
 
-    domain_boundaries = domain_dict[domain]["domain"]
+                if (
+                    coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
+                ):  # only add legend & startpoint for the main trajectories
+                    # plot main trajectory
+                    map.plot(
+                        longitude,  # define x-axis
+                        latitude,  # define y-axis
+                        linestyle,  # define linestyle
+                        alpha=alpha,  # define line opacity
+                        label=textstr,
+                        transform=ccrs.PlateCarree(),
+                    )
 
-    map.set_extent(
-        domain_boundaries, crs=ccrs.PlateCarree()
-    )  # Central Europe for IFS-HRES
+                    # add_time_interval_points(coord_dict, map, i, linestyle)
 
-    return domain_boundaries
+                    # add start point triangle
+                    map.plot(
+                        xstart,
+                        ystart,
+                        marker="^",
+                        markersize=10,
+                        markeredgecolor="red",
+                        markerfacecolor="white",
+                        transform=ccrs.PlateCarree(),
+                    )
+
+                else:
+                    map.plot(
+                        longitude,  # define x-axis
+                        latitude,  # define y-axis
+                        linestyle,  # define linestyle
+                        alpha=alpha,  # define line opacity
+                        transform=ccrs.PlateCarree(),
+                    )
+
+        else:  # no side traj
+            latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
+            longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
+
+            ystart = latitude.iloc[0]
+            xstart = longitude.iloc[0]
+
+            linestyle = subplot_properties_dict[sub_index]
+            # print(f'linestyle for subplot {sub_index}: {linestyle}')
+            alpha = coord_dict["altitude_" + str(i)]["traj_0"]["alpha"]
+
+            # print(f"longitude = {longitude}")
+            # print(f"latitude = {latitude}")
+
+            # plot main trajectory
+            map.plot(
+                longitude,  # define x-axis
+                latitude,  # define y-axis
+                linestyle,  # define linestyle
+                alpha=alpha,  # define line opacity
+                label=textstr,
+                transform=ccrs.PlateCarree(),
+            )
+
+            # add_time_interval_points(
+            #     coord_dict=coord_dict, map=map, i=i, linestyle=linestyle
+            # )
+
+            # add start point triangle
+            map.plot(
+                xstart,
+                ystart,
+                marker="^",
+                markersize=10,
+                markeredgecolor="red",
+                markerfacecolor="white",
+                transform=ccrs.PlateCarree(),
+            )
+
+        i += 1
 
 
 def add_time_interval_points(coord_dict, map, i, linestyle):
@@ -365,206 +544,6 @@ def retrieve_interval_points(coord_dict, i):
     lon_important = important_points["lon"]
     lat_important = important_points["lat"]
     return lon_important, lat_important
-
-
-def is_visible(name, lat, lon, domain_boundaries) -> bool:
-    """Check if a point is inside the domain."""
-    in_domain = (
-        domain_boundaries[0] <= lon <= domain_boundaries[1]
-        and domain_boundaries[2] <= lat <= domain_boundaries[3]
-    )
-
-    if in_domain:
-        return True
-    else:
-        return False
-
-
-def is_of_interest(name, capital_type, population) -> bool:
-    """Check if a city fulfils certain importance criteria."""
-    is_capital = capital_type == "primary"
-    is_large = (
-        population > 400000
-    )  # the filtering step happens already, when reading the csv-file. There, the population threshold is set to 400k.
-    # print(f'{name} has capital_type {capital_type} and thus is_capital is {is_capital}')
-
-    excluded_cities = [
-        "Incheon",
-    ]
-
-    is_excluded = name in excluded_cities
-
-    return (is_capital or is_large) and not is_excluded
-
-
-def add_cities(map, domain_boundaries):
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    cities_df = pd.read_csv(
-        "src/pytrajplot/cities/worldcities.csv"
-    )  # len(cities_df) = 41001
-    cities_df = (
-        cities_df.dropna()
-    )  # remove less important cities to reduce size of dataframe --> # len(cities_df) = 8695
-
-    for i, row in cities_df.iterrows():
-        city = row["city_ascii"]
-        lon = row["lng"]
-        lat = row["lat"]
-        capital_type = row["capital"]
-        population = row["population"]
-
-        if is_visible(
-            name=city, lat=lat, lon=lon, domain_boundaries=domain_boundaries
-        ) and is_of_interest(
-            name=city, capital_type=capital_type, population=population
-        ):
-            # print(f"{city} is visible and of interest")
-            # print(f"{city} has roughly {population} inhabitants")
-            plt.scatter(
-                x=lon, y=lat, marker="o", color="black", transform=ccrs.PlateCarree()
-            )
-
-            map.text(x=lon + 0.05, y=lat + 0.05, s=city, transform=ccrs.PlateCarree())
-
-            # map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05), transform=ccrs.PlateCarree())
-
-
-def generate_map_plot(
-    coord_dict, key, side_traj, output_dir, altitude_levels, language, domain
-):
-    origin = coord_dict["altitude_1"]["origin"]
-    print(f"--- generating map plot for {origin}")
-
-    if coord_dict["altitude_1"]["y_type"] == "hpa":
-        case = "HRES"
-        projection = ccrs.PlateCarree()
-    else:
-        case = "COSMO"
-        projection = ccrs.RotatedPole(
-            pole_longitude=-170,
-            pole_latitude=43,
-            central_rotated_longitude=0.0,
-            globe=None,
-        )
-
-    # this dict defines the subplot position and figure size for the different domains, which all have different aspect ratios
-    figsize_dict = {
-        "centraleurope": {
-            "figsize": (16, 10),
-            "left": 0.85,
-            "right": 0.9,
-            "top": 0.7,
-            "bottom": 0.3,
-        },
-        "ch": {"figsize": [9, 5], "left": 0.98, "right": 1, "top": 0.9, "bottom": 0.2},
-        "alps": {
-            "figsize": (12, 7),
-            "left": 0.85,
-            "right": 0.9,
-            "top": 0.7,
-            "bottom": 0.3,
-        },
-        "europe": {
-            "figsize": [2 * 5.7, 2 * 3.0],
-            "left": 0.85,
-            "right": 0.9,
-            "top": 0.7,
-            "bottom": 0.3,
-        },
-        "ch_hd": {
-            "figsize": (9.1, 5.3),
-            "left": 0.9,
-            "right": 0.95,
-            "top": 0.7,
-            "bottom": 0.3,
-        },
-    }
-
-    fig = plt.figure(
-        figsize=figsize_dict[domain]["figsize"],
-        constrained_layout=False,  # enable, s.t. everything fits nicely on the figure --> incompatible w/ cartopy
-    )
-
-    map = plt.axes(projection=projection, frameon=True)
-
-    map.set_aspect("auto")  # adapt the aspect ratio of the figure
-
-    # map = fig.add_subplot(
-    #     1,
-    #     1,
-    #     1,
-    #     projection=ccrs.PlateCarree(),  # choose projection
-    #     frameon=True,  # add/remove frame of map. I think it looks better w/o a frame
-    # )
-
-    # l, b, w, h = map.get_position().bounds
-    # print(f'l = {l}, b = {b}, w = {w}, h = {h}')
-    # map.set_position([0.8, 0.8, 0.8, 0.8])
-
-    # position subplot on figure, depending on aspect ratio of domain
-    # fig.subplots_adjust(
-    #     left=figsize_dict[domain]["left"],
-    #     bottom=figsize_dict[domain]["bottom"],
-    #     right=figsize_dict[domain]["right"],
-    #     top=figsize_dict[domain]["top"],
-    # )
-
-    domain_boundaries = crop_map(map=map, domain=domain)
-    # print(domain_boundaries)
-
-    gl = map.gridlines(
-        crs=ccrs.PlateCarree(),
-        draw_labels=True,
-        linewidth=0.5,
-        color="k",
-        alpha=0.3,
-        linestyle="-.",
-    )  # define grid line properties
-
-    gl.top_labels = False  # no x-axis on top
-    gl.right_labels = False  # no y-axis on the right
-
-    subplot_properties_dict = {
-        0: "k-",
-        1: "g-",
-        2: "b-",
-        3: "r-",
-        4: "c-",
-        5: "m-",
-        6: "y-",
-        7: "deepskyblue-",
-        8: "crimson-",
-        9: "lightgreen-",
-    }
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # HERE, THE ACTUAL PLOTTING HAPPENS
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    add_trajectories(
-        coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
-    )
-    add_features(map=map)  # add features: coastlines,lakes,...
-    add_cities(map=map, domain_boundaries=domain_boundaries)
-    map.legend()  # add legend
-    title = False  # don't want title for map plot as of now
-    if title:
-        if language == "en":
-            locale.setlocale(locale.LC_ALL, "en_GB")
-            fig.suptitle("Air trajectories originating from " + origin)
-        if language == "de":
-            fig.suptitle("Luft-Trajektorien Karte für " + origin)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # CREATE OUTPUT FOLDER AND SAVE MAP
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
-    os.makedirs(
-        outpath, exist_ok=True
-    )  # create plot folder if it doesn't already exist
-    plt.savefig(outpath + origin + "_" + domain + ".png", dpi=100)
-    plt.close(fig)
-
-    return
 
 
 def add_trajectories(
@@ -676,3 +655,66 @@ def add_trajectories(
             )
 
         i += 1
+
+
+def generate_map_plot(
+    coord_dict, side_traj, altitude_levels, domain, output_dir, language, key
+):
+    # projection = ccrs.RotatedPole(pole_longitude=-170.0, pole_latitude=43)
+    # projection = ccrs.PlateCarree()
+
+    origin = coord_dict["altitude_1"]["origin"]
+    print(f"--- generating map plot for {origin}")
+
+    if coord_dict["altitude_1"]["y_type"] == "hpa":
+        case = "HRES"
+        projection = ccrs.PlateCarree()
+    else:
+        case = "COSMO"
+        projection = ccrs.RotatedPole(pole_longitude=-170, pole_latitude=43)
+
+    fig = plt.figure(figsize=(12, 8), constrained_layout=False)
+    ax = plt.axes(projection=projection, frameon=False)
+    ax.set_aspect(
+        "auto"
+    )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
+    add_features(ax=ax)
+    domain_boundaries = crop_map(ax=ax, domain=domain)  # sets extent of map
+    add_cities(map=ax, domain_boundaries=domain_boundaries)
+    subplot_properties_dict = {
+        0: "k-",
+        1: "g-",
+        2: "b-",
+        3: "r-",
+        4: "c-",
+        5: "m-",
+        6: "y-",
+        7: "deepskyblue-",
+        8: "crimson-",
+        9: "lightgreen-",
+    }
+    add_trajectories(
+        coord_dict=coord_dict,
+        side_traj=side_traj,
+        altitude_levels=altitude_levels,
+        map=ax,
+        subplot_properties_dict=subplot_properties_dict,
+    )
+    ax.legend()  # add legend
+    title = False
+    if title:
+        if language == "en":
+            locale.setlocale(locale.LC_ALL, "en_GB")
+            fig.suptitle("Air trajectories originating from " + origin)
+        if language == "de":
+            fig.suptitle("Luft-Trajektorien Karte für " + origin)
+
+    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
+    os.makedirs(
+        outpath, exist_ok=True
+    )  # create plot folder if it doesn't already exist
+
+    # pdb.set_trace()
+    plt.savefig(outpath + origin + "_" + domain + ".png")
+    plt.close(fig)
+    # plt.show()
