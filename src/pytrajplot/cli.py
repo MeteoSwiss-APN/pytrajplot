@@ -11,9 +11,9 @@ import click
 
 # Local
 from . import __version__
-from .get_data import *
-from .plot_altitude import *
-from .plot_map import *
+from .get_data import check_input_dir
+from .plot_altitude import plot_altitude
+from .scratch import mimic_plot_map
 from .utils import count_to_log_level
 
 
@@ -138,12 +138,27 @@ def main(
         )
 
     if map:
-        plot_map(
-            trajectory_dict=trajectory_dict,
-            output_dir=output_dir,
-            separator=separator,
-            language=language,
-            domain=domain,
-        )
+        for key in trajectory_dict:  # iterate through the trajectory dict
+            print(f"--- defining trajectory plot properties for {key}")
+
+            coord_dict = create_coord_dict(
+                altitude_levels=trajectory_dict[key]["altitude_levels"].loc[0]
+            )
+
+            trajectory_df = trajectory_dict[key]  # extract df for given key
+            mimic_plot_map(
+                trajectory_df=trajectory_df,
+                separator=separator,
+                output_dir=output_dir,
+                domain=domain,
+            )
+
+        # plot_map(
+        #     trajectory_dict=trajectory_dict,
+        #     output_dir=output_dir,
+        #     separator=separator,
+        #     language=language,
+        #     domain=domain,
+        # )
 
     print("--- Done.")
