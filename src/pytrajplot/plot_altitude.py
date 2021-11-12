@@ -1,5 +1,6 @@
 """Generate Altitude Figure."""
 # Standard library
+import datetime
 import locale
 import os
 
@@ -9,16 +10,6 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import matplotlib.units as munits
-
-plt.rcParams["axes.grid"] = True
-plt.rcParams["figure.autolayout"] = True
-plt.rcParams["figure.figsize"] = [6, 8]
-
-
-# Standard library
-import datetime
-
-# Third-party
 import numpy as np
 
 
@@ -231,9 +222,6 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
     return
 
 
-# add y-top for cosmo & hres dependent on values
-
-
 def altitude_limits(y, max_start_altitude, altitude_levels):
     # print('--- defining the altitude limits')
 
@@ -272,11 +260,6 @@ def generate_altitude_plot(
     x, y, key, side_traj, output_dir, altitude_levels, language, max_start_altitude
 ):
 
-    # # TEMPORARY SOLUTION for the single subplot problem
-    # if altitude_levels == 1:
-    #     altitude_levels = 2
-    #     y["altitude_2"] = y["altitude_1"]
-
     subplot_properties_dict = {
         0: "k-",
         1: "g-",
@@ -303,14 +286,6 @@ def generate_altitude_plot(
         y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
     )
 
-    # if y["altitude_1"]["y0"]["z_type"] == "hpa":
-    #     unit = "hPa"  # unit for the HRES case
-    #     # (lower y-limit, upper y-limit); lower y-limit > upper y-limit to invert the y-axis for pressure altitude
-    #     custom_ylim = (1020, 0.8 * max_start_altitude)  # 20% margin on top
-    # else:
-    #     unit = "m"
-    #     custom_ylim = (0, max_start_altitude + 1000)  # 20% margin on top
-
     if altitude_levels == 1:
         # figsize=(width, height)
         fig, axs = plt.subplots(
@@ -318,16 +293,12 @@ def generate_altitude_plot(
             1,
             tight_layout=True,
             figsize=(9, 6),
-            dpi=500,
+            dpi=150,
         )
 
     else:
         fig, axs = plt.subplots(
-            altitude_levels,
-            1,
-            tight_layout=True,
-            sharex=True,
-            dpi=500,
+            altitude_levels, 1, tight_layout=True, sharex=True, figsize=(6, 8), dpi=150
         )
 
     # Setting the values for all y-axes.
@@ -344,8 +315,6 @@ def generate_altitude_plot(
             alt_level = y["altitude_" + str(i)]["alt_level"]
             sub_index = int(y["altitude_" + str(i)]["subplot_index"])
             # print(f'altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
-            # if unit == "hPa":
-            #     axs[sub_index].invert_yaxis()
 
             if side_traj:
                 traj_index = [0, 1, 2, 3, 4]
@@ -464,14 +433,7 @@ def generate_altitude_plot(
 
     else:  # only one subplot
 
-        # print(y['altitude_1'][])
-
         axs.grid(color="grey", linestyle="--", linewidth=1)
-
-        # if key[-1] == "B":
-        #     y_surf = np.flip(y["altitude_1"]["y_surf"])
-        # else:
-        #     y_surf = y["altitude_1"]["y_surf"]
 
         y_surf = y["altitude_1"]["y_surf"]
 
