@@ -243,3 +243,6 @@ zmichel/test_cases/single/HRES_F/tra_geom_HRES_F
 test_rotated.zip
 test_plate_carree.zip
 test_centraleurope.png
+zmichel/COSMO/test_case_forward_wo_sidetraj/plot_info
+zmichel/COSMO/test_case_forward_wo_sidetraj/startf_000-033F
+zmichel/COSMO/test_case_forward_wo_sidetraj/tra_geom_000-033F
