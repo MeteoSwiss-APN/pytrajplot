@@ -5,8 +5,6 @@ import locale
 import os
 
 # Third-party
-# import matplotlib.patches as mpatches
-import matplotlib as mpl
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import matplotlib.units as munits
@@ -14,6 +12,15 @@ import numpy as np
 
 
 def create_y_dict(altitude_levels):
+    """Create dict of dicts to be filled with information for all y-axes.
+
+    Args:
+        altitude_levels (int): Number of y-axis dicts (for each alt. level one dict) that need to be added to y
+
+    Returns:
+        y (dict): Dict of dicts. For each altitude level, one dict is present in this dict. Each of those 'altitude dicts' contains the relevant information to plot the corresponding subplot.
+
+    """
     assert (
         altitude_levels <= 10
     ), "It is not possible, to generate altitude plots for more than 10 different starting altitudes."
@@ -23,20 +30,6 @@ def create_y_dict(altitude_levels):
     key_name = "altitude_"
 
     i = 1
-    # I chose 10 to be the maximum number of altitude plots
-    # color_dict = {
-    #     1: "r-",
-    #     2: "b-",
-    #     3: "g-",
-    #     4: "k-",
-    #     5: "c-",
-    #     6: "m-",
-    #     7: "y-",
-    #     8: "deepskyblue-",
-    #     9: "crimson-",
-    #     10: "lightgreen-",
-    # }
-
     while i < altitude_levels + 1:
         altitude_dict = {
             "origin": None,
@@ -83,6 +76,15 @@ def create_y_dict(altitude_levels):
 
 
 def plot_altitude(trajectory_dict, output_dir, separator, language):
+    """Iterate through trajectory dict. For each key, generate altitude plots for all origins/altitude levels.
+
+    Args:
+        trajectory_dict (dict): [description]
+        output_dir (str): Path to output directory (where the subdirectories containing all plots should be saved)
+        separator (str): Separator string to identify main- and side-trajectories (default: '~')
+        language (str): Language for plot annotations.
+
+    """
     for key in trajectory_dict:  # iterate through the trajectory dict
         # print(f"--- defining altitude plot properties for {key}")
 
@@ -223,8 +225,19 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
 
 
 def altitude_limits(y, max_start_altitude, altitude_levels):
-    # print('--- defining the altitude limits')
+    """Define the y-axis limits dynamically.
 
+    Args:
+        y (dict):                   Dictionary containing the y-axis information (esp. the altitude)
+        max_start_altitude (float): The highest start altitude. Check the altitude for this trajectory only, to define the altitude limits
+        altitude_levels (int):      #start altitudes
+
+    Returns:
+        unit (str):                 [m] or [hPa]
+        custom_ylim (tuple):        (lower y-limit, upper y-limit)
+
+    """
+    # print('--- defining the altitude limits')
     i = 1
     max_altitude_array = []
 
@@ -259,7 +272,19 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
 def generate_altitude_plot(
     x, y, key, side_traj, output_dir, altitude_levels, language, max_start_altitude
 ):
+    """Iterate through y-dict, generate & save plot.
 
+    Args:
+        x (df): Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
+        y (dict): Dictionary, containig the y-axis information for all subplots
+        key (str): Key string necessary for creating an output folder for each start/trajectory file pair
+        side_traj (int): 0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
+        output_dir (str): Path to output directory
+        altitude_levels (int): #altitude levels = #subplots
+        language (str): language for plot annotations
+        max_start_altitude (float): maximum start altitude
+
+    """
     subplot_properties_dict = {
         0: "k-",
         1: "g-",
