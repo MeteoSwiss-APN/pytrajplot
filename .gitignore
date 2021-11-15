@@ -286,3 +286,5 @@ zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F/Beznau_ch.png
 zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F/Beznau_europe.png
 zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_altitude.png
 zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate.png
+sample_data.csv
+src/pytrajplot/scratch.py
