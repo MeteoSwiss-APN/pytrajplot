@@ -7,7 +7,8 @@ from enum import unique
 import numpy as np
 import pandas as pd
 
-pd.options.mode.chained_assignment = None  # default='warn'
+pd.options.mode.chained_assignment = None  # default: 'warn'
+
 # Standard library
 import datetime
 from datetime import timedelta
@@ -16,7 +17,15 @@ from datetime import timedelta
 
 
 def read_plot_info(plot_info_path):
-    """Read the pure txt file containing the plot_info to variables for later purposes."""
+    """Read the pure txt file containing the plot_info to corresponding variables.
+
+    Args:
+        plot_info_path (str): Path to plot_info file
+
+    Returns:
+        (dict): Dict, containing variables parsed from plot_info file
+
+    """
     # print("--- reading plot_info into dict")
 
     with open(plot_info_path, "r") as f:
@@ -41,7 +50,17 @@ def read_plot_info(plot_info_path):
 
 
 def map_altitudes_and_subplots(unit, unique_start_altitudes, current_altitude):
+    """Map (randomly sorted) start altitudes of the trajectories to the subplot indeces in descending order.
 
+    Args:
+        unit (str): [m] or [hPa] - altitude axis in [hPa] is inverted compared to [m]
+        unique_start_altitudes (array): array, containing the different start altitudes
+        current_altitude (float): current altitude to assign to a subplot index
+
+    Returns:
+        - (int): subplot index, corresponding to the current altitude
+
+    """
     altitude_levels = len(unique_start_altitudes)
     # map altitudes to subplots. i.e. w/ 4 start altitudes > alt1:sp3, alt2:sp2, alt3:sp1, alt4:sp0
     altitude_mapping_dict = {}
@@ -71,10 +90,21 @@ def map_altitudes_and_subplots(unit, unique_start_altitudes, current_altitude):
         altitude_mapping_dict[unique_start_altitudes[tmp_02]] = subplot_index
 
         tmp_02 += 1
+
     return altitude_mapping_dict[current_altitude]
 
 
 def read_startf(startf_path, separator):
+    """Read the start file, containing initial information of all trajectories for a corresponding trajectory file.
+
+    Args:
+        startf_path (str):  Path to start file
+        separator (str):    String, to indentify side- & main-trajectories. I.e. <origin><separator><trajectory index>
+
+    Returns:
+        start_df (pandas df): Dataframe containing the information of the start file
+
+    """
     # print("--- reading startf file")
 
     start_df = pd.read_csv(
@@ -213,6 +243,19 @@ def read_startf(startf_path, separator):
 
 
 def traj_helper_fct(case, file_path, firstline, start_df):
+    """Handle the different type of trajectory files (COSMO/HRES).
+
+    Args:
+        case (str): HRES/COSMO
+        file_path (str): Path to trajectory file
+        firstline (str): Content of the first line of trajectory file (relevant for HRES case)
+        start_df (df): Dataframe containing the information of the corresponding start file
+
+    Returns:
+        number_of_trajectories (int):   #rows in trajectory file, that make up one trajectory (const. for a given traj. file)
+        number_of_times (int):          #trajectory blocks (= #rows in start file)
+
+    """
     if case == "COSMO":
         # extract useful information from header
         info = pd.read_csv(
@@ -251,6 +294,17 @@ def traj_helper_fct(case, file_path, firstline, start_df):
 
 
 def convert_time(plot_info_dict, traj_df, case):
+    """Convert time steps into datetime objects.
+
+    Args:
+        plot_info_dict (dict): Dict containing the information of plot_info file. Esp. the trajectory initialisation time
+        traj_df (df): Trajectory dataframe containing the time step column (parsed form the trajectory file)
+        case (str): HRES/COSMO.
+
+    Returns:
+        traj_df (df): Trajectory dataframe w/ added datetime column.
+
+    """
     init_time = plot_info_dict["mbt"][:16]
     format = "%Y-%m-%d %H:%M"
     dt_object = datetime.datetime.strptime(init_time, format)
@@ -282,6 +336,19 @@ def convert_time(plot_info_dict, traj_df, case):
 
 
 def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
+    """Parse trajectory file.
+
+    Args:
+        trajectory_file_path (str): Path to trajectory file.
+        start_df (df): Dataframe containing the information of the corresponding start file
+        plot_info_dict (dict): Dict containing the information of plot_info file
+
+    Returns:
+        traj_df (df):                   Dataframe containig information of trajectory file
+        number_of_trajectories (int):   #trajectories
+        number_of_times (int):          #rows making up one trajectory
+
+    """
     # print("--- reading trajectory file")
 
     # read first line of trajectory file to check which case it is.
@@ -385,11 +452,21 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     return traj_df, number_of_trajectories, number_of_times
 
 
-def check_input_dir(
-    input_dir, prefix_dict, separator
-):  # iterate through the input folder containing the trajectory files
+def check_input_dir(input_dir, prefix_dict, separator):
     # print("--- iterating through input directory")
+    """Iterate through the input directory, containg all files to be parsed and plotted.
 
+    Args:
+        input_dir (str):    Path to input directory
+        prefix_dict (dict): Dict, defining the files which should be parsed
+        separator (str):    String, to indentify side- & main-trajectories.
+
+    Returns:
+        trajectory_dict (dict): Dictionary containing for each key (start/trajectory file pair) a dataframe with all relevant information.
+        plot_info_dict (dict):  Dictionary containing the information of the plot info file
+        keys (list):            List containing all keys that are present in the trajectory_dict. I.e. ['000-048F'] if there is only one start/traj. file pair.
+
+    """
     counter = 0
     start_dict, trajectory_dict, files, keys, traj_blocks = {}, {}, [], [], {}
 
@@ -448,10 +525,5 @@ def check_input_dir(
                 traj_blocks[filename[len(prefix_dict["trajectory"]) :]][
                     "number_of_trajectories"
                 ] = number_of_trajectories
-
-    if False:
-        print("Plot info dict:\n", plot_info_dict)
-        print("Trajectory dict:\n", trajectory_dict)
-        print("Keys:\n", keys)
 
     return trajectory_dict, plot_info_dict, keys
