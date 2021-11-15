@@ -151,7 +151,7 @@ def main(
         )
     if map:
 
-        domains = ["europe", "centraleurope", "alps", "ch"]
+        domains = ["europe", "centraleurope", "alps", "ch", "dynamic"]
 
         plot_map(
             trajectory_dict=trajectory_dict,
