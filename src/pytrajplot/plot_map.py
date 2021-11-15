@@ -10,10 +10,17 @@ import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# import ipdb as pdb
-
 
 def create_coord_dict(altitude_levels):
+    """Create dict of dicts to be filled with information for all trajectories to be plottet.
+
+    Args:
+        altitude_levels (int): Number of trajectory dicts (for each alt. level one dict)
+
+    Returns:
+        coord_dict (dict): Dict of dicts. For each altitude level, one dict is present in this dict. Each of those 'altitude dicts' contains the relevant information to plot the corresponding trajectory.
+
+    """
     assert (
         altitude_levels <= 10
     ), "It is not possible, to generate altitude plots for more than 10 different starting altitudes."
@@ -73,7 +80,12 @@ def create_coord_dict(altitude_levels):
 
 
 def add_features(ax):
-    # ax.gridlines() # add grid lines
+    """Add grid/coastlines/borders/oceans/lakes and rivers to current map (ax).
+
+    Args:
+        ax (cartopy.mpl.geoaxes.GeoAxesSubplot): adding features to current map (axes instance)
+
+    """
     gl = ax.gridlines(
         crs=ccrs.PlateCarree(),
         draw_labels=True,
@@ -103,9 +115,17 @@ def add_features(ax):
 
 
 def crop_map(ax, domain):
+    """Crop map to given domain (i.e. centraleurope).
 
+    Args:
+        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    cropping current map (axes instance)
+        domain (str):                               key for the domain_dict to read correct domain boundaries
+
+    Returns:
+        domain_boundaries (list):                   [lat0,lat1,lon0,lon1]
+
+    """
     # got these pre-defined domain boundaries from: https://github.com/MeteoSwiss-APN/oprtools/blob/master/dispersion/lib/get_domain.pro
-
     domain_dict = {
         "centraleurope": {
             "lat_0": 2,  # x_0
@@ -146,9 +166,6 @@ def crop_map(ax, domain):
 
     domain_boundaries = domain_dict[domain]["domain"]
 
-    # ax.set_ylim(domain_dict[domain]['lon_0'], domain_dict[domain]['lon_1'])
-    # ax.set_xlim(domain_dict[domain]['lat_0'], domain_dict[domain]['lat_1'])
-
     ax.set_extent(
         domain_boundaries, crs=ccrs.PlateCarree()
     )  # Central Europe for IFS-HRES
@@ -156,8 +173,18 @@ def crop_map(ax, domain):
     return domain_boundaries
 
 
-def is_visible(name, lat, lon, domain_boundaries) -> bool:
-    """Check if a point is inside the domain."""
+def is_visible(lat, lon, domain_boundaries) -> bool:
+    """Check if a point (city) is inside the domain.
+
+    Args:
+        lat (float):                latitude of city
+        lon (float):                longitue of city
+        domain_boundaries (list):   latitude & longitude range of domain
+
+    Returns:
+        bool:                       True if city is within domain boundaries, else false.
+
+    """
     in_domain = (
         domain_boundaries[0] <= lon <= domain_boundaries[1]
         and domain_boundaries[2] <= lat <= domain_boundaries[3]
@@ -170,7 +197,17 @@ def is_visible(name, lat, lon, domain_boundaries) -> bool:
 
 
 def is_of_interest(name, capital_type, population) -> bool:
-    """Check if a city fulfils certain importance criteria."""
+    """Check if a city fulfils certain importance criteria.
+
+    Args:
+        name (str):         Name of city
+        capital_type (str): primary -> country's capital, admin -> 1st level admin capital, minor -> lower-level admin capital
+        population (int):   Population of city (used for filtering out smaller cities)
+
+    Returns:
+        bool:               True if city is of interest, else false
+
+    """
     is_capital = capital_type == "primary"
     is_large = (
         population > 400000
@@ -184,7 +221,14 @@ def is_of_interest(name, capital_type, population) -> bool:
     return (is_capital or is_large) and not is_excluded
 
 
-def add_cities(map, domain_boundaries):
+def add_cities(ax, domain_boundaries):
+    """Add cities to map.
+
+    Args:
+        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    adding cities to current map (axes instance)
+        domain_boundaries (list):                   latitude & longitude range of domain
+
+    """
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -203,7 +247,7 @@ def add_cities(map, domain_boundaries):
         population = row["population"]
 
         if is_visible(
-            name=city, lat=lat, lon=lon, domain_boundaries=domain_boundaries
+            lat=lat, lon=lon, domain_boundaries=domain_boundaries
         ) and is_of_interest(
             name=city, capital_type=capital_type, population=population
         ):
@@ -218,12 +262,21 @@ def add_cities(map, domain_boundaries):
                 transform=ccrs.PlateCarree(),
             )
 
-            map.text(x=lon + 0.05, y=lat + 0.05, s=city, transform=ccrs.PlateCarree())
+            ax.text(x=lon + 0.05, y=lat + 0.05, s=city, transform=ccrs.PlateCarree())
             # map.annotate(city, xy=(lon, lat), xytext=(lon + 0.05, lat + 0.05))
 
 
 def plot_map(trajectory_dict, separator, output_dir, domains, language):
+    """Iterate through the trajectory dict and, for each key, generate map plot.
 
+    Args:
+        trajectory_dict (dict): Trajectory dictionary. Each key contains a dataframe with all relevant information for the plots.
+        separator (str):        Separator string between main- & side-trajectories.
+        output_dir (str):       Path to directory, where plots should be saved.
+        domains (list)):        List of possible domains. Iterates through this list and automatically plots all domains.
+        language (str):         Language in plots (en/ge).
+
+    """
     for key in trajectory_dict:  # iterate through the trajectory dict
         # print(f"--- defining trajectory plot properties for {key}")
 
@@ -364,7 +417,6 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                 coord_dict["altitude_" + str(alt_index)]["traj_0"][
                     "z_type"
                 ] = trajectory_df["z_type"][lower_row]
-
                 coord_dict["altitude_" + str(alt_index)]["traj_1"]["z_type"] = None
                 coord_dict["altitude_" + str(alt_index)]["traj_2"]["z_type"] = None
                 coord_dict["altitude_" + str(alt_index)]["traj_3"]["z_type"] = None
@@ -384,126 +436,27 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                             language=language,
                             key=key,
                         )
+    return
 
 
-def add_trajectories(
-    coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
-):
-    i = 1
-    while i <= altitude_levels:
-        alt_level = coord_dict["altitude_" + str(i)]["alt_level"]
-        sub_index = int(coord_dict["altitude_" + str(i)]["subplot_index"])
-        textstr = (
-            str(coord_dict["altitude_" + str(i)]["alt_level"])
-            + " "
-            + coord_dict["altitude_" + str(i)]["y_type"]
-        )
+def add_time_interval_points(coord_dict, ax, i, linestyle):
+    """Add time interval points to trajectories (6h interval).
 
-        # print(f'altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
+    Args:
+        coord_dict (dict):                          Dictionary containing the lan/lot data & other plot properties
+        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    adding time marks to trajectories on current map
+        i (int):                                    Altitude index. Only want to add legend for altitude one.
+        linestyle (str):                            Defines colour of interval poins. (Same as corresponding trajectory)
 
-        if side_traj:
-            traj_index = [0, 1, 2, 3, 4]
-
-            for traj in traj_index:
-                # textstr = (
-                #     str(coord_dict["altitude_" + str(i)]["alt_level"])
-                #     + " "
-                #     + coord_dict["altitude_" + str(i)]["y_type"]
-                # )
-                latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
-                longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
-
-                ystart = latitude.iloc[0]
-                xstart = longitude.iloc[0]
-
-                linestyle = subplot_properties_dict[sub_index]
-                # print(f'linestyle for subplot {sub_index}: {linestyle}')
-                alpha = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
-
-                if (
-                    coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
-                ):  # only add legend & startpoint for the main trajectories
-                    # plot main trajectory
-                    map.plot(
-                        longitude,  # define x-axis
-                        latitude,  # define y-axis
-                        linestyle,  # define linestyle
-                        alpha=alpha,  # define line opacity
-                        label=textstr,
-                        transform=ccrs.PlateCarree(),
-                    )
-
-                    # add_time_interval_points(coord_dict, map, i, linestyle)
-
-                    # add start point triangle
-                    map.plot(
-                        xstart,
-                        ystart,
-                        marker="^",
-                        markersize=10,
-                        markeredgecolor="red",
-                        markerfacecolor="white",
-                        transform=ccrs.PlateCarree(),
-                    )
-
-                else:
-                    map.plot(
-                        longitude,  # define x-axis
-                        latitude,  # define y-axis
-                        linestyle,  # define linestyle
-                        alpha=alpha,  # define line opacity
-                        transform=ccrs.PlateCarree(),
-                    )
-
-        else:  # no side traj
-            latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
-            longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
-
-            ystart = latitude.iloc[0]
-            xstart = longitude.iloc[0]
-
-            linestyle = subplot_properties_dict[sub_index]
-            # print(f'linestyle for subplot {sub_index}: {linestyle}')
-            alpha = coord_dict["altitude_" + str(i)]["traj_0"]["alpha"]
-
-            # print(f"longitude = {longitude}")
-            # print(f"latitude = {latitude}")
-
-            # plot main trajectory
-            map.plot(
-                longitude,  # define x-axis
-                latitude,  # define y-axis
-                linestyle,  # define linestyle
-                alpha=alpha,  # define line opacity
-                label=textstr,
-                transform=ccrs.PlateCarree(),
-            )
-
-            # add_time_interval_points(
-            #     coord_dict=coord_dict, map=map, i=i, linestyle=linestyle
-            # )
-
-            # add start point triangle
-            map.plot(
-                xstart,
-                ystart,
-                marker="^",
-                markersize=10,
-                markeredgecolor="red",
-                markerfacecolor="white",
-                transform=ccrs.PlateCarree(),
-            )
-
-        i += 1
-
-
-def add_time_interval_points(coord_dict, map, i, linestyle):
-    lon_important, lat_important = retrieve_interval_points(coord_dict, i)
+    """
+    lon_important, lat_important = retrieve_interval_points(
+        coord_dict, altitude_index=i
+    )
 
     # marker styles: https://matplotlib.org/stable/api/markers_api.html
     # add 6 hour interval points
     if i == 1:
-        map.scatter(
+        ax.scatter(
             lon_important,
             lat_important,
             marker="d",
@@ -512,7 +465,7 @@ def add_time_interval_points(coord_dict, map, i, linestyle):
             transform=ccrs.PlateCarree(),
         )
     else:
-        map.scatter(
+        ax.scatter(
             lon_important,
             lat_important,
             marker="d",
@@ -521,11 +474,26 @@ def add_time_interval_points(coord_dict, map, i, linestyle):
         )
 
 
-def retrieve_interval_points(coord_dict, i):
-    lat_df_tmp = pd.DataFrame(coord_dict["altitude_" + str(i)]["traj_0"]["lat"].items())
-    lon_df_tmp = pd.DataFrame(coord_dict["altitude_" + str(i)]["traj_0"]["lon"].items())
+def retrieve_interval_points(coord_dict, altitude_index):
+    """Extract only the interval points from the coord_dict and plot them.
+
+    Args:
+        coord_dict (dict):  Dictionary containing the lan/lot data & other plot properties
+        i (int):            Altitude index.
+
+    Returns:
+        lon_important (pandas.core.series.Series): pandas list w/ interval point longitude values
+        lat_important (pandas.core.series.Series): pandas list w/ interval point latitude values
+
+    """
+    lat_df_tmp = pd.DataFrame(
+        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lat"].items()
+    )
+    lon_df_tmp = pd.DataFrame(
+        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lon"].items()
+    )
     time_df_tmp = pd.DataFrame(
-        coord_dict["altitude_" + str(i)]["traj_0"]["time"].items()
+        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["time"].items()
     )
 
     # delete index columns
@@ -549,12 +517,23 @@ def retrieve_interval_points(coord_dict, i):
     ]  # remove start point --> want triangle there
     lon_important = important_points["lon"]
     lat_important = important_points["lat"]
+
     return lon_important, lat_important
 
 
 def add_trajectories(
-    coord_dict, side_traj, altitude_levels, map, subplot_properties_dict
+    coord_dict, side_traj, altitude_levels, ax, subplot_properties_dict
 ):
+    """Add trajectories to map.
+
+    Args:
+        coord_dict (dict):                          Dictionary containing the lan/lot data & other plot properties
+        side_traj (int):                            0/1 --> necessary for choosing the correct loop
+        altitude_levels (int):                      # altitude levels
+        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    adding trajectories to current map (axes instance)
+        subplot_properties_dict (dict):             Dictionary containing the mapping between the altitude levels and colours. Uniform w/ altitude plots.
+
+    """
     i = 1
     while i <= altitude_levels:
         alt_level = coord_dict["altitude_" + str(i)]["alt_level"]
@@ -571,11 +550,6 @@ def add_trajectories(
             traj_index = [0, 1, 2, 3, 4]
 
             for traj in traj_index:
-                # textstr = (
-                #     str(coord_dict["altitude_" + str(i)]["alt_level"])
-                #     + " "
-                #     + coord_dict["altitude_" + str(i)]["y_type"]
-                # )
                 latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
 
@@ -590,7 +564,7 @@ def add_trajectories(
                     coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
                 ):  # only add legend & startpoint for the main trajectories
                     # plot main trajectory
-                    map.plot(
+                    ax.plot(
                         longitude,  # define x-axis
                         latitude,  # define y-axis
                         linestyle,  # define linestyle
@@ -599,10 +573,10 @@ def add_trajectories(
                         transform=ccrs.PlateCarree(),
                     )
 
-                    add_time_interval_points(coord_dict, map, i, linestyle)
+                    add_time_interval_points(coord_dict, ax, i, linestyle)
 
                     # add start point triangle
-                    map.plot(
+                    ax.plot(
                         xstart,
                         ystart,
                         marker="^",
@@ -613,7 +587,7 @@ def add_trajectories(
                     )
 
                 else:
-                    map.plot(
+                    ax.plot(
                         longitude,  # define x-axis
                         latitude,  # define y-axis
                         linestyle,  # define linestyle
@@ -636,7 +610,7 @@ def add_trajectories(
             # print(f"latitude = {latitude}")
 
             # plot main trajectory
-            map.plot(
+            ax.plot(
                 longitude,  # define x-axis
                 latitude,  # define y-axis
                 linestyle,  # define linestyle
@@ -646,11 +620,11 @@ def add_trajectories(
             )
 
             add_time_interval_points(
-                coord_dict=coord_dict, map=map, i=i, linestyle=linestyle
+                coord_dict=coord_dict, ax=ax, i=i, linestyle=linestyle
             )
 
             # add start point triangle
-            map.plot(
+            ax.plot(
                 xstart,
                 ystart,
                 marker="^",
@@ -661,14 +635,24 @@ def add_trajectories(
             )
 
         i += 1
+    return
 
 
 def generate_map_plot(
     coord_dict, side_traj, altitude_levels, domain, output_dir, language, key
 ):
-    # projection = ccrs.RotatedPole(pole_longitude=-170.0, pole_latitude=43)
-    # projection = ccrs.PlateCarree()
+    """Generate map plot. fig & ax are defined here, as well as the plots are being saved.
 
+    Args:
+        coord_dict (dict):          Dictionary containing the lan/lot data & other plot properties
+        side_traj (int):            0/1 --> necessary for choosing the correct loop
+        altitude_levels (int):      # altitude levels
+        domain (str):               Domain for map
+        output_dir (str):           Path to directory where the plots should be saved.
+        language (str):             Language in plots (en/ge).
+        key (str):                  Key of start- & trajectory file. Necessary to create a corresponding directory in the output directory.
+
+    """
     origin = coord_dict["altitude_1"]["origin"]
     print(f"--- {key} / {origin} > map plot ({domain})")
 
@@ -677,7 +661,9 @@ def generate_map_plot(
         projection = ccrs.PlateCarree()
     else:
         case = "COSMO"
-        projection = ccrs.RotatedPole(pole_longitude=-170, pole_latitude=43)
+        projection = ccrs.RotatedPole(
+            pole_longitude=-170, pole_latitude=43
+        )  # define rotation of COSMO model
 
     fig = plt.figure(figsize=(12, 8), constrained_layout=False)
     ax = plt.axes(projection=projection, frameon=False)
@@ -686,7 +672,7 @@ def generate_map_plot(
     )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
     add_features(ax=ax)
     domain_boundaries = crop_map(ax=ax, domain=domain)  # sets extent of map
-    add_cities(map=ax, domain_boundaries=domain_boundaries)
+    add_cities(ax=ax, domain_boundaries=domain_boundaries)
     subplot_properties_dict = {
         0: "k-",
         1: "g-",
@@ -703,7 +689,7 @@ def generate_map_plot(
         coord_dict=coord_dict,
         side_traj=side_traj,
         altitude_levels=altitude_levels,
-        map=ax,
+        ax=ax,
         subplot_properties_dict=subplot_properties_dict,
     )
     ax.legend()  # add legend
@@ -720,7 +706,5 @@ def generate_map_plot(
         outpath, exist_ok=True
     )  # create plot folder if it doesn't already exist
 
-    # pdb.set_trace()
     plt.savefig(outpath + origin + "_" + domain + ".png")
     plt.close(fig)
-    # plt.show()
