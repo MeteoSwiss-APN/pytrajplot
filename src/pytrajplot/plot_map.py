@@ -8,6 +8,7 @@ import os
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -114,12 +115,13 @@ def add_features(ax):
     return
 
 
-def crop_map(ax, domain):
+def crop_map(ax, domain, custom_domain_boundaries):
     """Crop map to given domain (i.e. centraleurope).
 
     Args:
         ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    cropping current map (axes instance)
         domain (str):                               key for the domain_dict to read correct domain boundaries
+        custom_domain_boundaries (list):            list, containing the domain for these specifc trajectories (created dynamically)
 
     Returns:
         domain_boundaries (list):                   [lat0,lat1,lon0,lon1]
@@ -127,48 +129,23 @@ def crop_map(ax, domain):
     """
     # got these pre-defined domain boundaries from: https://github.com/MeteoSwiss-APN/oprtools/blob/master/dispersion/lib/get_domain.pro
     domain_dict = {
-        "centraleurope": {
-            "lat_0": 2,  # x_0
-            "lat_1": 18,  # x_1
-            "lon_0": 42,  # y_0
-            "lon_1": 52,  # y_1
-            "domain": [2, 18, 42, 52],  # [lat0,lat1,lon0,lon1]
-        },
-        "ch": {  # zoom domain Switzerland
-            "lat_0": 5.8,  # x_0
-            "lat_1": 10.6,  # x_1
-            "lon_0": 45.4,  # y_0
-            "lon_1": 48.2,  # y_1
-            "domain": [5.8, 10.6, 45.4, 48.2],  # [lat0,lat1,lon0,lon1]
-        },
-        "alps": {  # zoom domain alps for IFS-HRES
-            "lat_0": 2,  # x_0
-            "lat_1": 14,  # x_1
-            "lon_0": 43,  # y_0
-            "lon_1": 50,  # y_1
-            "domain": [2, 14, 43, 50],  # [lat0,lat1,lon0,lon1]
-        },
-        "europe": {  # zoom domain Europe (for IFS-HRES)
-            "lat_0": -10,  # x_0
-            "lat_1": 47,  # x_1
-            "lon_0": 35,  # y_0
-            "lon_1": 65,  # y_1
-            "domain": [-10, 47, 35, 65],  # [lat0,lat1,lon0,lon1]
-        },
-        "ch_hd": {  # zoom domain larger Siwtzerlad area for COSMO-7
-            "lat_0": 3.5,  # x_0
-            "lat_1": 12.6,  # x_1
-            "lon_0": 44.1,  # y_0
-            "lon_1": 49.4,  # y_1
-            "domain": [3.5, 12.6, 44.1, 49.4],  # [lat0,lat1,lon0,lon1]
+        "centraleurope": {"domain": [2, 18, 42, 52]},
+        "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},
+        "alps": {"domain": [2, 14, 43, 50]},
+        "europe": {"domain": [-10, 47, 35, 65]},
+        "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},
+        "dynamic": {
+            "domain": [
+                custom_domain_boundaries[0],
+                custom_domain_boundaries[1],
+                custom_domain_boundaries[2],
+                custom_domain_boundaries[3],
+            ]
         },
     }
 
     domain_boundaries = domain_dict[domain]["domain"]
-
-    ax.set_extent(
-        domain_boundaries, crs=ccrs.PlateCarree()
-    )  # Central Europe for IFS-HRES
+    ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree())
 
     return domain_boundaries
 
@@ -190,6 +167,8 @@ def is_visible(lat, lon, domain_boundaries) -> bool:
         and domain_boundaries[2] <= lat <= domain_boundaries[3]
     )
 
+    # print(f'lon/lat of city: ({lon}/{lat}) --> in domain: {in_domain}')
+
     if in_domain:
         return True
     else:
@@ -208,6 +187,7 @@ def is_of_interest(name, capital_type, population) -> bool:
         bool:               True if city is of interest, else false
 
     """
+    # print(f'checking whether {name} is of interest')
     is_capital = capital_type == "primary"
     is_large = (
         population > 400000
@@ -245,6 +225,14 @@ def add_cities(ax, domain_boundaries):
         lat = row["lat"]
         capital_type = row["capital"]
         population = row["population"]
+
+        print(f"domain boundaries:\t{domain_boundaries}")
+        print(f"lon {city}:\t{lon}")
+        print(f"lat {city}:\t{lat}")
+
+        print(
+            f"{city} is visible: {is_visible(lat=lat, lon=lon, domain_boundaries=domain_boundaries)} and is of interest: {is_of_interest(name=city, capital_type=capital_type, population=population)}"
+        )
 
         if is_visible(
             lat=lat, lon=lon, domain_boundaries=domain_boundaries
@@ -285,6 +273,12 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
         )
 
         trajectory_df = trajectory_dict[key]  # extract df for given key
+
+        # at this point, the dynamic boundary can be computed very easily, because all lon/lat values are still in one list
+        # if any trajectory crosses the dateline, the longitude dataframe (lon_df) contains the shifted values
+        central_longitude, domain_boundaries, lon_df = get_dynamic_domain(
+            trajectory_df=trajectory_df
+        )
 
         number_of_times = trajectory_df["block_length"].iloc[
             0
@@ -346,6 +340,10 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                 ] = trajectory_df["lon"][lower_row:upper_row]
 
                 coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
+                    "lon"
+                ] = lon_df[lower_row:upper_row]
+
+                coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "lat"
                 ] = trajectory_df["lat"][lower_row:upper_row]
 
@@ -369,13 +367,15 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
 
                     for domain in domains:
                         generate_map_plot(
-                            coord_dict,
-                            side_traj,
-                            altitude_levels,
+                            coord_dict=coord_dict,
+                            side_traj=side_traj,
+                            altitude_levels=altitude_levels,
                             domain=domain,
                             output_dir=output_dir,
                             language=language,
                             key=key,
+                            central_longitude=central_longitude,
+                            custom_domain_boundaries=domain_boundaries,
                         )
 
             # complete the non-side-trajectory case, after having completed the side trajectory case
@@ -392,9 +392,14 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                     "start_altitude"
                 ][lower_row]
 
-                coord_dict["altitude_" + str(alt_index)]["traj_0"][
-                    "lon"
-                ] = trajectory_df["lon"][lower_row:upper_row]
+                # coord_dict["altitude_" + str(alt_index)]["traj_0"][
+                #     "lon"
+                # ] = trajectory_df["lon"][lower_row:upper_row]
+
+                # fill the longitude column in the coord_dict using the lon_df
+                coord_dict["altitude_" + str(alt_index)]["traj_0"]["lon"] = lon_df[
+                    lower_row:upper_row
+                ]
 
                 coord_dict["altitude_" + str(alt_index)]["traj_0"][
                     "lat"
@@ -428,13 +433,15 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                     alt_index = 1
                     for domain in domains:
                         generate_map_plot(
-                            coord_dict,
-                            side_traj,
-                            altitude_levels,
+                            coord_dict=coord_dict,
+                            side_traj=side_traj,
+                            altitude_levels=altitude_levels,
                             domain=domain,
                             output_dir=output_dir,
                             language=language,
                             key=key,
+                            central_longitude=central_longitude,
+                            custom_domain_boundaries=domain_boundaries,
                         )
     return
 
@@ -638,19 +645,94 @@ def add_trajectories(
     return
 
 
+def get_dynamic_domain(trajectory_df):
+    """Check wheter dateline is crossed or not and return dynamic domain boundaries.
+
+    Args:
+        trajectory_df (df):         Dataframe containing the lon/lat values of all trajectories in two separate columns
+
+    Returns:
+        central_longitude (float):  0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
+        domain_boundaries (list):   [lon0,lon1,lat0,lat1]
+        lon_df            (df):     single column dataframe containing the (shifted/unchanged) longitude values
+
+    """
+    # print(f'--- getting dynamic domain more efficiently')
+    lon_df = trajectory_df["lon"]
+    lat = trajectory_df["lat"]
+    lower_boundary = np.min(lat)
+    upper_boundary = np.max(lat)
+
+    # check dateline crossing
+    far_east = True in ((150 <= longitude <= 179) for longitude in lon_df)
+    far_west = True in ((-150 >= longitude >= -179) for longitude in lon_df)
+
+    if far_east and far_west:  # trajectory *must* cross dateline somehow
+        # extract western & eastern points
+        lon_west = np.where(lon_df < 0, lon_df, np.NaN)
+        lon_east = np.where(lon_df >= 0, lon_df, np.NaN)
+
+        # remove NaN values (not actually necessary)
+        lon_west = lon_west[np.logical_not(np.isnan(lon_west))]
+        lon_east = lon_east[np.logical_not(np.isnan(lon_east))]
+
+        central_longitude = 180
+
+        left_boundary = np.min(lon_east)  # least eastern point
+        right_boundary = central_longitude + (
+            180 - abs(np.max(lon_west))
+        )  # least western point
+
+        # the lon-data must be adapted to the shifted projection
+        i = 0
+        while i < len(lon_df):
+            if lon_df[i] < 0:
+                lon_df[i] = central_longitude + (
+                    180 - abs(lon_df[i])
+                )  # make the lon data compatible with the shifted projection
+            i += 1
+
+    else:  # trajectory doesn't cross the dateline
+        central_longitude = 0
+
+        right_boundary = np.max(lon_df)  # most eastern point
+        left_boundary = np.min(lon_df)  # most western point
+
+    # print(f'Far West: {far_west}\nFar East: {far_east}\nCrosses Dateline: {far_east & far_west}\nShift central longitude to {central_longitude}')
+
+    print(f"left boundary {left_boundary}, right_boundary = {right_boundary}")
+
+    domain_boundaries = [left_boundary, right_boundary, lower_boundary, upper_boundary]
+
+    # print(f'Latitude (y) Range: \t{lower_boundary}°\t\t-\t{upper_boundary}° ')
+    # print(f'Longitude (x) Range:\t{left_boundary}°\t\t-\t{right_boundary}° ')
+
+    return central_longitude, domain_boundaries, lon_df
+
+
 def generate_map_plot(
-    coord_dict, side_traj, altitude_levels, domain, output_dir, language, key
+    coord_dict,
+    side_traj,
+    altitude_levels,
+    domain,
+    output_dir,
+    language,
+    key,
+    central_longitude,
+    custom_domain_boundaries,
 ):
     """Generate map plot. fig & ax are defined here, as well as the plots are being saved.
 
     Args:
-        coord_dict (dict):          Dictionary containing the lan/lot data & other plot properties
-        side_traj (int):            0/1 --> necessary for choosing the correct loop
-        altitude_levels (int):      # altitude levels
-        domain (str):               Domain for map
-        output_dir (str):           Path to directory where the plots should be saved.
-        language (str):             Language in plots (en/ge).
-        key (str):                  Key of start- & trajectory file. Necessary to create a corresponding directory in the output directory.
+        coord_dict                  (dict):   Dictionary containing the lan/lot data & other plot properties
+        side_traj                   (int):    0/1 --> necessary for choosing the correct loop
+        altitude_levels             (int):    # altitude levels
+        domain                      (str):    Domain for map
+        output_dir                  (str):    Path to directory where the plots should be saved.
+        language                    (str):    Language in plots (en/ge).
+        key                         (str):    Key of start- & trajectory file. Necessary to create a corresponding directory in the output directory.
+        central_longitude           (float):  0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
+        custom_domain_boundaries    (list):   [lon0,lon1,lat0,lat1]
 
     """
     origin = coord_dict["altitude_1"]["origin"]
@@ -658,7 +740,7 @@ def generate_map_plot(
 
     if coord_dict["altitude_1"]["y_type"] == "hpa":
         case = "HRES"
-        projection = ccrs.PlateCarree()
+        projection = ccrs.PlateCarree(central_longitude=central_longitude)
     else:
         case = "COSMO"
         projection = ccrs.RotatedPole(
@@ -671,8 +753,13 @@ def generate_map_plot(
         "auto"
     )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
     add_features(ax=ax)
-    domain_boundaries = crop_map(ax=ax, domain=domain)  # sets extent of map
+
+    domain_boundaries = crop_map(
+        ax=ax, domain=domain, custom_domain_boundaries=custom_domain_boundaries
+    )  # sets extent of map
+
     add_cities(ax=ax, domain_boundaries=domain_boundaries)
+
     subplot_properties_dict = {
         0: "k-",
         1: "g-",
@@ -685,6 +772,7 @@ def generate_map_plot(
         8: "crimson-",
         9: "lightgreen-",
     }
+
     add_trajectories(
         coord_dict=coord_dict,
         side_traj=side_traj,
@@ -692,7 +780,9 @@ def generate_map_plot(
         ax=ax,
         subplot_properties_dict=subplot_properties_dict,
     )
+
     ax.legend()  # add legend
+
     title = False
     if title:
         if language == "en":
