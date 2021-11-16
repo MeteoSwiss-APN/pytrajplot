@@ -288,3 +288,5 @@ zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_altitude.png
 zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate.png
 sample_data.csv
 src/pytrajplot/scratch.py
+src/pytrajplot/example_dateline_crossing.png
+zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_dynamic.png
