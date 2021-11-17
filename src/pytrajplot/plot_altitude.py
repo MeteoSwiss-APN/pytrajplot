@@ -305,7 +305,7 @@ def generate_altitude_plot(
 
     origin = y["altitude_1"]["origin"]
 
-    print(f"--- {key} / {origin} > altitude plot")
+    print(f"--- {key}\t{origin}\t plot altitude")
 
     unit, custom_ylim = altitude_limits(
         y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
