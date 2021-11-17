@@ -108,9 +108,9 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
         ["ch_hd", "ch", "europe", "centraleurope", "alps", "dynamic"],
         case_sensitive=False,
     ),
-    multiple=False,
-    default=("centraleurope"),
-    help="Choose domain for map plot. Default: centraleurope",
+    multiple=True,
+    default=("centraleurope", "europe", "dynamic"),
+    help="Choose domains for map plots. Default: centraleurope, europe, dynamic",
 )
 def main(
     *,
@@ -144,13 +144,12 @@ def main(
             language=language,
         )
     if map:
-        domains = ["europe", "centraleurope", "alps", "ch", "dynamic"]
-
+        # domains = ["europe", "centraleurope", "alps", "ch", "dynamic"]
         plot_map(
             trajectory_dict=trajectory_dict,
             separator=separator,
             output_dir=output_dir,
-            domains=domains,
+            domains=domain,
             language=language,
         )
 
