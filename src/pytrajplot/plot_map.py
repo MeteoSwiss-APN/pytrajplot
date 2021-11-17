@@ -898,7 +898,7 @@ def generate_map_plot(
     """
     origin = coord_dict["altitude_1"]["origin"]
 
-    print(f"--- {key} / {origin}\t --> {domain}")
+    print(f"--- {key}\t{origin}\t plot map ({domain})")
 
     if domain == "dynamic":
         (
