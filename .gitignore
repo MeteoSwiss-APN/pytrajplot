@@ -378,3 +378,11 @@ zmichel/test_cases/HRES_forward/plots/006-144F/Bagdad_altitude.png
 zmichel/test_cases/HRES_forward/plots/006-144F/Bushehr_altitude.png
 zmichel/test_cases/HRES_forward/plots/006-144F/Punggye-ri_altitude.png
 zmichel/test_cases/HRES_forward/plots/006-144F/Teheran_altitude.png
+zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F/Beznau_altitude.png
+zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F/Beznau_dynamic.png
+zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F-old/Beznau_alps.png
+zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F-old/Beznau_centraleurope.png
+zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F-old/Beznau_ch.png
+zmichel/COSMO/test_case_forward_w_sidetraj/plots/003-033F-old/Beznau_europe.png
+zmichel/HRES/readme.txt
+zmichel/test_cases/cross_dateline_hres/plots/006-144F/Punggye-ri_dynamic.png
