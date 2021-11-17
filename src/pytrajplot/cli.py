@@ -105,13 +105,7 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
 @click.option(
     "--domain",
     type=click.Choice(
-        [
-            "ch_hd",
-            "ch",
-            "europe",
-            "centraleurope",
-            "alps",
-        ],
+        ["ch_hd", "ch", "europe", "centraleurope", "alps", "dynamic"],
         case_sensitive=False,
     ),
     multiple=False,
@@ -150,7 +144,6 @@ def main(
             language=language,
         )
     if map:
-
         domains = ["europe", "centraleurope", "alps", "ch", "dynamic"]
 
         plot_map(
