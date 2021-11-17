@@ -102,8 +102,8 @@ def add_features(ax):
 
     ax.coastlines(resolution="10m")
     ax.add_feature(cfeature.LAND)
-    ax.add_feature(cfeature.COASTLINE)
-    ax.add_feature(cfeature.BORDERS, linestyle="--")
+    ax.add_feature(cfeature.COASTLINE, alpha=0.5)
+    ax.add_feature(cfeature.BORDERS, linestyle="--", alpha=0.5)
     ax.add_feature(cfeature.OCEAN)
     ax.add_feature(cfeature.LAKES)
     ax.add_feature(cfeature.RIVERS)
@@ -197,8 +197,6 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
         bool:               True if city is of interest, else false
 
     """
-    # print(f'checking whether {name} is of interest')
-    # is_capital = (capital_type == "primary") or (capital_type == "admin")
     is_capital = capital_type == "primary"
 
     # list of cities, that should be excluded for aesthetic reasons
@@ -270,15 +268,43 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
     is_excluded = name in excluded_cities
 
     if domain == "dynamic":
-        is_capital = (capital_type == "primary") or (capital_type == "admin")
-
-        if 40 <= lon <= 180:
+        if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
             is_capital = (
                 capital_type == "primary"
-            )  # there are too many cities that meet this requirement in Asia.
+            )  # incl. primary cities (= country capital)
+            if capital_type == "admin":  # incl. admin cities w/ population > 5'000'000
+                if population > 5000000:
+                    is_capital = True
+            is_large = population > 10000000  # incl. cities w/ population > 10'000'000
 
-        is_large = population > 8000000  # dynamic range often is global (or in Asia)
+        if 40 <= lon <= 180:  # 40°E - 180°E (mainly Asia)
+            is_capital = (
+                capital_type == "primary"
+            )  # incl. primary cities (= country capital)
+            if capital_type == "admin":  # incl. admin cities w/ population > 10'000'000
+                if population > 10000000:
+                    is_capital = True
+            is_large = population > 12000000  # incl. cities w/ population > 12'000'0000
 
+        if -40 <= lon < 0:  # 40° W to 0° E/W --> mainly the atlantic
+            is_capital = (
+                capital_type == "primary"
+            )  # incl. primary cities (= country capital)
+            if capital_type == "admin":  # incl. admin cities w/ population > 3'000'000
+                if population > 1000000:
+                    is_capital = True
+            is_large = population > 3000000  # incl. cities w/ population > 8'000'000
+
+        if (
+            -180 <= lon < -40
+        ):  # 180° W to 40° W --> capital & admin cities or population > 2'000'000
+            is_capital = (
+                capital_type == "primary"
+            )  # incl. primary cities (= country capital)
+            if capital_type == "admin":  # incl. admin cities w/ population > 800'000
+                if population > 800000:
+                    is_capital = True
+            is_large = population > 3000000  # incl. cities w/ population > 3'000'000
         return (is_capital or is_large) and not is_excluded
 
     if domain == "europe":
