@@ -367,3 +367,4 @@ zmichel/test_cases/HRES_forward/plots/006-144F/Teheran_dynamic.png
 zmichel/test_cases/HRES_forward/plots/006-144F/Teheran_europe.png
 src/pytrajplot/test.py
 src/pytrajplot/dynamic_domain.py
+zmichel/test_cases/cross_dateline_hres/tra_geom_006-144F
