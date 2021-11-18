@@ -135,7 +135,7 @@ def main(
     trajectory_dict, plot_info_dict, keys = check_input_dir(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
-
+    # hallo
     if altitude:
         plot_altitude(
             trajectory_dict=trajectory_dict,
