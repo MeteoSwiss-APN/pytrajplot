@@ -959,11 +959,13 @@ def generate_map_plot(
         )  # define rotation of COSMO model
 
     fig = plt.figure(figsize=(12, 8), constrained_layout=False)
-    ax = plt.axes(projection=projection, frameon=False)
+    ax = plt.axes(projection=projection, frameon=True)
     ax.set_aspect(
         "auto"
     )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
     add_features(ax=ax)
+
+    # plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0, hspace=0)
 
     domain_boundaries = crop_map(
         ax=ax, domain=domain, custom_domain_boundaries=custom_domain_boundaries
@@ -1008,13 +1010,15 @@ def generate_map_plot(
 
     ax.legend()  # add legend
 
-    title = True
+    title = False
     if title:
         if language == "en":
             locale.setlocale(locale.LC_ALL, "en_GB")
             fig.suptitle("Air trajectories originating from " + origin)
         if language == "de":
             fig.suptitle("Luft-Trajektorien Karte für " + origin)
+
+    # print(f'MapPlt: fig={fig}, type(fig)={type(fig)}, ax={ax}, type(ax)={type(ax)}')
 
     outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
     os.makedirs(

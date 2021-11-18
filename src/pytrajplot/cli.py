@@ -109,7 +109,7 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
         case_sensitive=False,
     ),
     multiple=True,
-    default=("centraleurope", "europe", "dynamic"),
+    default=("centraleurope", "europe", "dynamic", "ch_hd"),
     help="Choose domains for map plots. Default: centraleurope, europe, dynamic",
 )
 def main(

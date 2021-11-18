@@ -563,6 +563,8 @@ def generate_altitude_plot(
     if language == "de":
         fig.suptitle("Höhenplot für " + origin)
 
+    # print(f'AltPlt: fig={fig}, type(fig)={type(fig)}, ax={axs}, type(ax)={type(axs)}')
+
     plt.savefig(outpath + origin + "_altitude.png")
     plt.close(fig)
     # print('Saved plot: ', outpath + origin + '.png') # prints location of saved figure for further processing
