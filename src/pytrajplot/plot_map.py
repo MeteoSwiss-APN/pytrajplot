@@ -735,6 +735,7 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
         language (str):         Language in plots (en/ge).
 
     """
+    map_plot_dict = {}
     for key in trajectory_dict:  # iterate through the trajectory dict
         # print(f"--- defining trajectory plot properties for {key}")
 
@@ -830,7 +831,9 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                     alt_index = 1
 
                     for domain in domains:
-                        generate_map_plot(
+                        origin = coord_dict["altitude_1"]["origin"]
+                        map_plot_dict[origin + "_" + domain] = {}
+                        tmp_dict = generate_map_plot(
                             coord_dict=coord_dict,
                             side_traj=side_traj,
                             altitude_levels=altitude_levels,
@@ -839,6 +842,9 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                             language=language,
                             key=key,
                         )
+                        map_plot_dict[origin + "_" + domain].update(
+                            tmp_dict
+                        )  # TODO: Change, s.t. the map plot dict contains all origins!
 
             # complete the non-side-trajectory case, after having completed the side trajectory case
             else:
@@ -894,7 +900,8 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                 if alt_index > altitude_levels:
                     alt_index = 1
                     for domain in domains:
-                        generate_map_plot(
+                        origin = coord_dict["altitude_1"]["origin"]
+                        tmp_dict = generate_map_plot(
                             coord_dict=coord_dict,
                             side_traj=side_traj,
                             altitude_levels=altitude_levels,
@@ -903,7 +910,9 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                             language=language,
                             key=key,
                         )
-    return
+                        map_plot_dict[origin].update(tmp_dict)
+                        # print(f'domain: {domain} --> tmp dict: {tmp_dict} --> map plot dict: {map_plot_dict}')
+    return map_plot_dict
 
 
 def generate_map_plot(
@@ -931,7 +940,7 @@ def generate_map_plot(
     """
     origin = coord_dict["altitude_1"]["origin"]
 
-    print(f"--- {key}\t{origin}\t plot map ({domain})")
+    print(f"--- {key} > plot map \t{origin} / {domain}")
 
     if domain == "dynamic":
         (
@@ -1024,6 +1033,11 @@ def generate_map_plot(
     os.makedirs(
         outpath, exist_ok=True
     )  # create plot folder if it doesn't already exist
+
+    map_plot_dict = {domain: {"map_fig": fig, "map_axes": ax}}
+
+    return map_plot_dict
+
     plt.savefig(outpath + origin + "_" + domain + ".png", dpi=150)
     plt.close(fig)
     return

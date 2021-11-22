@@ -11,6 +11,7 @@ import click
 
 # Local
 from . import __version__
+from .assemble_pdf import assemble_pdf
 from .get_data import check_input_dir
 from .plot_altitude import plot_altitude
 from .plot_map import plot_map
@@ -135,22 +136,25 @@ def main(
     trajectory_dict, plot_info_dict, keys = check_input_dir(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
-    # hallo
+
     if altitude:
-        plot_altitude(
+        alt_plot_dict = plot_altitude(
             trajectory_dict=trajectory_dict,
             output_dir=output_dir,
             separator=separator,
             language=language,
         )
+
     if map:
-        # domains = ["europe", "centraleurope", "alps", "ch", "dynamic"]
-        plot_map(
+        map_plot_dict = plot_map(
             trajectory_dict=trajectory_dict,
             separator=separator,
             output_dir=output_dir,
             domains=domain,
             language=language,
         )
+
+    # TODO: write assemble pdf pipeline
+    assemble_pdf(altitude_axes=alt_plot_dict, map_axes=map_plot_dict, domains=domain)
 
     print("--- Done.")

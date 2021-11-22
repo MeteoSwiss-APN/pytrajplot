@@ -9,6 +9,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import numpy as np
+import pandas as pd
 
 
 def create_y_dict(altitude_levels):
@@ -85,6 +86,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
         language (str): Language for plot annotations.
 
     """
+    alt_plot_dict = {}
     for key in trajectory_dict:  # iterate through the trajectory dict
         # print(f"--- defining altitude plot properties for {key}")
 
@@ -165,7 +167,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
 
                 if alt_index > altitude_levels:
                     alt_index = 1
-                    generate_altitude_plot(
+                    tmp_dict = generate_altitude_plot(
                         x=x,
                         y=y,
                         key=key,
@@ -175,6 +177,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
                         language=language,
                         max_start_altitude=max_start_altitude,
                     )
+                    alt_plot_dict.update(tmp_dict)
 
             else:
                 # print(f'row_index = {row_index} corresponds to origin {origin}')
@@ -211,7 +214,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
                 alt_index += 1
                 if alt_index > altitude_levels:
                     alt_index = 1
-                    generate_altitude_plot(
+                    tmp_dict = generate_altitude_plot(
                         x=x,
                         y=y,
                         key=key,
@@ -221,7 +224,8 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
                         language=language,
                         max_start_altitude=max_start_altitude,
                     )
-    return
+                    alt_plot_dict.update(tmp_dict)
+    return alt_plot_dict
 
 
 def altitude_limits(y, max_start_altitude, altitude_levels):
@@ -305,7 +309,7 @@ def generate_altitude_plot(
 
     origin = y["altitude_1"]["origin"]
 
-    print(f"--- {key}\t{origin}\t plot altitude")
+    print(f"--- {key} > plot altitude \t{origin}")
 
     unit, custom_ylim = altitude_limits(
         y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
@@ -564,6 +568,16 @@ def generate_altitude_plot(
         fig.suptitle("Höhenplot für " + origin)
 
     # print(f'AltPlt: fig={fig}, type(fig)={type(fig)}, ax={axs}, type(ax)={type(axs)}')
+
+    alt_plot_dict = {origin: {"altitude_axes": {"alt_fig": fig, "alt_axes": axs}}}
+    # alt_plot_dict = {
+    #     'origin':{
+    #             'alt_fig':fig,
+    #             'alt_axes':axs
+    #             }
+    # }
+
+    return alt_plot_dict
 
     plt.savefig(outpath + origin + "_altitude.png")
     plt.close(fig)
