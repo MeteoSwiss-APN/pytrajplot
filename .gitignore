@@ -1400,3 +1400,8 @@ src/pytrajplot/scratch/pdfs/ch_hd_BaselBinnigen.pdf
 src/pytrajplot/scratch/pdfs/ch_hd_Linate.pdf
 src/pytrajplot/scratch/scratch_combine_figures.py
 src/pytrajplot/scratch/scratch_various_tmp.py
+src/pytrajplot/scratch backup/assemble_pdf.py
+src/pytrajplot/scratch backup/cli.py
+src/pytrajplot/scratch backup/get_data.py
+src/pytrajplot/scratch backup/plot_altitude.py
+src/pytrajplot/scratch backup/plot_map.py
