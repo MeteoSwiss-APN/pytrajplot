@@ -407,7 +407,7 @@ if False:
                                 markeredgecolor="red",
                                 markerfacecolor="white",
                             )
-                            axs[sub_index].legend()
+                            axs[sub_index].legend(fontsize=8)
 
                 else:  # no side traj
                     axs[sub_index].grid(color="grey", linestyle="--", linewidth=1)
@@ -462,7 +462,7 @@ if False:
                         markeredgecolor="red",
                         markerfacecolor="white",
                     )
-                    axs[sub_index].legend()
+                    axs[sub_index].legend(fontsize=8)
 
                 i += 1
 
@@ -522,7 +522,7 @@ if False:
                             markeredgecolor="red",
                             markerfacecolor="white",
                         )
-                        axs.legend()
+                        axs.legend(fontsize=8)
 
             else:
                 textstr = (
@@ -559,7 +559,7 @@ if False:
                     markeredgecolor="red",
                     markerfacecolor="white",
                 )
-                axs.legend()
+                axs.legend(fontsize=8)
 
         outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
 
@@ -732,7 +732,7 @@ def generate_altitude_plot(
                     markeredgecolor="red",
                     markerfacecolor="white",
                 )
-                ax.legend()
+                ax.legend(fontsize=8)
 
     else:  # no side traj
 
@@ -786,7 +786,7 @@ def generate_altitude_plot(
             markeredgecolor="red",
             markerfacecolor="white",
         )
-        ax.legend()
+        ax.legend(fontsize=8)
 
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
     return ax
