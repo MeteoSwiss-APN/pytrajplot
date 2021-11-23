@@ -940,11 +940,12 @@ def generate_map_plot(
     # fig = plt.figure(figsize=(12, 8), constrained_layout=False)
     # ax = plt.axes(projection=projection, frameon=True)
     ax = ax or plt.gca()
+
     plt.axes(projection=ccrs.PlateCarree())
+
     ax.set_aspect(
         "auto"
     )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
-    add_features(ax=ax)
 
     # plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0, hspace=0)
 
@@ -959,15 +960,22 @@ def generate_map_plot(
     if not is_visible(
         lat=lat.iloc[0],
         lon=lon.iloc[0],
-        # lat=coord_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
-        # lon=coord_dict["altitude_1"]["traj_0"]["lon"].iloc[0],
-        # lat=coord_dict["altitude_1"]["traj_0"]["lat"][0],
-        # lon=coord_dict["altitude_1"]["traj_0"]["lon"][0],
         domain_boundaries=domain_boundaries,
         cross_dateline=False,
     ):
-        return
+        print("start point not within domain")
 
+        return ax.text(
+            0.5,
+            0.5,
+            "The start point is not within the domain.",
+            transform=ax.transAxes,
+            fontsize=14,
+            verticalalignment="center",
+            horizontalalignment="center",
+        )
+
+    add_features(ax=ax)
     add_cities(
         ax=ax,
         domain_boundaries=domain_boundaries,
