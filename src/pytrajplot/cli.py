@@ -1,21 +1,12 @@
 """Command line interface of pytrajplot."""
-# Standard library
-import csv
-import datetime
-import json
-import logging
-import os
 
 # Third-party
 import click
 
 # Local
 from . import __version__
-from .assemble_pdf import assemble_pdf
 from .generate_pdf import generate_pdf
 from .parse_data import check_input_dir
-from .plot_altitude import plot_altitude
-from .plot_map import plot_map
 from .utils import count_to_log_level
 
 # from pytrajplot import plot_map_and_altitude
