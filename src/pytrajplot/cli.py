@@ -80,13 +80,15 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
 @click.option(
     "--altitude",
     type=bool,
-    is_flag=True,
+    # is_flag=True,
+    default=True,
     help="Choose, to create altitude plots. isFlag: True",
 )
 @click.option(
     "--map",
     type=bool,
-    is_flag=True,
+    default=True,
+    # is_flag=True,
     help="Choose, to create map plots. isFlag: True",
 )
 @click.option(
