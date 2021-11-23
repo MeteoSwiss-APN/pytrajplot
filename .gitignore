@@ -1410,3 +1410,9 @@ src/pytrajplot/pdfs/000-048F_Linate_ch_hd.pdf
 src/pytrajplot/pdfs/000-048F_Linate_dynamic.pdf
 src/pytrajplot/pdfs/000-048F_Linate_europe.pdf
 example_pdfs.zip
+zmichel/HRES/test_hres_cases.sh
+zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_centraleurope.pdf
+zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_ch_hd.pdf
+zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_dynamic.pdf
+zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_europe.pdf
+zmichel/test_cases/HRES_forward/plots/006-144F/Punggye-ri_alps.pdf
