@@ -1405,3 +1405,8 @@ src/pytrajplot/scratch backup/cli.py
 src/pytrajplot/scratch backup/get_data.py
 src/pytrajplot/scratch backup/plot_altitude.py
 src/pytrajplot/scratch backup/plot_map.py
+src/pytrajplot/pdfs/000-048F_Linate_centraleurope.pdf
+src/pytrajplot/pdfs/000-048F_Linate_ch_hd.pdf
+src/pytrajplot/pdfs/000-048F_Linate_dynamic.pdf
+src/pytrajplot/pdfs/000-048F_Linate_europe.pdf
+example_pdfs.zip

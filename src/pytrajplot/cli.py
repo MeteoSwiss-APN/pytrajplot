@@ -15,7 +15,10 @@ from .assemble_pdf import assemble_pdf
 from .get_data import check_input_dir
 from .plot_altitude import plot_altitude
 from .plot_map import plot_map
+from .plot_map_and_altitude import generate_pdf
 from .utils import count_to_log_level
+
+# from pytrajplot import plot_map_and_altitude
 
 
 def interpret_options(start_prefix, traj_prefix, info_prefix, language):
@@ -137,6 +140,19 @@ def main(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
 
+    if altitude and map:
+        print("--- Assembling PDF.")
+        generate_pdf(
+            trajectory_dict=trajectory_dict,
+            output_dir=output_dir,
+            separator=separator,
+            language=language,
+            domains=domain,
+        )
+        print("--- Done.")
+
+    return
+
     if altitude:
         alt_plot_dict = plot_altitude(
             trajectory_dict=trajectory_dict,
@@ -156,5 +172,3 @@ def main(
 
     # TODO: write assemble pdf pipeline
     assemble_pdf(altitude_axes=alt_plot_dict, map_axes=map_plot_dict, domains=domain)
-
-    print("--- Done.")

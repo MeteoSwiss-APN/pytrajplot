@@ -270,6 +270,7 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
         "Aguascalientes",
         "Guanajuato",
         "Leon de los Aldama",
+        "Wroclaw",
     ]
 
     is_excluded = name in excluded_cities
@@ -364,13 +365,16 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
             lon=lon,
         ):
 
-            plt.scatter(
+            ax.scatter(
                 x=lon,
                 y=lat,
                 marker="o",
-                color="black",
+                facecolors="none",
+                edgecolors="k",
                 transform=ccrs.PlateCarree(),
             )
+
+            # s=80, facecolors='none', edgecolors='r'
 
             ax.text(x=lon + 0.05, y=lat + 0.05, s=city, transform=ccrs.PlateCarree())
 
@@ -737,61 +741,32 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
     """
     map_plot_dict = {}
     for key in trajectory_dict:  # iterate through the trajectory dict
-        # print(f"--- defining trajectory plot properties for {key}")
-
-        coord_dict = create_coord_dict(
-            altitude_levels=trajectory_dict[key]["altitude_levels"].loc[0]
-        )
-
         trajectory_df = trajectory_dict[key]  # extract df for given key
+        altitude_levels = trajectory_df["altitude_levels"].loc[0]
+        number_of_times = number_of_times = trajectory_df["block_length"].iloc[0]
+        number_of_trajectories = trajectory_df["#trajectories"].iloc[0]
 
-        number_of_times = trajectory_df["block_length"].iloc[
-            0
-        ]  # block length is constant, because it depends on the runtime of the model and the timestep, which both are constant for a given traj file
-
-        number_of_trajectories = trajectory_df["#trajectories"].iloc[
-            0
-        ]  # this parameter, corresponds to the number of rows, present in the start file, thus also constant
-
-        x = trajectory_df["datetime"].iloc[
-            0:number_of_times
-        ]  # shared x-axis is the time axis, which is constant for a given traj file
+        coord_dict = create_coord_dict(altitude_levels=altitude_levels)
 
         row_index = 0  # corresponds to row from start file
-        alt_index = (
-            1  # altitude 1,2,3,4,... (however many starting altitudes there are)
-        )
+        alt_index = 1
         traj_index = 0  # 0=main, 1=east, 2=north, 3=west, 4=south
 
         while row_index < number_of_trajectories:
 
             lower_row = row_index * number_of_times
             upper_row = row_index * number_of_times + number_of_times
-
             origin = trajectory_df["origin"].loc[lower_row]
             altitude_levels = trajectory_df["altitude_levels"].loc[lower_row]
             subplot_index = trajectory_df["subplot_index"].loc[lower_row]
-            max_start_altitude = trajectory_df["max_start_altitude"].loc[lower_row]
-
-            if trajectory_df["side_traj"].loc[
-                lower_row
-            ]:  # if there are side trajectories, each subplot contains 5 trajectories
-                traj_per_plot = 5
-                side_traj = 1
-            else:
-                traj_per_plot = 1  # else, there is only one trajectory
-                side_traj = 0
+            side_traj = trajectory_df["side_traj"].loc[lower_row]
 
             if side_traj:
-                if (
-                    separator not in origin  # replaced '~' with separator
-                ):  # the y_surf information, is only taken from the main trajectories (not side trajectories)
-                    # print(f'row_index = {row_index} corresponds to origin {origin}')
+                if separator not in origin:
                     coord_dict["altitude_" + str(alt_index)]["origin"] = origin
                     coord_dict["altitude_" + str(alt_index)][
                         "subplot_index"
                     ] = subplot_index
-                    # print(trajectory_df['hsurf'][lower_row:upper_row])
 
                 coord_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
                     "z_type"
@@ -799,23 +774,15 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                 coord_dict["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
                     "start_altitude"
                 ][lower_row]
-
                 coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "lon"
                 ] = trajectory_df["lon"][lower_row:upper_row]
-
-                # coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
-                #     "lon"
-                # ] = lon_df[lower_row:upper_row]
-
                 coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "lat"
                 ] = trajectory_df["lat"][lower_row:upper_row]
-
                 coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "time"
                 ] = trajectory_df["time"][lower_row:upper_row]
-
                 coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "z_type"
                 ] = trajectory_df["z_type"][lower_row]
@@ -923,6 +890,7 @@ def generate_map_plot(
     output_dir,
     language,
     key,
+    ax=None,
 ):
     """Generate map plot. fig & ax are defined here, as well as the plots are being saved.
 
@@ -936,6 +904,7 @@ def generate_map_plot(
         key                         (str):    Key of start- & trajectory file. Necessary to create a corresponding directory in the output directory.
         central_longitude           (float):  0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
         custom_domain_boundaries    (list):   [lon0,lon1,lat0,lat1]
+        ax                          (Axes):   Axes to plot the map on
 
     """
     origin = coord_dict["altitude_1"]["origin"]
@@ -951,7 +920,7 @@ def generate_map_plot(
         ) = get_dynamic_domain(
             coord_dict, altitude_levels=altitude_levels, side_traj=side_traj
         )
-        coord_dict = coord_dict_new
+        # coord_dict = coord_dict_new
 
     else:
         central_longitude = 0
@@ -967,8 +936,10 @@ def generate_map_plot(
             pole_longitude=-170, pole_latitude=43
         )  # define rotation of COSMO model
 
-    fig = plt.figure(figsize=(12, 8), constrained_layout=False)
-    ax = plt.axes(projection=projection, frameon=True)
+    # fig = plt.figure(figsize=(12, 8), constrained_layout=False)
+    # ax = plt.axes(projection=projection, frameon=True)
+    ax = ax or plt.gca()
+    plt.axes(projection=ccrs.PlateCarree())
     ax.set_aspect(
         "auto"
     )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
@@ -1019,24 +990,24 @@ def generate_map_plot(
 
     ax.legend()  # add legend
 
-    title = False
-    if title:
-        if language == "en":
-            locale.setlocale(locale.LC_ALL, "en_GB")
-            fig.suptitle("Air trajectories originating from " + origin)
-        if language == "de":
-            fig.suptitle("Luft-Trajektorien Karte für " + origin)
+    # title = False
+    # if title:
+    #     if language == "en":
+    #         locale.setlocale(locale.LC_ALL, "en_GB")
+    #         fig.suptitle("Air trajectories originating from " + origin)
+    #     if language == "de":
+    #         fig.suptitle("Luft-Trajektorien Karte für " + origin)
 
     # print(f'MapPlt: fig={fig}, type(fig)={type(fig)}, ax={ax}, type(ax)={type(ax)}')
 
-    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
-    os.makedirs(
-        outpath, exist_ok=True
-    )  # create plot folder if it doesn't already exist
+    # outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
+    # os.makedirs(
+    #     outpath, exist_ok=True
+    # )  # create plot folder if it doesn't already exist
 
-    map_plot_dict = {domain: {"map_fig": fig, "map_axes": ax}}
+    # map_plot_dict = {domain: {"map_fig": fig, "map_axes": ax}}
 
-    return map_plot_dict
+    return ax
 
     plt.savefig(outpath + origin + "_" + domain + ".png", dpi=150)
     plt.close(fig)

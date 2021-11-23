@@ -106,9 +106,7 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
         ]  # shared x-axis is the time axis, which is constant for a given traj file
 
         row_index = 0
-        alt_index = (
-            1  # altitude 1,2,3,4,... (however many starting altitudes there are)
-        )
+        alt_index = 1
         traj_index = 0  # 0=main, 1=east, 2=north, 3=west, 4=south
 
         while row_index < number_of_trajectories:
@@ -120,15 +118,16 @@ def plot_altitude(trajectory_dict, output_dir, separator, language):
             altitude_levels = trajectory_df["altitude_levels"].loc[lower_row]
             subplot_index = trajectory_df["subplot_index"].loc[lower_row]
             max_start_altitude = trajectory_df["max_start_altitude"].loc[lower_row]
+            side_traj = trajectory_df["side_traj"].loc[lower_row]
 
-            if trajectory_df["side_traj"].loc[
-                lower_row
-            ]:  # if there are side trajectories, each subplot contains 5 trajectories
-                traj_per_plot = 5
-                side_traj = 1
-            else:
-                traj_per_plot = 1  # else, there is only one trajectory
-                side_traj = 0
+            # if trajectory_df["side_traj"].loc[
+            #     lower_row
+            # ]:  # if there are side trajectories, each subplot contains 5 trajectories
+            #     traj_per_plot = 5
+            #     side_traj = 1
+            # else:
+            #     traj_per_plot = 1  # else, there is only one trajectory
+            #     side_traj = 0
 
             if side_traj:
                 if (
@@ -245,11 +244,11 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
     i = 1
     max_altitude_array = []
 
-    if y["altitude_1"]["y0"]["z_type"] == "hpa":
+    if y["altitude_1"]["traj_0"]["z_type"] == "hpa":
         unit = "hPa"  # unit for the HRES case
 
         while i <= altitude_levels:
-            max_altitude_array.append(np.min(y["altitude_" + str(i)]["y0"]["z"]))
+            max_altitude_array.append(np.min(y["altitude_" + str(i)]["traj_0"]["z"]))
             i += 1
 
         # (lower y-limit, upper y-limit); lower y-limit > upper y-limit to invert the y-axis for pressure altitude
@@ -262,7 +261,7 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
     else:
         unit = "m"
         while i <= altitude_levels:
-            max_altitude_array.append(np.max(y["altitude_" + str(i)]["y0"]["z"]))
+            max_altitude_array.append(np.max(y["altitude_" + str(i)]["traj_0"]["z"]))
             i += 1
 
         if np.max(max_altitude_array) <= max_start_altitude:
@@ -273,8 +272,337 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
     return unit, custom_ylim
 
 
+if False:
+
+    def generate_altitude_plot(
+        x, y, key, side_traj, output_dir, altitude_levels, language, max_start_altitude
+    ):
+        """Iterate through y-dict, generate & save plot.
+
+        Args:
+            x (df): Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
+            y (dict): Dictionary, containig the y-axis information for all subplots
+            key (str): Key string necessary for creating an output folder for each start/trajectory file pair
+            side_traj (int): 0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
+            output_dir (str): Path to output directory
+            altitude_levels (int): #altitude levels = #subplots
+            language (str): language for plot annotations
+            max_start_altitude (float): maximum start altitude
+
+        """
+        subplot_properties_dict = {
+            0: "k-",
+            1: "g-",
+            2: "b-",
+            3: "r-",
+            4: "c-",
+            5: "m-",
+            6: "y-",
+            7: "deepskyblue-",
+            8: "crimson-",
+            9: "lightgreen-",
+        }
+
+        converter = mdates.ConciseDateConverter()
+        munits.registry[np.datetime64] = converter
+        munits.registry[datetime.date] = converter
+        munits.registry[datetime.datetime] = converter
+
+        origin = y["altitude_1"]["origin"]
+
+        print(f"--- {key} > plot altitude \t{origin}")
+
+        unit, custom_ylim = altitude_limits(
+            y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
+        )
+
+        if altitude_levels == 1:
+            # figsize=(width, height)
+            fig, axs = plt.subplots(
+                altitude_levels,
+                1,
+                tight_layout=True,
+                figsize=(9, 6),
+                dpi=150,
+            )
+
+        else:
+            fig, axs = plt.subplots(
+                altitude_levels,
+                1,
+                tight_layout=True,
+                sharex=True,
+                figsize=(6, 8),
+                dpi=150,
+            )
+
+        # Setting the values for all y-axes.
+        plt.setp(axs, ylim=custom_ylim)
+
+        if language == "en":
+            plt.setp(axs, ylabel="Altitude [" + str(unit) + "]")
+        if language == "de":
+            plt.setp(axs, ylabel="Höhe [" + str(unit) + "]")
+
+        if altitude_levels > 1:
+            i = 1
+            while i <= altitude_levels:
+                alt_level = y["altitude_" + str(i)]["alt_level"]
+                sub_index = int(y["altitude_" + str(i)]["subplot_index"])
+                # print(f'altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
+
+                if side_traj:
+                    traj_index = [0, 1, 2, 3, 4]
+
+                    axs[sub_index].grid(color="grey", linestyle="--", linewidth=1)
+
+                    y_surf = y["altitude_" + str(i)]["y_surf"]
+
+                    lower_boundary = [custom_ylim[0]] * len(x)
+                    upper_boundary = y_surf
+
+                    axs[sub_index].fill_between(
+                        x,
+                        lower_boundary,
+                        upper_boundary,
+                        color="brown",
+                        alpha=0.5,
+                    )
+
+                    for traj in traj_index:
+
+                        textstr = (
+                            str(y["altitude_" + str(i)]["alt_level"])
+                            + " "
+                            + unit
+                            + " ("
+                            + y["altitude_" + str(i)]["y" + str(traj)]["z_type"]
+                            + ")"
+                        )
+
+                        yaxis = y["altitude_" + str(i)]["y" + str(traj)]["z"]
+                        ystart = yaxis.iloc[0]
+                        xstart = x[0]
+
+                        linestyle = subplot_properties_dict[sub_index]
+                        # print(f'linestyle for subplot {sub_index}: {linestyle}')
+                        alpha = y["altitude_" + str(i)]["y" + str(traj)]["alpha"]
+
+                        axs[sub_index].plot(
+                            x,  # define x-axis
+                            yaxis,  # define y-axis
+                            linestyle,  # define linestyle
+                            alpha=alpha,  # define line opacity
+                            label=textstr,
+                        )
+
+                        if (
+                            y["altitude_" + str(i)]["y" + str(traj)]["alpha"] == 1
+                        ):  # only add legend & startpoint for the main trajectories
+                            axs[sub_index].plot(
+                                xstart,
+                                ystart,
+                                marker="^",
+                                markersize=10,
+                                markeredgecolor="red",
+                                markerfacecolor="white",
+                            )
+                            axs[sub_index].legend()
+
+                else:  # no side traj
+                    axs[sub_index].grid(color="grey", linestyle="--", linewidth=1)
+
+                    if key[-1] == "B":
+                        y_surf = np.flip(y["altitude_" + str(i)]["y_surf"])
+                    else:
+                        y_surf = y["altitude_" + str(i)]["y_surf"]
+
+                    lower_boundary = [custom_ylim[0]] * len(x)
+                    upper_boundary = y_surf
+
+                    axs[sub_index].fill_between(
+                        x,
+                        lower_boundary,
+                        upper_boundary,
+                        color="brown",
+                        alpha=0.5,
+                    )
+
+                    textstr = (
+                        str(y["altitude_" + str(i)]["alt_level"])
+                        + " "
+                        + unit
+                        + " ("
+                        + y["altitude_" + str(i)]["y0"]["z_type"]
+                        + ")"
+                    )
+
+                    yaxis = y["altitude_" + str(i)]["y0"]["z"]
+                    ystart = yaxis.iloc[0]
+                    xstart = x[0]
+
+                    linestyle = subplot_properties_dict[sub_index]
+                    alpha = y["altitude_" + str(i)]["y0"]["alpha"]
+
+                    # plot altitude profile
+                    axs[sub_index].plot(
+                        x,  # define x-axis
+                        yaxis,  # define y-axis
+                        linestyle,  # define linestyle
+                        alpha=alpha,  # define line opacity
+                        label=textstr,
+                    )
+
+                    # plot starting marker
+                    axs[sub_index].plot(
+                        xstart,
+                        ystart,
+                        marker="^",
+                        markersize=10,
+                        markeredgecolor="red",
+                        markerfacecolor="white",
+                    )
+                    axs[sub_index].legend()
+
+                i += 1
+
+        else:  # only one subplot
+
+            axs.grid(color="grey", linestyle="--", linewidth=1)
+
+            y_surf = y["altitude_1"]["y_surf"]
+
+            lower_boundary = [custom_ylim[0]] * len(x)
+            upper_boundary = y_surf
+
+            axs.fill_between(
+                x,
+                lower_boundary,
+                upper_boundary,
+                color="brown",
+                alpha=0.5,
+            )
+
+            if y["altitude_1"]["y1"]["z_type"] is not None:
+                traj_index = [0, 1, 2, 3, 4]
+                for traj in traj_index:
+                    textstr = (
+                        str(y["altitude_1"]["alt_level"])
+                        + " "
+                        + unit
+                        + " ("
+                        + y["altitude_1"]["y" + str(traj)]["z_type"]
+                        + ")"
+                    )
+
+                    yaxis = y["altitude_1"]["y" + str(traj)]["z"]
+                    ystart = yaxis.iloc[0]
+                    xstart = x[0]
+
+                    linestyle = subplot_properties_dict[0]
+                    # print(f'linestyle for subplot {sub_index}: {linestyle}')
+                    alpha = y["altitude_1"]["y" + str(traj)]["alpha"]
+
+                    axs.plot(
+                        x,  # define x-axis
+                        yaxis,  # define y-axis
+                        linestyle,  # define linestyle
+                        alpha=alpha,  # define line opacity
+                        label=textstr,
+                    )
+
+                    if (
+                        y["altitude_1"]["y" + str(traj)]["alpha"] == 1
+                    ):  # only add legend & startpoint for the main trajectories
+                        axs.plot(
+                            xstart,
+                            ystart,
+                            marker="^",
+                            markersize=10,
+                            markeredgecolor="red",
+                            markerfacecolor="white",
+                        )
+                        axs.legend()
+
+            else:
+                textstr = (
+                    str(y["altitude_1"]["alt_level"])
+                    + " "
+                    + unit
+                    + " ("
+                    + y["altitude_1"]["y0"]["z_type"]
+                    + ")"
+                )
+
+                yaxis = y["altitude_1"]["y0"]["z"]
+                ystart = yaxis.iloc[0]
+                xstart = x[0]
+
+                linestyle = subplot_properties_dict[0]
+                alpha = y["altitude_1"]["y0"]["alpha"]
+
+                # plot altitude profile
+                axs.plot(
+                    x,  # define x-axis
+                    yaxis,  # define y-axis
+                    linestyle,  # define linestyle
+                    alpha=alpha,  # define line opacity
+                    label=textstr,
+                )
+
+                # plot starting marker
+                axs.plot(
+                    xstart,
+                    ystart,
+                    marker="^",
+                    markersize=10,
+                    markeredgecolor="red",
+                    markerfacecolor="white",
+                )
+                axs.legend()
+
+        outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
+
+        os.makedirs(
+            outpath, exist_ok=True
+        )  # create plot folder if it doesn't already exist
+
+        if language == "en":
+            locale.setlocale(locale.LC_ALL, "en_GB")
+            fig.suptitle("Altitude Plot for " + origin)
+        if language == "de":
+            fig.suptitle("Höhenplot für " + origin)
+
+        # print(f'AltPlt: fig={fig}, type(fig)={type(fig)}, ax={axs}, type(ax)={type(axs)}')
+
+        alt_plot_dict = {origin: {"altitude_axes": {"alt_fig": fig, "alt_axes": axs}}}
+        # alt_plot_dict = {
+        #     'origin':{
+        #             'alt_fig':fig,
+        #             'alt_axes':axs
+        #             }
+        # }
+
+        return alt_plot_dict
+
+        plt.savefig(outpath + origin + "_altitude.png")
+        plt.close(fig)
+        # print('Saved plot: ', outpath + origin + '.png') # prints location of saved figure for further processing
+
+        return
+
+
 def generate_altitude_plot(
-    x, y, key, side_traj, output_dir, altitude_levels, language, max_start_altitude
+    x,
+    y,
+    key,
+    side_traj,
+    altitude_levels,
+    language,
+    max_start_altitude,
+    alt_index,
+    sub_index,
+    ax=None,
 ):
     """Iterate through y-dict, generate & save plot.
 
@@ -283,12 +611,20 @@ def generate_altitude_plot(
         y (dict): Dictionary, containig the y-axis information for all subplots
         key (str): Key string necessary for creating an output folder for each start/trajectory file pair
         side_traj (int): 0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
-        output_dir (str): Path to output directory
         altitude_levels (int): #altitude levels = #subplots
         language (str): language for plot annotations
         max_start_altitude (float): maximum start altitude
+        alt_index: index of current altitude (in dict)
+        sub_index (float): index of subplot
+        ax(SubplotAxes): axes to plot the altitude on
 
     """
+    ax = ax or plt.gca()
+    if sub_index != (
+        altitude_levels - 1
+    ):  # TODO: replace this three w/ altitude_levels-1
+        ax.set_xticklabels([])
+
     subplot_properties_dict = {
         0: "k-",
         1: "g-",
@@ -315,161 +651,42 @@ def generate_altitude_plot(
         y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
     )
 
-    if altitude_levels == 1:
-        # figsize=(width, height)
-        fig, axs = plt.subplots(
-            altitude_levels,
-            1,
-            tight_layout=True,
-            figsize=(9, 6),
-            dpi=150,
-        )
+    # if altitude_levels == 1:
+    #     # figsize=(width, height)
+    #     fig, axs = plt.subplots(
+    #         altitude_levels,
+    #         1,
+    #         tight_layout=True,
+    #         figsize=(9, 6),
+    #         dpi=150,
+    #     )
 
-    else:
-        fig, axs = plt.subplots(
-            altitude_levels, 1, tight_layout=True, sharex=True, figsize=(6, 8), dpi=150
-        )
+    # else:
+    #     fig, axs = plt.subplots(
+    #         altitude_levels, 1, tight_layout=True, sharex=True, figsize=(6, 8), dpi=150
+    #     )
 
     # Setting the values for all y-axes.
-    plt.setp(axs, ylim=custom_ylim)
+    plt.setp(ax, ylim=custom_ylim)
+    ax.grid(color="grey", linestyle="--", linewidth=1)
 
     if language == "en":
-        plt.setp(axs, ylabel="Altitude [" + str(unit) + "]")
+        plt.setp(ax, ylabel="Altitude [" + str(unit) + "]")
     if language == "de":
-        plt.setp(axs, ylabel="Höhe [" + str(unit) + "]")
+        plt.setp(ax, ylabel="Höhe [" + str(unit) + "]")
 
-    if altitude_levels > 1:
-        i = 1
-        while i <= altitude_levels:
-            alt_level = y["altitude_" + str(i)]["alt_level"]
-            sub_index = int(y["altitude_" + str(i)]["subplot_index"])
-            # print(f'altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
+    alt_level = y["altitude_" + str(alt_index)]["alt_level"]
+    # print(f'altitude_{alt_index} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
 
-            if side_traj:
-                traj_index = [0, 1, 2, 3, 4]
+    if side_traj:
+        traj_index = [0, 1, 2, 3, 4]
 
-                axs[sub_index].grid(color="grey", linestyle="--", linewidth=1)
-
-                y_surf = y["altitude_" + str(i)]["y_surf"]
-
-                lower_boundary = [custom_ylim[0]] * len(x)
-                upper_boundary = y_surf
-
-                axs[sub_index].fill_between(
-                    x,
-                    lower_boundary,
-                    upper_boundary,
-                    color="brown",
-                    alpha=0.5,
-                )
-
-                for traj in traj_index:
-
-                    textstr = (
-                        str(y["altitude_" + str(i)]["alt_level"])
-                        + " "
-                        + unit
-                        + " ("
-                        + y["altitude_" + str(i)]["y" + str(traj)]["z_type"]
-                        + ")"
-                    )
-
-                    yaxis = y["altitude_" + str(i)]["y" + str(traj)]["z"]
-                    ystart = yaxis.iloc[0]
-                    xstart = x[0]
-
-                    linestyle = subplot_properties_dict[sub_index]
-                    # print(f'linestyle for subplot {sub_index}: {linestyle}')
-                    alpha = y["altitude_" + str(i)]["y" + str(traj)]["alpha"]
-
-                    axs[sub_index].plot(
-                        x,  # define x-axis
-                        yaxis,  # define y-axis
-                        linestyle,  # define linestyle
-                        alpha=alpha,  # define line opacity
-                        label=textstr,
-                    )
-
-                    if (
-                        y["altitude_" + str(i)]["y" + str(traj)]["alpha"] == 1
-                    ):  # only add legend & startpoint for the main trajectories
-                        axs[sub_index].plot(
-                            xstart,
-                            ystart,
-                            marker="^",
-                            markersize=10,
-                            markeredgecolor="red",
-                            markerfacecolor="white",
-                        )
-                        axs[sub_index].legend()
-
-            else:  # no side traj
-                axs[sub_index].grid(color="grey", linestyle="--", linewidth=1)
-
-                if key[-1] == "B":
-                    y_surf = np.flip(y["altitude_" + str(i)]["y_surf"])
-                else:
-                    y_surf = y["altitude_" + str(i)]["y_surf"]
-
-                lower_boundary = [custom_ylim[0]] * len(x)
-                upper_boundary = y_surf
-
-                axs[sub_index].fill_between(
-                    x,
-                    lower_boundary,
-                    upper_boundary,
-                    color="brown",
-                    alpha=0.5,
-                )
-
-                textstr = (
-                    str(y["altitude_" + str(i)]["alt_level"])
-                    + " "
-                    + unit
-                    + " ("
-                    + y["altitude_" + str(i)]["y0"]["z_type"]
-                    + ")"
-                )
-
-                yaxis = y["altitude_" + str(i)]["y0"]["z"]
-                ystart = yaxis.iloc[0]
-                xstart = x[0]
-
-                linestyle = subplot_properties_dict[sub_index]
-                alpha = y["altitude_" + str(i)]["y0"]["alpha"]
-
-                # plot altitude profile
-                axs[sub_index].plot(
-                    x,  # define x-axis
-                    yaxis,  # define y-axis
-                    linestyle,  # define linestyle
-                    alpha=alpha,  # define line opacity
-                    label=textstr,
-                )
-
-                # plot starting marker
-                axs[sub_index].plot(
-                    xstart,
-                    ystart,
-                    marker="^",
-                    markersize=10,
-                    markeredgecolor="red",
-                    markerfacecolor="white",
-                )
-                axs[sub_index].legend()
-
-            i += 1
-
-    else:  # only one subplot
-
-        axs.grid(color="grey", linestyle="--", linewidth=1)
-
-        y_surf = y["altitude_1"]["y_surf"]
+        y_surf = y["altitude_" + str(alt_index)]["y_surf"]
 
         lower_boundary = [custom_ylim[0]] * len(x)
         upper_boundary = y_surf
 
-        axs.fill_between(
+        ax.fill_between(
             x,
             lower_boundary,
             upper_boundary,
@@ -477,66 +694,26 @@ def generate_altitude_plot(
             alpha=0.5,
         )
 
-        if y["altitude_1"]["y1"]["z_type"] is not None:
-            traj_index = [0, 1, 2, 3, 4]
-            for traj in traj_index:
-                textstr = (
-                    str(y["altitude_1"]["alt_level"])
-                    + " "
-                    + unit
-                    + " ("
-                    + y["altitude_1"]["y" + str(traj)]["z_type"]
-                    + ")"
-                )
+        for traj in traj_index:
 
-                yaxis = y["altitude_1"]["y" + str(traj)]["z"]
-                ystart = yaxis.iloc[0]
-                xstart = x[0]
-
-                linestyle = subplot_properties_dict[0]
-                # print(f'linestyle for subplot {sub_index}: {linestyle}')
-                alpha = y["altitude_1"]["y" + str(traj)]["alpha"]
-
-                axs.plot(
-                    x,  # define x-axis
-                    yaxis,  # define y-axis
-                    linestyle,  # define linestyle
-                    alpha=alpha,  # define line opacity
-                    label=textstr,
-                )
-
-                if (
-                    y["altitude_1"]["y" + str(traj)]["alpha"] == 1
-                ):  # only add legend & startpoint for the main trajectories
-                    axs.plot(
-                        xstart,
-                        ystart,
-                        marker="^",
-                        markersize=10,
-                        markeredgecolor="red",
-                        markerfacecolor="white",
-                    )
-                    axs.legend()
-
-        else:
             textstr = (
-                str(y["altitude_1"]["alt_level"])
+                str(y["altitude_" + str(alt_index)]["alt_level"])
                 + " "
                 + unit
                 + " ("
-                + y["altitude_1"]["y0"]["z_type"]
+                + y["altitude_" + str(alt_index)]["traj_" + str(traj)]["z_type"]
                 + ")"
             )
 
-            yaxis = y["altitude_1"]["y0"]["z"]
+            yaxis = y["altitude_" + str(alt_index)]["traj_" + str(traj)]["z"]
             ystart = yaxis.iloc[0]
             xstart = x[0]
 
-            linestyle = subplot_properties_dict[0]
-            alpha = y["altitude_1"]["y0"]["alpha"]
+            linestyle = subplot_properties_dict[sub_index]
+            # print(f'linestyle for subplot {sub_index}: {linestyle}')
+            alpha = y["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"]
 
-            # plot altitude profile
-            axs.plot(
+            ax.plot(
                 x,  # define x-axis
                 yaxis,  # define y-axis
                 linestyle,  # define linestyle
@@ -544,43 +721,72 @@ def generate_altitude_plot(
                 label=textstr,
             )
 
-            # plot starting marker
-            axs.plot(
-                xstart,
-                ystart,
-                marker="^",
-                markersize=10,
-                markeredgecolor="red",
-                markerfacecolor="white",
-            )
-            axs.legend()
+            if (
+                y["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"] == 1
+            ):  # only add legend & startpoint for the main trajectories
+                ax.plot(
+                    xstart,
+                    ystart,
+                    marker="^",
+                    markersize=10,
+                    markeredgecolor="red",
+                    markerfacecolor="white",
+                )
+                ax.legend()
 
-    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
+    else:  # no side traj
 
-    os.makedirs(
-        outpath, exist_ok=True
-    )  # create plot folder if it doesn't already exist
+        if key[-1] == "B":
+            y_surf = np.flip(y["altitude_" + str(alt_index)]["y_surf"])
+        else:
+            y_surf = y["altitude_" + str(alt_index)]["y_surf"]
 
-    if language == "en":
-        locale.setlocale(locale.LC_ALL, "en_GB")
-        fig.suptitle("Altitude Plot for " + origin)
-    if language == "de":
-        fig.suptitle("Höhenplot für " + origin)
+        lower_boundary = [custom_ylim[0]] * len(x)
+        upper_boundary = y_surf
 
-    # print(f'AltPlt: fig={fig}, type(fig)={type(fig)}, ax={axs}, type(ax)={type(axs)}')
+        ax.fill_between(
+            x,
+            lower_boundary,
+            upper_boundary,
+            color="brown",
+            alpha=0.5,
+        )
 
-    alt_plot_dict = {origin: {"altitude_axes": {"alt_fig": fig, "alt_axes": axs}}}
-    # alt_plot_dict = {
-    #     'origin':{
-    #             'alt_fig':fig,
-    #             'alt_axes':axs
-    #             }
-    # }
+        textstr = (
+            str(y["altitude_" + str(alt_index)]["alt_level"])
+            + " "
+            + unit
+            + " ("
+            + y["altitude_" + str(alt_index)]["traj_0"]["z_type"]
+            + ")"
+        )
 
-    return alt_plot_dict
+        yaxis = y["altitude_" + str(alt_index)]["traj_0"]["z"]
+        ystart = yaxis.iloc[0]
+        xstart = x[0]
 
-    plt.savefig(outpath + origin + "_altitude.png")
-    plt.close(fig)
-    # print('Saved plot: ', outpath + origin + '.png') # prints location of saved figure for further processing
+        linestyle = subplot_properties_dict[sub_index]
+        alpha = y["altitude_" + str(alt_index)]["traj_0"]["alpha"]
 
-    return
+        # plot altitude profile
+        ax.plot(
+            x,  # define x-axis
+            yaxis,  # define y-axis
+            linestyle,  # define linestyle
+            alpha=alpha,  # define line opacity
+            label=textstr,
+        )
+
+        # plot starting marker
+        ax.plot(
+            xstart,
+            ystart,
+            marker="^",
+            markersize=10,
+            markeredgecolor="red",
+            markerfacecolor="white",
+        )
+        ax.legend()
+
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
+    return ax
