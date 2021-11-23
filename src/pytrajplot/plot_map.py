@@ -172,8 +172,8 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
             lon = 360 - abs(lon)
 
     in_domain = (
-        domain_boundaries[0] <= lon <= domain_boundaries[1]
-        and domain_boundaries[2] <= lat <= domain_boundaries[3]
+        domain_boundaries[0] <= float(lon) <= domain_boundaries[1]
+        and domain_boundaries[2] <= float(lat) <= domain_boundaries[3]
     )
 
     # print(f'lon/lat of city: ({lon}/{lat}) --> in domain: {in_domain}')
@@ -271,6 +271,7 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
         "Guanajuato",
         "Leon de los Aldama",
         "Wroclaw",
+        "Rotterdam",
     ]
 
     is_excluded = name in excluded_cities
@@ -368,15 +369,20 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
             ax.scatter(
                 x=lon,
                 y=lat,
+                s=2,
                 marker="o",
-                facecolors="none",
+                facecolors="k",
                 edgecolors="k",
                 transform=ccrs.PlateCarree(),
             )
 
-            # s=80, facecolors='none', edgecolors='r'
-
-            ax.text(x=lon + 0.05, y=lat + 0.05, s=city, transform=ccrs.PlateCarree())
+            ax.text(
+                x=lon + 0.05,
+                y=lat + 0.05,
+                s=city,
+                fontsize=8,
+                transform=ccrs.PlateCarree(),
+            )
 
 
 def add_time_interval_points(coord_dict, ax, i, linestyle):
@@ -831,11 +837,6 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
                     "lon"
                 ] = trajectory_df["lon"][lower_row:upper_row]
 
-                # fill the longitude column in the coord_dict using the lon_df
-                # coord_dict["altitude_" + str(alt_index)]["traj_0"]["lon"] = lon_df[
-                #     lower_row:upper_row
-                # ]
-
                 coord_dict["altitude_" + str(alt_index)]["traj_0"][
                     "lat"
                 ] = trajectory_df["lat"][lower_row:upper_row]
@@ -899,7 +900,7 @@ def generate_map_plot(
         side_traj                   (int):    0/1 --> necessary for choosing the correct loop
         altitude_levels             (int):    # altitude levels
         domain                      (str):    Domain for map
-        output_dir                  (str):    Path to directory where the plots should be saved.
+        output_dir                  (str):    Path to output directory
         language                    (str):    Language in plots (en/ge).
         key                         (str):    Key of start- & trajectory file. Necessary to create a corresponding directory in the output directory.
         central_longitude           (float):  0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
@@ -952,9 +953,16 @@ def generate_map_plot(
     )  # sets extent of map
 
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
+    lat = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
+    lon = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lon"], columns=["lon"])
+
     if not is_visible(
-        lat=coord_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
-        lon=coord_dict["altitude_1"]["traj_0"]["lon"].iloc[0],
+        lat=lat.iloc[0],
+        lon=lon.iloc[0],
+        # lat=coord_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
+        # lon=coord_dict["altitude_1"]["traj_0"]["lon"].iloc[0],
+        # lat=coord_dict["altitude_1"]["traj_0"]["lat"][0],
+        # lon=coord_dict["altitude_1"]["traj_0"]["lon"][0],
         domain_boundaries=domain_boundaries,
         cross_dateline=False,
     ):
@@ -988,7 +996,7 @@ def generate_map_plot(
         subplot_properties_dict=subplot_properties_dict,
     )
 
-    ax.legend()  # add legend
+    ax.legend(fontsize=8)  # add legend
 
     # title = False
     # if title:
