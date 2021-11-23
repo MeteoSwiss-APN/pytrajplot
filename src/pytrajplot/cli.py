@@ -12,10 +12,10 @@ import click
 # Local
 from . import __version__
 from .assemble_pdf import assemble_pdf
-from .get_data import check_input_dir
+from .generate_pdf import generate_pdf
+from .parse_data import check_input_dir
 from .plot_altitude import plot_altitude
 from .plot_map import plot_map
-from .plot_map_and_altitude import generate_pdf
 from .utils import count_to_log_level
 
 # from pytrajplot import plot_map_and_altitude
@@ -78,20 +78,6 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
     help="Separator str between origin of trajectory and side trajectory index. Default: ~",
 )
 @click.option(
-    "--altitude",
-    type=bool,
-    # is_flag=True,
-    default=True,
-    help="Choose, to create altitude plots. isFlag: True",
-)
-@click.option(
-    "--map",
-    type=bool,
-    default=True,
-    # is_flag=True,
-    help="Choose, to create map plots. isFlag: True",
-)
-@click.option(
     "--language",
     type=click.Choice(
         [
@@ -127,8 +113,6 @@ def main(
     output_dir: str,
     separator: str,
     language: str,
-    altitude: bool,
-    map: bool,
     domain: str,
 ) -> None:
 
@@ -138,39 +122,18 @@ def main(
         info_prefix=info_prefix,
         language=language,
     )
+    print("--- Parsing Input Files")
     trajectory_dict, plot_info_dict, keys = check_input_dir(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
-
-    if altitude and map:
-        print("--- Assembling PDF.")
-        generate_pdf(
-            trajectory_dict=trajectory_dict,
-            output_dir=output_dir,
-            separator=separator,
-            language=language,
-            domains=domain,
-        )
-        print("--- Done.")
+    print("--- Assembling PDF")
+    generate_pdf(
+        trajectory_dict=trajectory_dict,
+        output_dir=output_dir,
+        separator=separator,
+        language=language,
+        domains=domain,
+    )
+    print("--- Done.")
 
     return
-
-    if altitude:
-        alt_plot_dict = plot_altitude(
-            trajectory_dict=trajectory_dict,
-            output_dir=output_dir,
-            separator=separator,
-            language=language,
-        )
-
-    if map:
-        map_plot_dict = plot_map(
-            trajectory_dict=trajectory_dict,
-            separator=separator,
-            output_dir=output_dir,
-            domains=domain,
-            language=language,
-        )
-
-    # TODO: write assemble pdf pipeline
-    assemble_pdf(altitude_axes=alt_plot_dict, map_axes=map_plot_dict, domains=domain)
