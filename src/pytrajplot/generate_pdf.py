@@ -104,16 +104,17 @@ def get_projection(plot_dict, altitude_levels, side_traj):
     if plot_dict["altitude_1"]["y_type"] == "hpa":
         case = "HRES"
         # check if dateline is crossed or not
-        central_longitude, _, _, _ = get_dynamic_domain(
+        central_longitude, _, _, cross_dateline = get_dynamic_domain(
             coord_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
         )
         projection = ccrs.PlateCarree(central_longitude=central_longitude)
     else:
         case = "COSMO"
+        cross_dateline = False
         projection = ccrs.RotatedPole(
             pole_longitude=-170, pole_latitude=43
         )  # define rotation of COSMO model
-    return projection
+    return projection, cross_dateline
 
 
 def assemble_pdf(
@@ -145,23 +146,25 @@ def assemble_pdf(
     info_ax = plt.subplot(grid_specification[0, :])
     # plot_dummy_info(data=np.random.normal(0, 1, 500), ax=info_ax)
     generate_info_header(
-        plot_info=plot_info_dict, plot_data=plot_dict, ax=info_ax, domain=domain
+        language=language,
+        plot_info=plot_info_dict,
+        plot_data=plot_dict,
+        ax=info_ax,
+        domain=domain,
     )
 
     # ADD MAP TO PDF
-    projection = get_projection(
+    projection, cross_dateline = get_projection(
         plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
     )
     map_ax = plt.subplot(grid_specification[1:, 0:-2], projection=projection)
     # plot_dummy_map(ax=map_ax, projection=ccrs.PlateCarree())
     generate_map_plot(
+        cross_dateline=cross_dateline,
         coord_dict=plot_dict,
         side_traj=side_traj,
         altitude_levels=altitude_levels,
         domain=domain,
-        output_dir=output_dir,
-        language=language,
-        key=key,
         ax=map_ax,
     )
 
@@ -298,7 +301,6 @@ def generate_pdf(
                         )
 
             else:
-                # print(f'row_index = {row_index} corresponds to origin {origin}')
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
                 plot_dict["altitude_" + str(alt_index)]["subplot_index"] = subplot_index
                 plot_dict["altitude_" + str(alt_index)][
