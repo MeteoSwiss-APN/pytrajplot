@@ -155,10 +155,11 @@ def crop_map(ax, domain, custom_domain_boundaries):
     return domain_boundaries
 
 
-def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
+def is_visible(city, lat, lon, domain_boundaries, cross_dateline) -> bool:
     """Check if a point (city) is inside the domain.
 
     Args:
+        city (str):                 name of city
         lat (float):                latitude of city
         lon (float):                longitue of city
         domain_boundaries (list):   latitude & longitude range of domain
@@ -176,7 +177,7 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
         and domain_boundaries[2] <= float(lat) <= domain_boundaries[3]
     )
 
-    # print(f'lon/lat of city: ({lon}/{lat}) --> in domain: {in_domain}')
+    # print(f'lon/lat of {city}: ({lon}/{lat}) --> in domain: {in_domain}')
 
     if in_domain:
         return True
@@ -239,6 +240,7 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
                 if population > 1000000:
                     is_capital = True
             is_large = population > 1100000  # incl. cities w/ population > 3'000'000
+
         excluded_cities = [
             "Casablanca",
             "Fes",
@@ -455,7 +457,28 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
         capital_type = row["capital"]
         population = row["population"]
 
+        # if city == 'Los Angeles':
+        #     print(f'City: {city}, lon = {lon}, lon_corrected = {360-abs(lon)}, lat = {lat}')
+        #     ax.scatter(
+        #         x=360-abs(lon),
+        #         y=lat,
+        #         s=2,
+        #         marker="o",
+        #         facecolors="k",
+        #         edgecolors="k",
+        #         transform=ccrs.PlateCarree(),
+        #     )
+
+        #     ax.text(
+        #         x=360 - abs(lon) + 0.05,
+        #         y=lat + 0.05,
+        #         s=city,
+        #         fontsize=8,
+        #         transform=ccrs.PlateCarree(),
+        #     )
+
         if is_visible(
+            city=city,
             lat=lat,
             lon=lon,
             domain_boundaries=domain_boundaries,
@@ -467,6 +490,12 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
             domain=domain,
             lon=lon,
         ):
+
+            if cross_dateline:
+                if lon < 0:
+                    lon = 360 - abs(lon)
+
+            # print(f'City: {city}, lon = {lon}, lat = {lat}')
 
             ax.scatter(
                 x=lon,
@@ -986,25 +1015,21 @@ def plot_map(trajectory_dict, separator, output_dir, domains, language):
 
 
 def generate_map_plot(
+    cross_dateline,
     coord_dict,
     side_traj,
     altitude_levels,
     domain,
-    output_dir,
-    language,
-    key,
     ax=None,
 ):
     """Generate map plot. fig & ax are defined here, as well as the plots are being saved.
 
     Args:
+        cross_dateline              (bool):   Bool, to specify whether the dateline was crossed or not
         coord_dict                  (dict):   Dictionary containing the lan/lot data & other plot properties
         side_traj                   (int):    0/1 --> necessary for choosing the correct loop
         altitude_levels             (int):    # altitude levels
         domain                      (str):    Domain for map
-        output_dir                  (str):    Path to output directory
-        language                    (str):    Language in plots (en/ge).
-        key                         (str):    Key of start- & trajectory file. Necessary to create a corresponding directory in the output directory.
         central_longitude           (float):  0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
         custom_domain_boundaries    (list):   [lon0,lon1,lat0,lat1]
         ax                          (Axes):   Axes to plot the map on
@@ -1015,12 +1040,7 @@ def generate_map_plot(
     # print(f"--- {key} > plot map \t{origin} / {domain}")
 
     if domain == "dynamic":
-        (
-            central_longitude,
-            custom_domain_boundaries,
-            coord_dict_new,
-            cross_dateline,
-        ) = get_dynamic_domain(
+        (_, custom_domain_boundaries, _, _,) = get_dynamic_domain(
             coord_dict, altitude_levels=altitude_levels, side_traj=side_traj
         )
         # coord_dict = coord_dict_new
@@ -1030,26 +1050,11 @@ def generate_map_plot(
         custom_domain_boundaries = [0, 0, 0, 0]
         cross_dateline = False
 
-    if coord_dict["altitude_1"]["y_type"] == "hpa":
-        case = "HRES"
-        projection = ccrs.PlateCarree(central_longitude=central_longitude)
-    else:
-        case = "COSMO"
-        projection = ccrs.RotatedPole(
-            pole_longitude=-170, pole_latitude=43
-        )  # define rotation of COSMO model
-
-    # fig = plt.figure(figsize=(12, 8), constrained_layout=False)
-    # ax = plt.axes(projection=projection, frameon=True)
     ax = ax or plt.gca()
-
-    plt.axes(projection=ccrs.PlateCarree())
 
     ax.set_aspect(
         "auto"
     )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
-
-    # plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0, hspace=0)
 
     domain_boundaries = crop_map(
         ax=ax, domain=domain, custom_domain_boundaries=custom_domain_boundaries
@@ -1060,13 +1065,12 @@ def generate_map_plot(
     lon = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lon"], columns=["lon"])
 
     if not is_visible(
+        city="none",
         lat=lat.iloc[0],
         lon=lon.iloc[0],
         domain_boundaries=domain_boundaries,
         cross_dateline=False,
     ):
-        print("start point not within domain")
-
         return ax.text(
             0.5,
             0.5,
@@ -1078,6 +1082,7 @@ def generate_map_plot(
         )
 
     add_features(ax=ax)
+
     add_cities(
         ax=ax,
         domain_boundaries=domain_boundaries,
@@ -1107,26 +1112,4 @@ def generate_map_plot(
     )
 
     ax.legend(fontsize=8)  # add legend
-
-    # title = False
-    # if title:
-    #     if language == "en":
-    #         locale.setlocale(locale.LC_ALL, "en_GB")
-    #         fig.suptitle("Air trajectories originating from " + origin)
-    #     if language == "de":
-    #         fig.suptitle("Luft-Trajektorien Karte für " + origin)
-
-    # print(f'MapPlt: fig={fig}, type(fig)={type(fig)}, ax={ax}, type(ax)={type(ax)}')
-
-    # outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
-    # os.makedirs(
-    #     outpath, exist_ok=True
-    # )  # create plot folder if it doesn't already exist
-
-    # map_plot_dict = {domain: {"map_fig": fig, "map_axes": ax}}
-
     return ax
-
-    plt.savefig(outpath + origin + "_" + domain + ".png", dpi=150)
-    plt.close(fig)
-    return

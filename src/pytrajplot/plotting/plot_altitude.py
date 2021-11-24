@@ -620,6 +620,10 @@ def generate_altitude_plot(
 
     """
     ax = ax or plt.gca()
+
+    if language == "en":
+        locale.setlocale(locale.LC_ALL, "en_GB")
+
     if sub_index != (altitude_levels - 1):
         ax.set_xticklabels([])
 

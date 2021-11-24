@@ -4,17 +4,27 @@
 import matplotlib.pyplot as plt
 
 
-def generate_info_header(plot_info, plot_data, domain, ax=None):
+def generate_info_header(language, plot_info, plot_data, domain, ax=None):
     ax = ax or plt.gca()
     ax.axis("off")
 
     # TODO: extract relevant parameters from plot_data for the header
     origin = plot_data["altitude_1"]["origin"]
     y_type = plot_data["altitude_1"]["y_type"]
-    elevation = plot_data["altitude_1"]["traj_0"]["z"].iloc[0]
     lon_0 = plot_data["altitude_1"]["traj_0"]["lon"].iloc[0]
     lat_0 = plot_data["altitude_1"]["traj_0"]["lat"].iloc[0]
     model_name = plot_info["model_name"]
+    elevation = ""
+
+    for key in plot_data:
+        if plot_data[key]["subplot_index"] == (len(plot_data.keys()) - 1):
+            elevation = plot_data[key]["y_surf"].iloc[0]
+
+    if not elevation:
+        if language == "en":
+            elevation = "not available"
+        else:
+            elevation = "nicht verfügbar"
 
     if y_type == "hpa":
         unit = "hPA"
@@ -23,7 +33,10 @@ def generate_info_header(plot_info, plot_data, domain, ax=None):
 
     start_time = plot_info["mbt"]
 
-    title = f"TRAJECTORY from {origin} on: {start_time}"
+    if language == "en":
+        title = f"TRAJECTORY from {origin} on: {start_time}"
+    else:
+        title = f"TAJEKTORIE von {origin} am: {start_time}"
 
     ax.set_title(
         title,
@@ -37,24 +50,38 @@ def generate_info_header(plot_info, plot_data, domain, ax=None):
     #     ax.spines[pos].set_visible(False)
     # ax.axes.get_xaxis().set_visible(False)
     # ax.axes.get_yaxis().set_visible(False)
-
-    info = (
-        "$\it{Release}$ $\it{Site}:}$ "
-        + f"{origin}"
-        + "  |  "
-        + "$\it{Coordinates:}$"
-        + " ("
-        + f"{lat_0}"
-        + "°N, "
-        + f"{lon_0}"
-        + "°E)  |  "
-        + "$\it{Domain:}$"
-        + f" {domain}  |  "
-        + "$\it{Model:}$"
-        + f" {model_name}  |  "
-        + "$\it{Elevation: }$"
-        + f" {elevation} {unit} ({y_type})"
-    )
+    if language == "en":
+        info = (
+            "$\it{Release}$ $\it{Site}:}$ "
+            + f"{origin}"
+            + "  |  "
+            + "$\it{Coordinates:}$"
+            + f" {lat_0}"
+            + "°N, "
+            + f"{lon_0}°E  |  "
+            + "$\it{Domain:}$"
+            + f" {domain}  |  "
+            + "$\it{Model:}$"
+            + f" {model_name}  |  "
+            + "$\it{Elevation: }$"
+            + f" {elevation} {unit} ({y_type})"
+        )
+    else:
+        info = (
+            "$\it{Ursprungsort}$: "
+            + f"{origin}"
+            + "  |  "
+            + "$\it{Koordinaten:}$"
+            + f" {lat_0}"
+            + "°N, "
+            + f"{lon_0}°E  |  "
+            + "$\it{Domäne:}$"
+            + f" {domain}  |  "
+            + "$\it{Model:}$"
+            + f" {model_name}  |  "
+            + "$\it{Elevation: }$"
+            + f" {elevation} {unit} ({y_type})"
+        )
 
     ax.text(
         x=0.5,
