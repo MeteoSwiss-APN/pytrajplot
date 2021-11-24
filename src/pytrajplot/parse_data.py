@@ -13,8 +13,6 @@ pd.options.mode.chained_assignment = None  # default: 'warn'
 import datetime
 from datetime import timedelta
 
-# import pdb  # use: python debugger, i.e. pdb.set_trace()
-
 
 def read_plot_info(plot_info_path):
     """Read the pure txt file containing the plot_info to corresponding variables.
