@@ -2,23 +2,21 @@
 
 # Standard library
 import os
-from typing import Sized
 
 # Third-party
 import cartopy.crs as ccrs
-import matplotlib
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.figure import Figure
 
 plt.rc("axes", labelsize=8)  # change the font size of the axis labels
 
 
 # Local
-from .plot_altitude import generate_altitude_plot
-from .plot_map import generate_map_plot
-from .plot_map import get_dynamic_domain
+from .plotting.plot_altitude import generate_altitude_plot
+from .plotting.plot_info_header import generate_info_header
+from .plotting.plot_map import generate_map_plot
+from .plotting.plot_map import get_dynamic_domain
 from .scratch.scratch_assemble_pdf import plot_dummy_info
 
 
@@ -119,6 +117,7 @@ def get_projection(plot_dict, altitude_levels, side_traj):
 
 
 def assemble_pdf(
+    plot_info_dict,
     x,
     plot_dict,
     key,
@@ -131,7 +130,8 @@ def assemble_pdf(
 ):
 
     # DEFINE FIGURE PROPERTIES AND GRID SPECIFICATION
-    fig = plt.figure(figsize=(11.69, 8.27), dpi=150)
+    fig = plt.figure(figsize=(11.69, 8.27), dpi=200)  # A4 size
+    # fig = plt.figure(figsize=(12, 8), dpi=200)
     widths = [0.1, 2, 0.01, 1.5]
     heights = [0.5] + [1] * (altitude_levels)
     # create grid spec oject
@@ -143,7 +143,10 @@ def assemble_pdf(
 
     # ADD INFO HEADER TO PDF
     info_ax = plt.subplot(grid_specification[0, :])
-    plot_dummy_info(data=np.random.normal(0, 1, 500), ax=info_ax)
+    # plot_dummy_info(data=np.random.normal(0, 1, 500), ax=info_ax)
+    generate_info_header(
+        plot_info=plot_info_dict, plot_data=plot_dict, ax=info_ax, domain=domain
+    )
 
     # ADD MAP TO PDF
     projection = get_projection(
@@ -194,11 +197,14 @@ def assemble_pdf(
     return
 
 
-def generate_pdf(trajectory_dict, output_dir, separator, language, domains):
+def generate_pdf(
+    trajectory_dict, plot_info_dict, output_dir, separator, language, domains
+):
     """Iterate through trajectory dict. For each key, generate altitude plots for all origins/altitude levels.
 
     Args:
         trajectory_dict (dict): [description]
+        plot_info_dict (dict): [description]
         output_dir (str): Path to output directory (where the subdirectories containing all plots should be saved)
         separator (str): Separator string to identify main- and side-trajectories (default: '~')
         language (str): Language for plot annotations.
@@ -279,6 +285,7 @@ def generate_pdf(trajectory_dict, output_dir, separator, language, domains):
 
                     for domain in domains:
                         assemble_pdf(
+                            plot_info_dict=plot_info_dict,
                             x=time_axis,
                             plot_dict=plot_dict,
                             key=key,
@@ -351,6 +358,7 @@ def generate_pdf(trajectory_dict, output_dir, separator, language, domains):
                     alt_index = 1
                     for domain in domains:
                         assemble_pdf(
+                            plot_info_dict=plot_info_dict,
                             x=time_axis,
                             plot_dict=plot_dict,
                             key=key,
