@@ -1,8 +1,5 @@
 """Command line interface of pytrajplot."""
 
-# Standard library
-import time
-
 # Third-party
 import click
 
@@ -95,7 +92,7 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
         case_sensitive=False,
     ),
     multiple=True,
-    default=("centraleurope", "europe", "dynamic", "ch_hd"),
+    default=("centraleurope", "europe", "dynamic", "ch_hd", "ch", "alps"),
     help="Choose domains for map plots. Default: centraleurope, europe, dynamic",
 )
 def main(
@@ -116,18 +113,11 @@ def main(
         info_prefix=info_prefix,
         language=language,
     )
-    end = time.perf_counter()
-
     print("--- Parsing Input Files")
-    start_parse = time.perf_counter()
     trajectory_dict, plot_info_dict, keys = check_input_dir(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
-    end_parse = time.perf_counter()
-    print(f"Parsing Input Files took {end_parse-start_parse} s")
-
     print("--- Assembling PDF")
-    start_pdf = time.perf_counter()
     generate_pdf(
         trajectory_dict=trajectory_dict,
         plot_info_dict=plot_info_dict,
@@ -136,9 +126,6 @@ def main(
         language=language,
         domains=domain,
     )
-    end_pdf = time.perf_counter()
-    print(f"Assembling final PDF for: {domain} took {end_pdf-start_pdf} s")
-
     print("--- Done.")
 
     return
