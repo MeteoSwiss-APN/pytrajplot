@@ -2,7 +2,6 @@
 # Standard library
 import datetime
 import locale
-import os
 
 # Third-party
 import matplotlib.dates as mdates
@@ -24,7 +23,6 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
         custom_ylim (tuple):        (lower y-limit, upper y-limit)
 
     """
-    # print('--- defining the altitude limits')
     i = 1
     max_altitude_array = []
 
@@ -34,8 +32,6 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
         while i <= altitude_levels:
             max_altitude_array.append(np.min(y["altitude_" + str(i)]["traj_0"]["z"]))
             i += 1
-
-        # (lower y-limit, upper y-limit); lower y-limit > upper y-limit to invert the y-axis for pressure altitude
 
         if np.min(max_altitude_array) >= max_start_altitude:
             custom_ylim = (1020, 0.8 * max_start_altitude)  # 20% margin on top
@@ -109,8 +105,6 @@ def generate_altitude_plot(
     munits.registry[datetime.date] = converter
     munits.registry[datetime.datetime] = converter
 
-    origin = y["altitude_1"]["origin"]
-
     # print(f"--- {key} > plot altitude \t{origin}")
 
     unit, custom_ylim = altitude_limits(
@@ -125,9 +119,6 @@ def generate_altitude_plot(
         plt.setp(ax, ylabel="Altitude [" + str(unit) + "]")
     if language == "de":
         plt.setp(ax, ylabel="Höhe [" + str(unit) + "]")
-
-    alt_level = y["altitude_" + str(alt_index)]["alt_level"]
-    # print(f'altitude_{alt_index} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
 
     if side_traj:
         traj_index = [0, 1, 2, 3, 4]
@@ -162,14 +153,13 @@ def generate_altitude_plot(
             xstart = x[0]
 
             linestyle = subplot_properties_dict[sub_index]
-            # print(f'linestyle for subplot {sub_index}: {linestyle}')
             alpha = y["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"]
 
             ax.plot(
-                x,  # define x-axis
-                yaxis,  # define y-axis
-                linestyle,  # define linestyle
-                alpha=alpha,  # define line opacity
+                x,
+                yaxis,
+                linestyle,
+                alpha=alpha,
                 label=textstr,
                 rasterized=False,
             )
@@ -225,10 +215,10 @@ def generate_altitude_plot(
 
         # plot altitude profile
         ax.plot(
-            x,  # define x-axis
-            yaxis,  # define y-axis
-            linestyle,  # define linestyle
-            alpha=alpha,  # define line opacity
+            x,
+            yaxis,
+            linestyle,
+            alpha=alpha,
             label=textstr,
             rasterized=False,
         )
