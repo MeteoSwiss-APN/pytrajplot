@@ -421,12 +421,9 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    cities_df = pd.read_csv(
-        "src/pytrajplot/cities/worldcities.csv"
-    )  # len(cities_df) = 41001
-    cities_df = (
-        cities_df.dropna()
-    )  # remove less important cities to reduce size of dataframe --> # len(cities_df) = 8695
+    cities_df = pd.read_csv("src/pytrajplot/cities/worldcities.csv")
+    # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
+    cities_df = cities_df.dropna()
 
     for i, row in cities_df.iterrows():
         city = row["city_ascii"]
@@ -434,26 +431,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
         lat = row["lat"]
         capital_type = row["capital"]
         population = row["population"]
-
-        # if city == 'Los Angeles':
-        #     print(f'City: {city}, lon = {lon}, lon_corrected = {360-abs(lon)}, lat = {lat}')
-        #     ax.scatter(
-        #         x=360-abs(lon),
-        #         y=lat,
-        #         s=2,
-        #         marker="o",
-        #         facecolors="k",
-        #         edgecolors="k",
-        #         transform=ccrs.PlateCarree(),
-        #     )
-
-        #     ax.text(
-        #         x=360 - abs(lon) + 0.05,
-        #         y=lat + 0.05,
-        #         s=city,
-        #         fontsize=8,
-        #         transform=ccrs.PlateCarree(),
-        #     )
 
         if is_visible(
             lat=lat,
@@ -471,8 +448,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
             if cross_dateline:
                 if lon < 0:
                     lon = 360 - abs(lon)
-
-            # print(f'City: {city}, lon = {lon}, lat = {lat}')
 
             ax.scatter(
                 x=lon,
@@ -509,7 +484,6 @@ def add_time_interval_points(coord_dict, ax, i, linestyle):
         coord_dict, altitude_index=i
     )
 
-    # marker styles: https://matplotlib.org/stable/api/markers_api.html
     # add 6 hour interval points
     if i == 1:
         ax.scatter(
@@ -536,14 +510,15 @@ def retrieve_interval_points(coord_dict, altitude_index):
     """Extract only the interval points from the coord_dict and plot them.
 
     Args:
-        coord_dict (dict):  Dictionary containing the lan/lot data & other plot properties
-        i (int):            Altitude index.
+        coord_dict (dict):      Dictionary containing the lan/lot data & other plot properties
+        altitude_index (int):   Altitude index.
 
     Returns:
         lon_important (pandas.core.series.Series): pandas list w/ interval point longitude values
         lat_important (pandas.core.series.Series): pandas list w/ interval point latitude values
 
     """
+    # create temporary dataframes
     lat_df_tmp = pd.DataFrame(
         coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lat"].items()
     )
@@ -553,7 +528,6 @@ def retrieve_interval_points(coord_dict, altitude_index):
     time_df_tmp = pd.DataFrame(
         coord_dict["altitude_" + str(altitude_index)]["traj_0"]["time"].items()
     )
-
     # delete index columns
     del lon_df_tmp[0]
     del lat_df_tmp[0]
@@ -594,15 +568,12 @@ def add_trajectories(
     """
     i = 1
     while i <= altitude_levels:
-        alt_level = coord_dict["altitude_" + str(i)]["alt_level"]
         sub_index = int(coord_dict["altitude_" + str(i)]["subplot_index"])
         textstr = (
             str(coord_dict["altitude_" + str(i)]["alt_level"])
             + " "
             + coord_dict["altitude_" + str(i)]["y_type"]
         )
-
-        # print(f'altitude_{i} = {alt_level} --> subplot {sub_index} (have {altitude_levels} alt levels/subplots)')
 
         if side_traj:
             traj_index = [0, 1, 2, 3, 4]
@@ -615,12 +586,12 @@ def add_trajectories(
                 xstart = longitude.iloc[0]
 
                 linestyle = subplot_properties_dict[sub_index]
-                # print(f'linestyle for subplot {sub_index}: {linestyle}')
                 alpha = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
 
                 if (
                     coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
                 ):  # only add legend & startpoint for the main trajectories
+
                     # plot main trajectory
                     ax.plot(
                         longitude,  # define x-axis
@@ -632,6 +603,7 @@ def add_trajectories(
                         rasterized=True,
                     )
 
+                    # add time interval points to main trajectory
                     add_time_interval_points(coord_dict, ax, i, linestyle)
 
                     # add start point triangle
@@ -647,6 +619,7 @@ def add_trajectories(
                     )
 
                 else:
+                    # plot sidetrajectories
                     ax.plot(
                         longitude,  # define x-axis
                         latitude,  # define y-axis
@@ -664,11 +637,7 @@ def add_trajectories(
             xstart = longitude.iloc[0]
 
             linestyle = subplot_properties_dict[sub_index]
-            # print(f'linestyle for subplot {sub_index}: {linestyle}')
             alpha = coord_dict["altitude_" + str(i)]["traj_0"]["alpha"]
-
-            # print(f"longitude = {longitude}")
-            # print(f"latitude = {latitude}")
 
             # plot main trajectory
             ax.plot(
@@ -681,6 +650,7 @@ def add_trajectories(
                 rasterized=True,
             )
 
+            # add time interval points to main trajectory
             add_time_interval_points(
                 coord_dict=coord_dict, ax=ax, i=i, linestyle=linestyle
             )
@@ -773,17 +743,12 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
     lower_boundary = np.min(lat_mins)
     upper_boundary = np.max(lat_maxs)
 
-    # print(f'lon_min: {np.min(lon_mins)}')
-    # print(f'lon_max: {np.max(lon_maxs)}')
-    # print(f'far east: {150 <= np.max(lon_maxs) <= 180}')
-    # print(f'far west: {-180 <= np.min(lon_mins) <= -150}')
-
     # check dateline crossing
     far_east = 150 <= np.max(lon_maxs) <= 180
     far_west = -180 <= np.min(lon_mins) <= -150
 
-    if far_east and far_west:  # trajectory *must* cross dateline somehow
-        central_longitude = 180
+    if far_east and far_west:  # if True > trajectory *must* cross dateline somehow
+        central_longitude = 180  # shift the central longitude
 
         # reset altitude index
         alt_index = 1
@@ -811,9 +776,6 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
                         180 - abs(np.max(lon_west))
                     )  # least western point
 
-                # print(f'minimum occuring in the lon array for this trajectory ({alt_index}, {traj_index}):\t{np.min(lon)}\t(maximum: {np.max(lon)})')
-                # the lon-data must be adapted to the shifted projection
-                # lon is a dataframe !
                 if np.min(lon) < 0:
                     i = 0
                     while i < len(lon):
@@ -847,158 +809,6 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
         cross_dateline = False
         return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
 
-    # print(f'Latitude (y) Range: \t{lower_boundary}°\t\t-\t{upper_boundary}° ')
-    # print(f'Longitude (x) Range:\t{left_boundary}°\t\t-\t{right_boundary}° ')
-
-
-def plot_map(trajectory_dict, separator, output_dir, domains, language):
-    """Iterate through the trajectory dict and, for each key, generate map plot.
-
-    Args:
-        trajectory_dict (dict): Trajectory dictionary. Each key contains a dataframe with all relevant information for the plots.
-        separator (str):        Separator string between main- & side-trajectories.
-        output_dir (str):       Path to directory, where plots should be saved.
-        domains (list)):        List of possible domains. Iterates through this list and automatically plots all domains.
-        language (str):         Language in plots (en/ge).
-
-    """
-    map_plot_dict = {}
-    for key in trajectory_dict:  # iterate through the trajectory dict
-        trajectory_df = trajectory_dict[key]  # extract df for given key
-        altitude_levels = trajectory_df["altitude_levels"].loc[0]
-        number_of_times = number_of_times = trajectory_df["block_length"].iloc[0]
-        number_of_trajectories = trajectory_df["#trajectories"].iloc[0]
-
-        coord_dict = create_coord_dict(altitude_levels=altitude_levels)
-
-        row_index = 0  # corresponds to row from start file
-        alt_index = 1
-        traj_index = 0  # 0=main, 1=east, 2=north, 3=west, 4=south
-
-        while row_index < number_of_trajectories:
-
-            lower_row = row_index * number_of_times
-            upper_row = row_index * number_of_times + number_of_times
-            origin = trajectory_df["origin"].loc[lower_row]
-            altitude_levels = trajectory_df["altitude_levels"].loc[lower_row]
-            subplot_index = trajectory_df["subplot_index"].loc[lower_row]
-            side_traj = trajectory_df["side_traj"].loc[lower_row]
-
-            if side_traj:
-                if separator not in origin:
-                    coord_dict["altitude_" + str(alt_index)]["origin"] = origin
-                    coord_dict["altitude_" + str(alt_index)][
-                        "subplot_index"
-                    ] = subplot_index
-
-                coord_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
-                    "z_type"
-                ][lower_row]
-                coord_dict["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
-                    "start_altitude"
-                ][lower_row]
-                coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
-                    "lon"
-                ] = trajectory_df["lon"][lower_row:upper_row]
-                coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
-                    "lat"
-                ] = trajectory_df["lat"][lower_row:upper_row]
-                coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
-                    "time"
-                ] = trajectory_df["time"][lower_row:upper_row]
-                coord_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
-                    "z_type"
-                ] = trajectory_df["z_type"][lower_row]
-
-                row_index += 1
-                traj_index += 1
-
-                if traj_index == 5:
-                    traj_index = 0
-                    alt_index += 1
-
-                if alt_index > altitude_levels:
-                    alt_index = 1
-
-                    for domain in domains:
-                        origin = coord_dict["altitude_1"]["origin"]
-                        map_plot_dict[origin + "_" + domain] = {}
-                        tmp_dict = generate_map_plot(
-                            coord_dict=coord_dict,
-                            side_traj=side_traj,
-                            altitude_levels=altitude_levels,
-                            domain=domain,
-                            output_dir=output_dir,
-                            language=language,
-                            key=key,
-                        )
-                        map_plot_dict[origin + "_" + domain].update(
-                            tmp_dict
-                        )  # TODO: Change, s.t. the map plot dict contains all origins!
-
-            # complete the non-side-trajectory case, after having completed the side trajectory case
-            else:
-                # print(f'row_index = {row_index} corresponds to origin {origin}')
-                coord_dict["altitude_" + str(alt_index)]["origin"] = origin
-                coord_dict["altitude_" + str(alt_index)][
-                    "subplot_index"
-                ] = subplot_index
-                coord_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
-                    "z_type"
-                ][lower_row]
-                coord_dict["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
-                    "start_altitude"
-                ][lower_row]
-
-                coord_dict["altitude_" + str(alt_index)]["traj_0"][
-                    "lon"
-                ] = trajectory_df["lon"][lower_row:upper_row]
-
-                coord_dict["altitude_" + str(alt_index)]["traj_0"][
-                    "lat"
-                ] = trajectory_df["lat"][lower_row:upper_row]
-
-                coord_dict["altitude_" + str(alt_index)]["traj_0"][
-                    "time"
-                ] = trajectory_df["time"][lower_row:upper_row]
-
-                # since there are no side-traj, these keys remain empty
-                coord_dict["altitude_" + str(alt_index)]["traj_1"]["lon"] = []
-                coord_dict["altitude_" + str(alt_index)]["traj_1"]["lat"] = []
-                coord_dict["altitude_" + str(alt_index)]["traj_2"]["lon"] = []
-                coord_dict["altitude_" + str(alt_index)]["traj_2"]["lat"] = []
-                coord_dict["altitude_" + str(alt_index)]["traj_3"]["lon"] = []
-                coord_dict["altitude_" + str(alt_index)]["traj_3"]["lat"] = []
-                coord_dict["altitude_" + str(alt_index)]["traj_4"]["lon"] = []
-                coord_dict["altitude_" + str(alt_index)]["traj_4"]["lat"] = []
-
-                coord_dict["altitude_" + str(alt_index)]["traj_0"][
-                    "z_type"
-                ] = trajectory_df["z_type"][lower_row]
-                coord_dict["altitude_" + str(alt_index)]["traj_1"]["z_type"] = None
-                coord_dict["altitude_" + str(alt_index)]["traj_2"]["z_type"] = None
-                coord_dict["altitude_" + str(alt_index)]["traj_3"]["z_type"] = None
-                coord_dict["altitude_" + str(alt_index)]["traj_4"]["z_type"] = None
-
-                row_index += 1
-                alt_index += 1
-                if alt_index > altitude_levels:
-                    alt_index = 1
-                    for domain in domains:
-                        origin = coord_dict["altitude_1"]["origin"]
-                        tmp_dict = generate_map_plot(
-                            coord_dict=coord_dict,
-                            side_traj=side_traj,
-                            altitude_levels=altitude_levels,
-                            domain=domain,
-                            output_dir=output_dir,
-                            language=language,
-                            key=key,
-                        )
-                        map_plot_dict[origin].update(tmp_dict)
-                        # print(f'domain: {domain} --> tmp dict: {tmp_dict} --> map plot dict: {map_plot_dict}')
-    return map_plot_dict
-
 
 def generate_map_plot(
     cross_dateline,
@@ -1021,18 +831,12 @@ def generate_map_plot(
         ax                          (Axes):   Axes to plot the map on
 
     """
-    origin = coord_dict["altitude_1"]["origin"]
-
-    # print(f"--- {key} > plot map \t{origin} / {domain}")
-
     if domain == "dynamic":
         (_, custom_domain_boundaries, _, _,) = get_dynamic_domain(
             coord_dict, altitude_levels=altitude_levels, side_traj=side_traj
         )
-        # coord_dict = coord_dict_new
 
     else:
-        central_longitude = 0
         custom_domain_boundaries = [0, 0, 0, 0]
         cross_dateline = False
 
@@ -1040,7 +844,7 @@ def generate_map_plot(
 
     ax.set_aspect(
         "auto"
-    )  # skaliert die karte s.d. dass Bildformat von fig & axes übereinstimmen
+    )  # scales the map, so that the aspeact ratio of fig & axes match
 
     domain_boundaries = crop_map(
         ax=ax, domain=domain, custom_domain_boundaries=custom_domain_boundaries
@@ -1049,7 +853,6 @@ def generate_map_plot(
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
     lon = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lon"], columns=["lon"])
-
     if not is_visible(
         lat=lat.iloc[0],
         lon=lon.iloc[0],
@@ -1064,6 +867,7 @@ def generate_map_plot(
             fontsize=14,
             verticalalignment="center",
             horizontalalignment="center",
+            rasterized=True,
         )
 
     add_features(ax=ax)
@@ -1096,5 +900,5 @@ def generate_map_plot(
         subplot_properties_dict=subplot_properties_dict,
     )
 
-    ax.legend(fontsize=8)  # add legend
+    ax.legend(fontsize=8)
     return ax

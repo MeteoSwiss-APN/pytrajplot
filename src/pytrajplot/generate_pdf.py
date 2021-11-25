@@ -17,7 +17,6 @@ from .plotting.plot_altitude import generate_altitude_plot
 from .plotting.plot_info_header import generate_info_header
 from .plotting.plot_map import generate_map_plot
 from .plotting.plot_map import get_dynamic_domain
-from .scratch.scratch_assemble_pdf import plot_dummy_info
 
 
 def create_plot_dict(altitude_levels):
