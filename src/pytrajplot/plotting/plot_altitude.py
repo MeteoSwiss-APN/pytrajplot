@@ -14,13 +14,18 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
     """Define the y-axis limits dynamically.
 
     Args:
-        y (dict):                   Dictionary containing the y-axis information (esp. the altitude)
-        max_start_altitude (float): The highest start altitude. Check the altitude for this trajectory only, to define the altitude limits
-        altitude_levels (int):      #start altitudes
+        y
+                            dict       Dictionary containing the y-axis information (esp. the altitude)
+        max_start_altitude
+                            float      Highest start altitude - derive upper limit from these altitude-values.
+        altitude_levels
+                            int        # start altitudes
 
     Returns:
-        unit (str):                 [m] or [hPa]
-        custom_ylim (tuple):        (lower y-limit, upper y-limit)
+        unit
+                            str        [m] or [hPa]
+        custom_ylim
+                            tuple      (lower y-limit, upper y-limit)
 
     """
     i = 1
@@ -64,19 +69,33 @@ def generate_altitude_plot(
     sub_index,
     ax=None,
 ):
-    """Iterate through y-dict, generate & save plot.
+    """Summary - First line should end with a period.
 
     Args:
-        x (df): Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
-        y (dict): Dictionary, containig the y-axis information for all subplots
-        key (str): Key string necessary for creating an output folder for each start/trajectory file pair
-        side_traj (int): 0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
-        altitude_levels (int): #altitude levels = #subplots
-        language (str): language for plot annotations
-        max_start_altitude (float): maximum start altitude
-        alt_index: index of current altitude (in dict)
-        sub_index (float): index of subplot
-        ax(SubplotAxes): axes to plot the altitude on
+        x
+                            df         description
+        y
+                            dict       description
+        key
+                            type       description
+        side_traj
+                            type       description
+        altitude_levels
+                            type       description
+        language
+                            type       description
+        max_start_altitude
+                            type       description
+        alt_index
+                            type       description
+        sub_index
+                            type       description
+
+        ax ([type], optional): [description]. Defaults to None.
+
+    Returns:
+        output_variable
+                            type       description
 
     """
     ax = ax or plt.gca()
