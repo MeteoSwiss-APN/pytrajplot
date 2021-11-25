@@ -73,11 +73,11 @@ def generate_altitude_plot(
 
     Args:
         x
-                            df         description
+                            df         Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
         y
-                            dict       description
+                            dict       Dictionary, containig the y-axis information for all subplots
         key
-                            str        description
+                            str        Key string necessary for creating an output folder for each start/trajectory file pair
         side_traj
                             int        description
         altitude_levels
@@ -101,9 +101,9 @@ def generate_altitude_plot(
     """Summary - First line should end with a period.
 
     Args:
-        x                   (df)         Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
-        y                   (dict)       Dictionary, containig the y-axis information for all subplots
-        key                 (str)        Key string necessary for creating an output folder for each start/trajectory file pair
+        x                   (df)
+        y                   (dict)
+        key                 (str)
         side_traj           (int)        0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
         altitude_levels     (int)        #altitude levels = #subplots
         language            (str)        language for plot annotations
