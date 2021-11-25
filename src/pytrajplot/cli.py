@@ -16,14 +16,20 @@ def interpret_options(start_prefix, traj_prefix, info_prefix, language):
     """Reformat command line inputs.
 
     Args:
-        start_prefix (str): Prefix of start files
-        traj_prefix (str):  Prefix of trajectory files
-        info_prefix (str):  Prefix of plot info files
-        language (str):     Language for plot annotations
+        start_prefix
+                            str       Prefix of start files.
+        traj_prefix
+                            str       Prefix of trajectory files.
+        info_prefix
+                            str       Prefix of info file.
+        language
+                            str       language for plot annotations
 
     Returns:
-        prefix_dict (dict): Dictionary, collecting the prefix-inputs
-        language (str):     Correctly assigned language, based on various inputs
+        prefix_dict
+                            dict      The various prefixes are stored in this dict.
+        language
+                            str       language for plot annotations after mapping. "en" or "de"
 
     """
     prefix_dict = {
