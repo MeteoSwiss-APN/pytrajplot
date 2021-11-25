@@ -94,8 +94,8 @@ def generate_altitude_plot(
         ax ([Axes], optional): Axes to plot the altitude on. Defaults to None.
 
     Returns:
-        output_variable
-                            type       description
+        ax ([Axes], optional): Axes w/ altitude plot.
+
 
     """
     ax = ax or plt.gca()

@@ -5,6 +5,24 @@ import matplotlib.pyplot as plt
 
 
 def generate_info_header(language, plot_info, plot_data, domain, ax=None):
+    """Summary - First line should end with a period.
+
+    Args:
+        language
+                            str        language for plot annotations
+        plot_info
+                            dict       Dict w/ information for info header (taken from info file)
+        plot_data
+                            dict       Dict w/ information for info header (taken from start/traj files)
+        domain
+                            str        domain of current plot
+
+        ax ([Axes], optional): Axes to plot the info header on. Defaults to None.
+
+    Returns:
+        ax ([Axes], optional): Axes w/ info header.
+
+    """
     ax = ax or plt.gca()
     ax.axis("off")
 
@@ -46,10 +64,6 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
             "verticalalignment": "baseline",
         },
     )
-    # for pos in ['right', 'top', 'bottom', 'left']:
-    #     ax.spines[pos].set_visible(False)
-    # ax.axes.get_xaxis().set_visible(False)
-    # ax.axes.get_yaxis().set_visible(False)
     if language == "en":
         info = (
             "$\it{Release}$ $\it{Site}:}$ "
