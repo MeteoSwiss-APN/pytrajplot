@@ -1,0 +1,32 @@
+{{! MeteoSwiss Docstring Template }}
+Summary - First line should end with a period.
+
+{{extendedSummaryPlaceholder}}
+
+{{#parametersExist}}
+Args:
+{{#args}}
+    {{var}}
+                        type       description
+{{/args}}
+
+{{#kwargs}}
+    {{var}} ({{typePlaceholder}}, optional): {{descriptionPlaceholder}}. Defaults to {{&default}}.
+{{/kwargs}}
+{{/parametersExist}}
+
+{{#exceptionsExist}}
+Raises:
+{{#exceptions}}
+    {{type}}: {{descriptionPlaceholder}}
+{{/exceptions}}
+{{/exceptionsExist}}
+
+{{#returnsExist}}
+Returns:
+{{#returns}}
+    output_variable     type       description
+    empty_line_here
+{{/returns}}
+
+{{/returnsExist}}
