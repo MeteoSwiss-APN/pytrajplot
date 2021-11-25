@@ -1,8 +1,4 @@
 """Generate Map Plot Figure."""
-# follwing this guide: https://earth-env-data-science.github.io/lectures/mapping_cartopy.html
-# Standard library
-import locale
-import os
 
 # Third-party
 import cartopy.crs as ccrs
@@ -10,8 +6,6 @@ import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-# import ipdb
 
 
 def create_coord_dict(altitude_levels):
@@ -100,20 +94,20 @@ def add_features(ax):
     gl.top_labels = False
     gl.right_labels = False
 
-    ax.coastlines(resolution="10m")
-    ax.add_feature(cfeature.LAND)
-    ax.add_feature(cfeature.COASTLINE, alpha=0.5)
-    ax.add_feature(cfeature.BORDERS, linestyle="--", alpha=0.5)
-    ax.add_feature(cfeature.OCEAN)
-    ax.add_feature(cfeature.LAKES)
-    ax.add_feature(cfeature.RIVERS)
+    ax.coastlines(resolution="10m", rasterized=True)
+    ax.add_feature(cfeature.LAND, rasterized=True)
+    ax.add_feature(cfeature.COASTLINE, alpha=0.5, rasterized=True)
+    ax.add_feature(cfeature.BORDERS, linestyle="--", alpha=0.5, rasterized=True)
+    ax.add_feature(cfeature.OCEAN, rasterized=True)
+    ax.add_feature(cfeature.LAKES, rasterized=True)
+    ax.add_feature(cfeature.RIVERS, rasterized=True)
     # additional lakes & rivers on a smaller scale
     rivers_10m = cfeature.NaturalEarthFeature(
         "physical", "rivers_lake_centerlines", "10m"
     )
-    ax.add_feature(rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5)
-
-    # ax.add_feature(cfeature.STATES)
+    ax.add_feature(
+        rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5, rasterized=True
+    )
     return
 
 
@@ -128,9 +122,9 @@ def crop_map(ax, domain, custom_domain_boundaries):
     Returns:
         domain_boundaries (list):                   [lat0,lat1,lon0,lon1]
 
-    """
-    # got these pre-defined domain boundaries from: https://github.com/MeteoSwiss-APN/oprtools/blob/master/dispersion/lib/get_domain.pro
+    Remark: got these pre-defined domain boundaries from: https://github.com/MeteoSwiss-APN/oprtools/blob/master/dispersion/lib/get_domain.pro
 
+    """
     padding = 5  # padding on each side, for the dynamically created plots
 
     domain_dict = {
@@ -155,14 +149,14 @@ def crop_map(ax, domain, custom_domain_boundaries):
     return domain_boundaries
 
 
-def is_visible(city, lat, lon, domain_boundaries, cross_dateline) -> bool:
+def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
     """Check if a point (city) is inside the domain.
 
     Args:
-        city (str):                 name of city
         lat (float):                latitude of city
         lon (float):                longitue of city
         domain_boundaries (list):   latitude & longitude range of domain
+        cross_dateline (bool):      if cross_dateline --> True, else false
 
     Returns:
         bool:                       True if city is within domain boundaries, else false.
@@ -176,8 +170,6 @@ def is_visible(city, lat, lon, domain_boundaries, cross_dateline) -> bool:
         domain_boundaries[0] <= float(lon) <= domain_boundaries[1]
         and domain_boundaries[2] <= float(lat) <= domain_boundaries[3]
     )
-
-    # print(f'lon/lat of {city}: ({lon}/{lat}) --> in domain: {in_domain}')
 
     if in_domain:
         return True
@@ -198,48 +190,34 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
         bool:               True if city is of interest, else false
 
     """
-    is_capital = capital_type == "primary"
-
-    # list of cities, that should be excluded for aesthetic reasons
-
     if domain == "dynamic":
         if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
-            is_capital = (
-                capital_type == "primary"
-            )  # incl. primary cities (= country capital)
-            if capital_type == "admin":  # incl. admin cities w/ population > 5'000'000
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
                 if population > 5000000:
                     is_capital = True
-            is_large = population > 10000000  # incl. cities w/ population > 10'000'000
+            is_large = population > 10000000
 
         if 40 <= lon <= 180:  # 40°E - 180°E (mainly Asia)
-            is_capital = (
-                capital_type == "primary"
-            )  # incl. primary cities (= country capital)
-            if capital_type == "admin":  # incl. admin cities w/ population > 10'000'000
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
                 if population > 10000000:
                     is_capital = True
-            is_large = population > 12000000  # incl. cities w/ population > 12'000'0000
+            is_large = population > 12000000
 
-        if -40 <= lon < 0:  # 40° W to 0° E/W --> mainly the atlantic
-            is_capital = (
-                capital_type == "primary"
-            )  # incl. primary cities (= country capital)
-            if capital_type == "admin":  # incl. admin cities w/ population > 3'000'000
-                if population > 1000000:
+        if -40 <= lon < 0:  # 40° W to 0° E/W (mainly Atlantic)
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
+                if population > 2500000:
                     is_capital = True
-            is_large = population > 3000000  # incl. cities w/ population > 8'000'000
+            is_large = population > 3000000
 
-        if (
-            -180 <= lon < -40
-        ):  # 180° W to 40° W --> capital & admin cities or population > 2'000'000
-            is_capital = (
-                capital_type == "primary"
-            )  # incl. primary cities (= country capital)
-            if capital_type == "admin":  # incl. admin cities w/ population > 800'000
-                if population > 1000000:
+        if -180 <= lon < -40:  # 180° W to 40° W (mainly American Continent)
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
+                if population > 800000:
                     is_capital = True
-            is_large = population > 1100000  # incl. cities w/ population > 3'000'000
+            is_large = population > 1100000
 
         excluded_cities = [
             "Casablanca",
@@ -317,6 +295,8 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
         is_excluded = name in excluded_cities
         return (is_capital or is_large) and not is_excluded
 
+    is_capital = capital_type == "primary"
+
     if domain == "europe":
         is_large = population > 2000000
         excluded_cities = [
@@ -358,10 +338,8 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
 
     if domain == "ch":
         is_large = population > 200000
-        if capital_type == "admin":  # incl. admin cities w/ population > 5'000'000
+        if capital_type == "admin":
             is_capital = True
-            # if population > 30000:
-            #     is_capital = True
         excluded_cities = [
             "Neuchatel",
             "Stans",
@@ -384,7 +362,7 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
 
     if domain == "ch_hd":
         is_large = population > 200000
-        if capital_type == "admin":  # incl. admin cities w/ population > 5'000'000
+        if capital_type == "admin":
             if population > 50000:
                 is_capital = True
         excluded_cities = [
@@ -403,7 +381,7 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
 
     if domain == "alps":
         is_large = population > 200000
-        if capital_type == "admin":  # incl. admin cities w/ population > 5'000'000
+        if capital_type == "admin":
             if population > 50000:
                 is_capital = True
         excluded_cities = [
@@ -478,7 +456,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
         #     )
 
         if is_visible(
-            city=city,
             lat=lat,
             lon=lon,
             domain_boundaries=domain_boundaries,
@@ -505,6 +482,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 facecolors="k",
                 edgecolors="k",
                 transform=ccrs.PlateCarree(),
+                rasterized=True,
             )
 
             ax.text(
@@ -513,6 +491,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 s=city,
                 fontsize=8,
                 transform=ccrs.PlateCarree(),
+                rasterized=True,
             )
 
 
@@ -540,6 +519,7 @@ def add_time_interval_points(coord_dict, ax, i, linestyle):
             color=linestyle[:-1],
             label="6,12,...h",
             transform=ccrs.PlateCarree(),
+            rasterized=True,
         )
     else:
         ax.scatter(
@@ -548,6 +528,7 @@ def add_time_interval_points(coord_dict, ax, i, linestyle):
             marker="d",
             color=linestyle[:-1],
             transform=ccrs.PlateCarree(),
+            rasterized=True,
         )
 
 
@@ -648,6 +629,7 @@ def add_trajectories(
                         alpha=alpha,  # define line opacity
                         label=textstr,
                         transform=ccrs.PlateCarree(),
+                        rasterized=True,
                     )
 
                     add_time_interval_points(coord_dict, ax, i, linestyle)
@@ -661,6 +643,7 @@ def add_trajectories(
                         markeredgecolor="red",
                         markerfacecolor="white",
                         transform=ccrs.PlateCarree(),
+                        rasterized=True,
                     )
 
                 else:
@@ -670,6 +653,7 @@ def add_trajectories(
                         linestyle,  # define linestyle
                         alpha=alpha,  # define line opacity
                         transform=ccrs.PlateCarree(),
+                        rasterized=True,
                     )
 
         else:  # no side traj
@@ -694,6 +678,7 @@ def add_trajectories(
                 alpha=alpha,  # define line opacity
                 label=textstr,
                 transform=ccrs.PlateCarree(),
+                rasterized=True,
             )
 
             add_time_interval_points(
@@ -709,6 +694,7 @@ def add_trajectories(
                 markeredgecolor="red",
                 markerfacecolor="white",
                 transform=ccrs.PlateCarree(),
+                rasterized=True,
             )
 
         i += 1
@@ -1065,7 +1051,6 @@ def generate_map_plot(
     lon = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lon"], columns=["lon"])
 
     if not is_visible(
-        city="none",
         lat=lat.iloc[0],
         lon=lon.iloc[0],
         domain_boundaries=domain_boundaries,

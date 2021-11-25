@@ -134,7 +134,7 @@ def generate_altitude_plot(
             upper_boundary,
             color="brown",
             alpha=0.5,
-            rasterized=False,
+            rasterized=True,
         )
 
         for traj in traj_index:
@@ -161,7 +161,7 @@ def generate_altitude_plot(
                 linestyle,
                 alpha=alpha,
                 label=textstr,
-                rasterized=False,
+                rasterized=True,
             )
 
             if (
@@ -174,7 +174,7 @@ def generate_altitude_plot(
                     markersize=10,
                     markeredgecolor="red",
                     markerfacecolor="white",
-                    rasterized=False,
+                    rasterized=True,
                 )
                 ax.legend(fontsize=8)
 
@@ -194,7 +194,7 @@ def generate_altitude_plot(
             upper_boundary,
             color="brown",
             alpha=0.5,
-            rasterized=False,
+            rasterized=True,
         )
 
         textstr = (
@@ -220,7 +220,7 @@ def generate_altitude_plot(
             linestyle,
             alpha=alpha,
             label=textstr,
-            rasterized=False,
+            rasterized=True,
         )
 
         # plot starting marker
@@ -231,7 +231,7 @@ def generate_altitude_plot(
             markersize=10,
             markeredgecolor="red",
             markerfacecolor="white",
-            rasterized=False,
+            rasterized=True,
         )
         ax.legend(fontsize=8)
 
