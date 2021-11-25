@@ -327,3 +327,8 @@ zmichel/COSMO/lagranto_c/compare_output_files/plots_rasterized_pdf/003-033F/Fess
 zmichel/COSMO/lagranto_c/compare_output_files/plots_rasterized_pdf/003-033F/Goesgen_ch_hd.pdf
 zmichel/COSMO/lagranto_c/compare_output_files/plots_rasterized_pdf/003-033F/Leibstadt_ch_hd.pdf
 zmichel/COSMO/lagranto_c/compare_output_files/plots_rasterized_pdf/003-033F/Muehleberg_ch_hd.pdf
+zmichel/HRES/test_case_side_traj/easy/plots/000-048F/Linate_ch.pdf
+src/pytrajplot/docstring_template/sphinx.mustache
+src/pytrajplot/docstring_template/numpy.mustache
+src/pytrajplot/docstring_template/google.mustache
+src/pytrajplot/docstring_template/default.mustache
