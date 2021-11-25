@@ -79,38 +79,23 @@ def generate_altitude_plot(
         key
                             str        Key string necessary for creating an output folder for each start/trajectory file pair
         side_traj
-                            int        description
+                            int        0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
         altitude_levels
-                            int        description
+                            int        #altitude levels = #subplots
         language
-                            str        description
+                            str        language for plot annotations
         max_start_altitude
-                            float      description
+                            float      maximum start altitude
         alt_index
-                            int        description
+                            int        index of current altitude (in dict)
         sub_index
-                            int        description
+                            int        index of corresponding subplot
 
         ax ([Axes], optional): Axes to plot the altitude on. Defaults to None.
 
     Returns:
         output_variable
                             type       description
-
-    """
-    """Summary - First line should end with a period.
-
-    Args:
-        x                   (df)
-        y                   (dict)
-        key                 (str)
-        side_traj           (int)        0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
-        altitude_levels     (int)        #altitude levels = #subplots
-        language            (str)        language for plot annotations
-        max_start_altitude  (float)      maximum start altitude
-        alt_index           (int)        index of current altitude (in dict)
-        sub_index           (int)        index of corresponding subplot
-        ax                  (Axes)       axes to plot the altitude on
 
     """
     ax = ax or plt.gca()
