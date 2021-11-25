@@ -425,6 +425,28 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
     cities_df = cities_df.dropna()
 
+    add_w_town = True
+
+    if add_w_town:
+        if not cross_dateline:
+            # add Weesen to maps
+            ax.scatter(
+                x=9.108376385221725,
+                y=47.1361694653364,
+                marker="1",
+                color="r",
+                transform=ccrs.PlateCarree(),
+                rasterized=True,
+            )
+            ax.text(
+                x=9.108376385221725 + 0.01,
+                y=47.1361694653364 + 0.01,
+                s="W-Town",
+                fontsize=5,
+                transform=ccrs.PlateCarree(),
+                rasterized=True,
+            )
+
     for i, row in cities_df.iterrows():
         city = row["city_ascii"]
         lon = row["lng"]
@@ -460,9 +482,14 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 rasterized=True,
             )
 
+            text_shift = 0.05
+
+            if domain == "ch":
+                text_shift = 0.01
+
             ax.text(
-                x=lon + 0.05,
-                y=lat + 0.05,
+                x=lon + text_shift,
+                y=lat + text_shift,
                 s=city,
                 fontsize=8,
                 transform=ccrs.PlateCarree(),
