@@ -12,10 +12,12 @@ def create_coord_dict(altitude_levels):
     """Create dict of dicts to be filled with information for all trajectories to be plottet.
 
     Args:
-        altitude_levels (int): Number of trajectory dicts (for each alt. level one dict)
+        altitude_levels
+                            int        Number of trajectory dicts (for each alt. level one dict)
 
     Returns:
-        coord_dict (dict): Dict of dicts. For each altitude level, one dict is present in this dict. Each of those 'altitude dicts' contains the relevant information to plot the corresponding trajectory.
+        coord_dict
+                            dict       Dict of dicts. For each altitude level, one dict is present in this dict. Each of those 'altitude dicts' contains the relevant information to plot the corresponding trajectory.
 
     """
     assert (
@@ -80,7 +82,7 @@ def add_features(ax):
     """Add grid/coastlines/borders/oceans/lakes and rivers to current map (ax).
 
     Args:
-        ax (cartopy.mpl.geoaxes.GeoAxesSubplot): adding features to current map (axes instance)
+        ax:                 Axes       Current map to add features to
 
     """
     gl = ax.gridlines(
@@ -90,6 +92,7 @@ def add_features(ax):
         color="k",
         alpha=0.3,
         linestyle="-.",
+        # rasterized=True,
     )  # define grid line properties
     gl.top_labels = False
     gl.right_labels = False
@@ -115,14 +118,16 @@ def crop_map(ax, domain, custom_domain_boundaries):
     """Crop map to given domain (i.e. centraleurope).
 
     Args:
-        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    cropping current map (axes instance)
-        domain (str):                               key for the domain_dict to read correct domain boundaries
-        custom_domain_boundaries (list):            list, containing the domain for these specifc trajectories (created dynamically)
+        ax
+                            Axes       current map to crop
+        domain
+                            str        key for the domain_dict to retrieve correct domain boundaries
+        custom_domain_boundaries
+                            list       list, containing the domain for these specifc trajectories (created dynamically)
 
     Returns:
-        domain_boundaries (list):                   [lat0,lat1,lon0,lon1]
-
-    Remark: got these pre-defined domain boundaries from: https://github.com/MeteoSwiss-APN/oprtools/blob/master/dispersion/lib/get_domain.pro
+        domain_boundaries
+                            list       [lat0,lat1,lon0,lon1]
 
     """
     padding = 5  # padding on each side, for the dynamically created plots
@@ -153,13 +158,17 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
     """Check if a point (city) is inside the domain.
 
     Args:
-        lat (float):                latitude of city
-        lon (float):                longitue of city
-        domain_boundaries (list):   latitude & longitude range of domain
-        cross_dateline (bool):      if cross_dateline --> True, else false
+        lat
+                            float      latitude of city
+        lon
+                            float      longitude of city
+        domain_boundaries
+                            list       lon/lat range of domain
+        cross_dateline
+                            bool       if cross_dateline --> western lon values need to be shifted
 
     Returns:
-        bool:                       True if city is within domain boundaries, else false.
+                            bool       True if city is within domain boundaries, else false.
 
     """
     if cross_dateline:
@@ -181,13 +190,19 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
     """Check if a city fulfils certain importance criteria.
 
     Args:
-        name (str):         Name of city
-        capital_type (str): primary -> country's capital, admin -> 1st level admin capital, minor -> lower-level admin capital
-        population (int):   Population of city (used for filtering out smaller cities)
-        domain (str):       Domain for map
+        name
+                            str        Name of city
+        capital_type
+                            str        primary/admin/minor (label for "relevance" of city)
+        population
+                            int        Population of city (there are conditions based on population)
+        domain
+                            str        Map domain. Different domains have different conditions to determine interest.
+        lon
+                            float      Longitude of city  (there are conditions based on longitude)
 
     Returns:
-        bool:               True if city is of interest, else false
+                            bool       True if city is of interest, else false
 
     """
     if domain == "dynamic":
@@ -412,10 +427,10 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     """Add cities to map.
 
     Args:
-        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    adding cities to current map (axes instance)
-        domain_boundaries (list):                   latitude & longitude range of domain
-        domain (str):                               Domain for map
-        cross_dateline (bool):                      Bool, to pass on to the is_visible function.
+        ax:                 Axes       current map to crop
+        domain_boundaries:  list       lon/lat range of domain
+        domain:             str        Map domain. Different domains have different conditions to determine interest.
+        cross_dateline:     bool       if cross_dateline --> western lon values need to be shifted
 
     """
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -498,13 +513,13 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
 
 
 def add_time_interval_points(coord_dict, ax, i, linestyle):
-    """Add time interval points to trajectories (6h interval).
+    """Summary - First line should end with a period.
 
     Args:
-        coord_dict (dict):                          Dictionary containing the lan/lot data & other plot properties
-        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    adding time marks to trajectories on current map
-        i (int):                                    Altitude index. Only want to add legend for altitude one.
-        linestyle (str):                            Defines colour of interval poins. (Same as corresponding trajectory)
+        coord_dict:         dict       containing the lan/lot data & other plot properties
+        ax:                 Axes       current map to crop
+        i:                  int        Altitude index. Only want to add legend for altitude one.
+        linestyle:          str        Defines colour of interval poins (same as corresponding trajectory)
 
     """
     lon_important, lat_important = retrieve_interval_points(
@@ -534,15 +549,19 @@ def add_time_interval_points(coord_dict, ax, i, linestyle):
 
 
 def retrieve_interval_points(coord_dict, altitude_index):
-    """Extract only the interval points from the coord_dict and plot them.
+    """Extract the interval points from coord_dict add them to ax.
 
     Args:
-        coord_dict (dict):      Dictionary containing the lan/lot data & other plot properties
-        altitude_index (int):   Altitude index.
+        coord_dict
+                            dict       containing the lan/lot data & other plot properties
+        altitude_index
+                            int        Altitude index. Only want to add legend for altitude one.
 
     Returns:
-        lon_important (pandas.core.series.Series): pandas list w/ interval point longitude values
-        lat_important (pandas.core.series.Series): pandas list w/ interval point latitude values
+        lon_important
+                            series     pandas list w/ interval point longitude values
+        lat_important
+                            series     pandas list w/ interval point latitude values
 
     """
     # create temporary dataframes
@@ -586,11 +605,11 @@ def add_trajectories(
     """Add trajectories to map.
 
     Args:
-        coord_dict (dict):                          Dictionary containing the lan/lot data & other plot properties
-        side_traj (int):                            0/1 --> necessary for choosing the correct loop
-        altitude_levels (int):                      # altitude levels
-        ax (cartopy.mpl.geoaxes.GeoAxesSubplot):    adding trajectories to current map (axes instance)
-        subplot_properties_dict (dict):             Dictionary containing the mapping between the altitude levels and colours. Uniform w/ altitude plots.
+        coord_dict:                    dict       containing the lan/lot data & other plot properties
+        side_traj:                     int        0/1 --> necessary for choosing the correct loop
+        altitude_levels:               int        # altitude levels
+        ax:                            Axes       current map to crop
+        subplot_properties_dict:       dict       Dictionary containing the mapping between the altitude levels and colours. Uniform w/ altitude plots.
 
     """
     i = 1
@@ -702,13 +721,22 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
     """Check wheter dateline is crossed or not and return dynamic domain boundaries.
 
     Args:
-        trajectory_df (df):         Dataframe containing the lon/lat values of all trajectories
+        coord_dict
+                            dict       containing the lan/lot data & other plot properties
+        altitude_levels
+                            int        # altitude levels
+        side_traj
+                            bool       True if there are side trajectories, else false.
 
     Returns:
-        central_longitude (float):  0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
-        domain_boundaries (list):   [lon0,lon1,lat0,lat1]
-        lon_df            (df):     single column dataframe containing the (shifted/unchanged) longitude values
-        cross_dateline    (bool):   bool, to remember if the dateline was crossed for a given trajectory
+        central_longitude
+                            float      0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
+        domain_boundaries
+                            list       [lon0,lon1,lat0,lat1]
+        lon_df
+                            df         single column dataframe containing the (shifted/unchanged) longitude values
+        cross_dateline
+                            bool       bool, to remember if the dateline was crossed for a given trajectory
 
     """
     coord_dict_tmp = coord_dict.copy()
@@ -845,17 +873,25 @@ def generate_map_plot(
     domain,
     ax=None,
 ):
-    """Generate map plot. fig & ax are defined here, as well as the plots are being saved.
+    """Summary - First line should end with a period.
 
     Args:
-        cross_dateline              (bool):   Bool, to specify whether the dateline was crossed or not
-        coord_dict                  (dict):   Dictionary containing the lan/lot data & other plot properties
-        side_traj                   (int):    0/1 --> necessary for choosing the correct loop
-        altitude_levels             (int):    # altitude levels
-        domain                      (str):    Domain for map
-        central_longitude           (float):  0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
-        custom_domain_boundaries    (list):   [lon0,lon1,lat0,lat1]
-        ax                          (Axes):   Axes to plot the map on
+        cross_dateline
+                            bool       Bool, to specify whether the dateline was crossed or not
+        coord_dict
+                            dict       Dictionary containing the lan/lot data & other plot properties
+        side_traj
+                            int        0/1 --> necessary for choosing the correct loop
+        altitude_levels
+                            int        # altitude levels
+        domain
+                            str        Domain for map
+
+        ax ([Axes], optional): Axes to generate the map on. Defaults to None.
+
+    Returns:
+        output_variable
+                            type       description
 
     """
     if domain == "dynamic":
