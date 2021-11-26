@@ -132,11 +132,11 @@ def assemble_pdf(
     # DEFINE FIGURE PROPERTIES AND GRID SPECIFICATION
     fig = plt.figure(figsize=(11.69, 8.27), dpi=200)  # A4 size
     # fig = plt.figure(figsize=(12, 8), dpi=200)
-    widths = [0.1, 2, 0.01, 1.5]
+    widths = [2, 1]
     heights = [0.5] + [1] * (altitude_levels)
     # create grid spec oject
     grid_specification = gs.GridSpec(
-        nrows=altitude_levels + 1, ncols=4, width_ratios=widths, height_ratios=heights
+        nrows=altitude_levels + 1, ncols=2, width_ratios=widths, height_ratios=heights
     )
 
     origin = plot_dict["altitude_1"]["origin"]
@@ -156,7 +156,7 @@ def assemble_pdf(
     projection, cross_dateline = get_projection(
         plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
     )
-    map_ax = plt.subplot(grid_specification[1:, 0:-2], projection=projection)
+    map_ax = plt.subplot(grid_specification[1:, 0], projection=projection)
     # plot_dummy_map(ax=map_ax, projection=ccrs.PlateCarree())
     generate_map_plot(
         cross_dateline=cross_dateline,
@@ -171,7 +171,91 @@ def assemble_pdf(
     alt_index = 1
     while alt_index <= altitude_levels:
         subplot_index = int(plot_dict["altitude_" + str(alt_index)]["subplot_index"])
-        tmp_ax = plt.subplot(grid_specification[subplot_index + 1, 3])
+        tmp_ax = plt.subplot(grid_specification[subplot_index + 1, 1])
+        generate_altitude_plot(
+            x=x,
+            y=plot_dict,
+            key=key,
+            side_traj=side_traj,
+            altitude_levels=altitude_levels,
+            language=language,
+            max_start_altitude=max_start_altitude,
+            ax=tmp_ax,
+            alt_index=alt_index,
+            sub_index=subplot_index,
+        )
+
+        # plot_dummy_altitude(ax=tmp_ax, plot_index=subplot_index, altitude_levels=altitude_levels)
+        alt_index += 1
+
+    # SAVE PDF
+    # plt.tight_layout()
+    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
+    os.makedirs(
+        outpath, exist_ok=True
+    )  # create plot folder if it doesn't already exist
+    plt.savefig(outpath + origin + "_" + domain + ".pdf")
+    plt.close(fig)
+    return
+
+
+def assemble_pdf_new(
+    plot_info_dict,
+    x,
+    plot_dict,
+    key,
+    side_traj,
+    output_dir,
+    altitude_levels,
+    language,
+    max_start_altitude,
+    domain,
+):
+
+    # DEFINE FIGURE PROPERTIES AND GRID SPECIFICATION
+    fig = plt.figure(figsize=(11.69, 8.27), dpi=200)  # A4 size
+    # fig = plt.figure(figsize=(12, 8), dpi=200)
+
+    gs0 = fig.add_gridspec(2, 2, width_ratios=[2, 1], height_ratios=[0.125, 1])
+
+    gs00 = gs0[1, 0].subgridspec(
+        10, 1, width_ratios=[1], height_ratios=[0.5] + [0.1] * 9
+    )  # Expected the given number of height ratios to match the number of rows of the grid
+    gs01 = gs0[1, 1].subgridspec(altitude_levels + 1, 1)
+
+    origin = plot_dict["altitude_1"]["origin"]
+
+    # ADD INFO HEADER TO PDF
+    info_ax = plt.subplot(gs0[0, :])
+    # plot_dummy_info(data=np.random.normal(0, 1, 500), ax=info_ax)
+    generate_info_header(
+        language=language,
+        plot_info=plot_info_dict,
+        plot_data=plot_dict,
+        ax=info_ax,
+        domain=domain,
+    )
+
+    # ADD MAP TO PDF
+    projection, cross_dateline = get_projection(
+        plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
+    )
+    map_ax = plt.subplot(gs00[0:9, :], projection=projection)
+    # plot_dummy_map(ax=map_ax, projection=ccrs.PlateCarree())
+    generate_map_plot(
+        cross_dateline=cross_dateline,
+        coord_dict=plot_dict,
+        side_traj=side_traj,
+        altitude_levels=altitude_levels,
+        domain=domain,
+        ax=map_ax,
+    )
+
+    # ADD ALTITUDE PLOT TO PDF
+    alt_index = 1
+    while alt_index <= altitude_levels:
+        subplot_index = int(plot_dict["altitude_" + str(alt_index)]["subplot_index"])
+        tmp_ax = plt.subplot(gs01[subplot_index + 1, 0])
         generate_altitude_plot(
             x=x,
             y=plot_dict,
