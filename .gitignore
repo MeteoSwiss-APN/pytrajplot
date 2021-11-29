@@ -335,3 +335,4 @@ src/pytrajplot/docstring_template/default.mustache
 src/pytrajplot/docstring_template/meteoswiss.mustache
 src/pytrajplot/docstring_template/meteoswiss.mustache
 src/pytrajplot/meteoswiss.mustache
+src/pytrajplot/scratch/test.png
