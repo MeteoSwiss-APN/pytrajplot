@@ -95,12 +95,26 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
 @click.option(
     "--datatype",
     type=click.Choice(
-        ["pdf", "png"],
+        [
+            "eps",
+            "jpeg",
+            "jpg",
+            "pdf",
+            "pgf",
+            "png",
+            "ps",
+            "raw",
+            "rgba",
+            "svg",
+            "svgz",
+            "tif",
+            "tiff",
+        ],
         case_sensitive=False,
     ),
     multiple=True,
-    default=("png"),
-    help="Choose data type(s) of final result. Default: png",
+    default=["pdf"],
+    help="Choose data type(s) of final result. Default: pdf",
 )
 def main(
     *,
