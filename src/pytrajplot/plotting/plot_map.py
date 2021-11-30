@@ -127,13 +127,14 @@ def crop_map(ax, domain, custom_domain_boundaries):
     padding = 5  # padding on each side, for the dynamically created plots
 
     domain_dict = {
-        "centraleurope": {"domain": [2, 18, 42, 52]},  # TODO: adapt to pdf boundaries
-        "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},  # don't change
-        "alps": {"domain": [0.7, 16.5, 42.3, 50]},  # don't change
-        "europe": {
-            "domain": [-10, 47, 35, 65]
-        },  # TODO: add domain boundaries and fit to pdf boundaries
-        "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},  # TODO: adapt to pdf boundaries
+        "centraleurope": {"domain": [2, 18, 42.5, 51.5]},  # optimised boundaries
+        # "centraleurope": {"domain": [2, 18, 42, 52]},     # original boundaries
+        "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},  # optimised boundaries
+        "alps": {"domain": [0.7, 16.5, 42.3, 50]},  # optimised boundaries
+        # "europe": {"domain": [-12.5, 50.5, 35, 65]},      # optimised boundaries
+        "europe": {"domain": [-10, 47, 35, 65]},  # original boundaries
+        "ch_hd": {"domain": [2.8, 13.2, 44.1, 49.4]},  # optimised boundaries
+        # "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},     # original boundaries
         "dynamic": {
             "domain": [
                 round(custom_domain_boundaries[0]) - padding,
@@ -925,7 +926,6 @@ def generate_map_plot(
         8: "crimson-",
         9: "lightgreen-",
     }
-
     add_trajectories(
         coord_dict=coord_dict,
         side_traj=side_traj,
