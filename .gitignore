@@ -336,3 +336,17 @@ src/pytrajplot/docstring_template/meteoswiss.mustache
 src/pytrajplot/docstring_template/meteoswiss.mustache
 src/pytrajplot/meteoswiss.mustache
 src/pytrajplot/scratch/test.png
+tests/test_cosmo/plot_info
+tests/test_cosmo/startf_000-033F
+tests/test_cosmo/tra_geom_000-033F
+tests/test_cosmo/plots/000-033F/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_alps.png
+tests/test_cosmo/plots/000-033F/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_centraleurope.png
+tests/test_cosmo/plots/000-033F/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch_hd.pdf
+tests/test_cosmo/plots/000-033F/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch_hd.png
+tests/test_cosmo/plots/000-033F/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch.png
+tests/test_cosmo/plots/000-033F/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_dynamic.png
+tests/test_cosmo/plots/000-033F/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_europe.png
+tests/test_hres/plot_info
+tests/test_hres/startf_000-048F
+tests/test_hres/tra_geom_000-048F
+zmichel/test_cases/single/COSMO_F/plots/COSMO_F/20211011TCOS_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_O_F_ch_hd.png
