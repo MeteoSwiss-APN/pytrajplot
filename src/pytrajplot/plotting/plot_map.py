@@ -95,7 +95,7 @@ def add_features(ax):
     gl.top_labels = False
     gl.right_labels = False
 
-    ax.add_feature(cfeature.LAND, rasterized=True)
+    ax.add_feature(cfeature.LAND, rasterized=True, color="MintCream")
     ax.add_feature(cfeature.COASTLINE, alpha=0.5, rasterized=True)
     ax.add_feature(cfeature.BORDERS, linestyle="--", alpha=0.5, rasterized=True)
     ax.add_feature(cfeature.OCEAN, rasterized=True)
