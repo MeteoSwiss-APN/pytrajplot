@@ -69,32 +69,23 @@ def generate_altitude_plot(
     sub_index,
     ax=None,
 ):
-    """Summary - First line should end with a period.
+    """Generate the altitude plots.
 
     Args:
-        x
-                            df         Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
-        y
-                            dict       Dictionary, containig the y-axis information for all subplots
-        key
-                            str        Key string necessary for creating an output folder for each start/trajectory file pair
-        side_traj
-                            int        0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
-        altitude_levels
-                            int        #altitude levels = #subplots
-        language
-                            str        language for plot annotations
-        max_start_altitude
-                            float      maximum start altitude
-        alt_index
-                            int        index of current altitude (in dict)
-        sub_index
-                            int        index of corresponding subplot
+        x                   df         Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
+        y                   dict       Dictionary, containig the y-axis information for all subplots
+        key                 str        Key string necessary for creating an output folder for each start/trajectory file pair
+        side_traj           int        0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
+        altitude_levels     int        #altitude levels = #subplots
+        language            str        language for plot annotations
+        max_start_altitude  float      maximum start altitude
+        alt_index           int        index of current altitude (in dict)
+        sub_index           int        index of corresponding subplot
 
-        ax ([Axes], optional): Axes to plot the altitude on. Defaults to None.
+        ax (Axes): Axes to plot the altitude on. Defaults to None.
 
     Returns:
-        ax ([Axes], optional): Axes w/ altitude plot.
+        ax (Axes): Axes w/ altitude plot.
 
 
     """
@@ -102,6 +93,8 @@ def generate_altitude_plot(
 
     if language == "en":
         locale.setlocale(locale.LC_ALL, "en_GB")
+    else:  # language == "de"
+        locale.setlocale(locale.LC_ALL, "de_DE")
 
     if sub_index != (altitude_levels - 1):
         ax.set_xticklabels([])
@@ -118,7 +111,7 @@ def generate_altitude_plot(
         8: "crimson-",
         9: "lightgreen-",
     }
-
+    plt.tick_params(axis="both", labelsize=8)
     converter = mdates.ConciseDateConverter()
     munits.registry[np.datetime64] = converter
     munits.registry[datetime.date] = converter
