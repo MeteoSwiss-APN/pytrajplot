@@ -8,30 +8,26 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
     """Summary - First line should end with a period.
 
     Args:
-        language
-                            str        language for plot annotations
-        plot_info
-                            dict       Dict w/ information for info header (taken from info file)
-        plot_data
-                            dict       Dict w/ information for info header (taken from start/traj files)
-        domain
-                            str        domain of current plot
+        language            str        language for plot annotations
+        plot_info           dict       Dict w/ information for info header (taken from info file)
+        plot_data           dict       Dict w/ information for info header (taken from start/traj files)
+        domain              str        domain of current plot
 
-        ax ([Axes], optional): Axes to plot the info header on. Defaults to None.
+        ax (Axes): Axes to plot the info header on. Defaults to None.
 
     Returns:
-        ax ([Axes], optional): Axes w/ info header.
+        ax (Axes): Axes w/ info header.
 
     """
     ax = ax or plt.gca()
     ax.axis("off")
 
-    # TODO: extract relevant parameters from plot_data for the header
     origin = plot_data["altitude_1"]["origin"]
     y_type = plot_data["altitude_1"]["y_type"]
     lon_0 = plot_data["altitude_1"]["traj_0"]["lon"].iloc[0]
     lat_0 = plot_data["altitude_1"]["traj_0"]["lat"].iloc[0]
     model_name = plot_info["model_name"]
+    trajectory_direction = plot_data["altitude_1"]["trajectory_direction"]
     elevation = ""
 
     for key in plot_data:
@@ -52,9 +48,15 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
     start_time = plot_info["mbt"]
 
     if language == "en":
-        title = f"TRAJECTORY from {origin} on: {start_time}"
+        if trajectory_direction == "F":
+            title = f"Forward Trajectory from {origin} departing on: {start_time}"
+        if trajectory_direction == "B":
+            title = f"Backward Trajectory from {origin} arriving on: {start_time}"
     else:
-        title = f"TAJEKTORIE von {origin} am: {start_time}"
+        if trajectory_direction == "F":
+            title = f"Vorwärts Trajektorie von {origin} gestartet am: {start_time}"
+        if trajectory_direction == "B":
+            title = f"Rückwärts Trajektorie von {origin} gestartet am: {start_time}"
 
     ax.set_title(
         title,
@@ -104,7 +106,5 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
         transform=ax.transAxes,
         va="center",
         ha="center",
-        # bbox=dict(facecolor='red', alpha=0.5),
-        # fontsize='xx-large'
     )
     return ax
