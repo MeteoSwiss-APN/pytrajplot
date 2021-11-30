@@ -1,7 +1,6 @@
 """Util functions to get data."""
 # Standard library
 import os
-from enum import unique
 
 # Third-party
 import numpy as np
@@ -210,7 +209,6 @@ def read_startf(startf_path, separator):
                             i
                         ]  # altitude levels for given location
                         # add information to unique_altitude_levels_dict
-                        # print(f"{origin}: rows {i} - {i + altitude_levels}")
                         unique_altitude_levels_dict[start_df["origin"].loc[i]] = (
                             start_df["z"].loc[i : (i + altitude_levels)].unique()
                         )
@@ -347,8 +345,6 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         number_of_times (int):          #rows making up one trajectory
 
     """
-    # print("--- reading trajectory file")
-
     # read first line of trajectory file to check which case it is.
     with open(trajectory_file_path) as f:
         firstline = f.readline().rstrip()
@@ -415,6 +411,9 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     traj_df["altitude_levels"] = None
     traj_df["#trajectories"] = number_of_trajectories
     traj_df["block_length"] = number_of_times
+    traj_df["trajectory_direction"] = trajectory_file_path[
+        -1:
+    ]  # the last letter of the trajectorys file name is either B (backward) or F (forward)
     traj_df["subplot_index"] = np.NaN
     traj_df["max_start_altitude"] = np.NaN
 
@@ -438,6 +437,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         traj_df["start_altitude"].iloc[lower_row:upper_row] = start_altitude
         traj_df["subplot_index"].iloc[lower_row:upper_row] = subplot_index
         traj_df["max_start_altitude"].iloc[lower_row:upper_row] = max_start_altitude
+        # traj_df["trajectory_direction"].iloc[lower_row:upper_row] = trajectory_file_path[-1:]
         tmp += 1
 
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
@@ -465,6 +465,7 @@ def check_input_dir(input_dir, prefix_dict, separator):
         keys (list):            List containing all keys that are present in the trajectory_dict. I.e. ['000-048F'] if there is only one start/traj. file pair.
 
     """
+    print("--- Parsing Input Files")
     counter = 0
     start_dict, trajectory_dict, files, keys, traj_blocks = {}, {}, [], [], {}
 
@@ -503,10 +504,6 @@ def check_input_dir(input_dir, prefix_dict, separator):
         if os.path.isfile(file_path):
             if filename[: len(prefix_dict["trajectory"])] == prefix_dict["trajectory"]:
                 files.append(filename)
-
-                # if filename[len(prefix_dict['trajectory']):] not in keys:
-                #     keys.append(filename[len(prefix_dict['trajectory']):])
-
                 (
                     trajectory_dict[filename[len(prefix_dict["trajectory"]) :]],
                     number_of_trajectories,
