@@ -12,12 +12,10 @@ def create_coord_dict(altitude_levels):
     """Create dict of dicts to be filled with information for all trajectories to be plottet.
 
     Args:
-        altitude_levels
-                            int        Number of trajectory dicts (for each alt. level one dict)
+        altitude_levels     int        Number of trajectory dicts (for each alt. level one dict)
 
     Returns:
-        coord_dict
-                            dict       Dict of dicts. For each altitude level, one dict is present in this dict. Each of those 'altitude dicts' contains the relevant information to plot the corresponding trajectory.
+        coord_dict          dict       Dict of dicts. For each altitude level, one dict is present in this dict. Each of those 'altitude dicts' contains the relevant information to plot the corresponding trajectory.
 
     """
     assert (
@@ -97,7 +95,6 @@ def add_features(ax):
     gl.top_labels = False
     gl.right_labels = False
 
-    ax.coastlines(resolution="10m", rasterized=True)
     ax.add_feature(cfeature.LAND, rasterized=True)
     ax.add_feature(cfeature.COASTLINE, alpha=0.5, rasterized=True)
     ax.add_feature(cfeature.BORDERS, linestyle="--", alpha=0.5, rasterized=True)
@@ -118,26 +115,25 @@ def crop_map(ax, domain, custom_domain_boundaries):
     """Crop map to given domain (i.e. centraleurope).
 
     Args:
-        ax
-                            Axes       current map to crop
-        domain
-                            str        key for the domain_dict to retrieve correct domain boundaries
+        ax                  Axes       current map to crop
+        domain              str        key for the domain_dict to retrieve correct domain boundaries
         custom_domain_boundaries
                             list       list, containing the domain for these specifc trajectories (created dynamically)
 
     Returns:
-        domain_boundaries
-                            list       [lat0,lat1,lon0,lon1]
+        domain_boundaries   list       [lat0,lat1,lon0,lon1]
 
     """
     padding = 5  # padding on each side, for the dynamically created plots
 
     domain_dict = {
-        "centraleurope": {"domain": [2, 18, 42, 52]},
-        "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},
-        "alps": {"domain": [2, 14, 43, 50]},
-        "europe": {"domain": [-10, 47, 35, 65]},
-        "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},
+        "centraleurope": {"domain": [2, 18, 42, 52]},  # TODO: adapt to pdf boundaries
+        "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},  # don't change
+        "alps": {"domain": [0.7, 16.5, 42.3, 50]},  # don't change
+        "europe": {
+            "domain": [-10, 47, 35, 65]
+        },  # TODO: add domain boundaries and fit to pdf boundaries
+        "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},  # TODO: adapt to pdf boundaries
         "dynamic": {
             "domain": [
                 round(custom_domain_boundaries[0]) - padding,
@@ -158,14 +154,10 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
     """Check if a point (city) is inside the domain.
 
     Args:
-        lat
-                            float      latitude of city
-        lon
-                            float      longitude of city
-        domain_boundaries
-                            list       lon/lat range of domain
-        cross_dateline
-                            bool       if cross_dateline --> western lon values need to be shifted
+        lat                 float      latitude of city
+        lon                 float      longitude of city
+        domain_boundaries   list       lon/lat range of domain
+        cross_dateline      bool       if cross_dateline --> western lon values need to be shifted
 
     Returns:
                             bool       True if city is within domain boundaries, else false.
@@ -190,16 +182,11 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
     """Check if a city fulfils certain importance criteria.
 
     Args:
-        name
-                            str        Name of city
-        capital_type
-                            str        primary/admin/minor (label for "relevance" of city)
-        population
-                            int        Population of city (there are conditions based on population)
-        domain
-                            str        Map domain. Different domains have different conditions to determine interest.
-        lon
-                            float      Longitude of city  (there are conditions based on longitude)
+        name                str        Name of city
+        capital_type        str        primary/admin/minor (label for "relevance" of city)
+        population          int        Population of city (there are conditions based on population)
+        domain              str        Map domain. Different domains have different conditions to determine interest.
+        lon                 float      Longitude of city  (there are conditions based on longitude)
 
     Returns:
                             bool       True if city is of interest, else false
@@ -306,6 +293,8 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
             "Leon de los Aldama",
             "Wroclaw",
             "Rotterdam",
+            "Indianapolis",
+            "Raleigh",
         ]
         is_excluded = name in excluded_cities
         return (is_capital or is_large) and not is_excluded
@@ -418,6 +407,9 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
             "San Marino",
             "Nice",
             "Lucerne",
+            "Maribor",
+            "Kranj",
+            "L'Aquila",
         ]
         is_excluded = name in excluded_cities
         return (is_capital or is_large) and not is_excluded
@@ -440,7 +432,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
     cities_df = cities_df.dropna()
 
-    add_w_town = True
+    add_w_town = False
 
     if add_w_town:
         if not cross_dateline:
@@ -552,16 +544,12 @@ def retrieve_interval_points(coord_dict, altitude_index):
     """Extract the interval points from coord_dict add them to ax.
 
     Args:
-        coord_dict
-                            dict       containing the lan/lot data & other plot properties
-        altitude_index
-                            int        Altitude index. Only want to add legend for altitude one.
+        coord_dict          dict       containing the lan/lot data & other plot properties
+        altitude_index      int        Altitude index. Only want to add legend for altitude one.
 
     Returns:
-        lon_important
-                            series     pandas list w/ interval point longitude values
-        lat_important
-                            series     pandas list w/ interval point latitude values
+        lon_important       series     pandas list w/ interval point longitude values
+        lat_important       series     pandas list w/ interval point latitude values
 
     """
     # create temporary dataframes
@@ -721,22 +709,15 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
     """Check wheter dateline is crossed or not and return dynamic domain boundaries.
 
     Args:
-        coord_dict
-                            dict       containing the lan/lot data & other plot properties
-        altitude_levels
-                            int        # altitude levels
-        side_traj
-                            bool       True if there are side trajectories, else false.
+        coord_dict          dict       containing the lan/lot data & other plot properties
+        altitude_levels     int        # altitude levels
+        side_traj           bool       True if there are side trajectories, else false.
 
     Returns:
-        central_longitude
-                            float      0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
-        domain_boundaries
-                            list       [lon0,lon1,lat0,lat1]
-        lon_df
-                            df         single column dataframe containing the (shifted/unchanged) longitude values
-        cross_dateline
-                            bool       bool, to remember if the dateline was crossed for a given trajectory
+        central_longitude   float      0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
+        domain_boundaries   list       [lon0,lon1,lat0,lat1]
+        lon_df              df         single column dataframe containing the (shifted/unchanged) longitude values
+        cross_dateline      bool       bool, to remember if the dateline was crossed for a given trajectory
 
     """
     coord_dict_tmp = coord_dict.copy()
@@ -873,25 +854,15 @@ def generate_map_plot(
     domain,
     ax=None,
 ):
-    """Summary - First line should end with a period.
+    """Generate Map Plot.
 
     Args:
-        cross_dateline
-                            bool       Bool, to specify whether the dateline was crossed or not
-        coord_dict
-                            dict       Dictionary containing the lan/lot data & other plot properties
-        side_traj
-                            int        0/1 --> necessary for choosing the correct loop
-        altitude_levels
-                            int        # altitude levels
-        domain
-                            str        Domain for map
-
-        ax ([Axes], optional): Axes to generate the map on. Defaults to None.
-
-    Returns:
-        output_variable
-                            type       description
+        cross_dateline:     bool       Bool, to specify whether the dateline was crossed or not
+        coord_dict:         dict       Dictionary containing the lan/lot data & other plot properties
+        side_traj:          int        0/1 --> necessary for choosing the correct loop
+        altitude_levels:    int        # altitude levels
+        domain:             str        Domain for map
+        ax:                 Axes       Axes to generate the map on. Defaults to None.
 
     """
     if domain == "dynamic":
