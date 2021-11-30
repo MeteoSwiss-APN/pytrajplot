@@ -350,3 +350,9 @@ tests/test_hres/plot_info
 tests/test_hres/startf_000-048F
 tests/test_hres/tra_geom_000-048F
 zmichel/test_cases/single/COSMO_F/plots/COSMO_F/20211011TCOS_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_O_F_ch_hd.png
+zmichel/test_cosmo/plot_info
+zmichel/test_cosmo/startf_000-033F
+zmichel/test_cosmo/tra_geom_000-033F
+zmichel/test_hres/plot_info
+zmichel/test_hres/startf_000-048F
+zmichel/test_hres/tra_geom_000-048F
