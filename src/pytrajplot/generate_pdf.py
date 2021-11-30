@@ -1,12 +1,32 @@
 """Generate PDF w/ altitude figure and map plot."""
 
 # Standard library
+import cProfile
+import io
 import os
+import pstats
 
 # Third-party
 import cartopy.crs as ccrs
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
+
+
+def profile(func):
+    def wrapper(*args, **kwargs):
+        pr = cProfile.Profile()
+        pr.enable()
+        retval = func(*args, **kwargs)
+        pr.disable()
+        s = io.StringIO()
+        sortby = "cumulative"
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return wrapper
+
 
 plt.rc("axes", labelsize=8)  # change the font size of the axis labels
 
@@ -221,7 +241,6 @@ def assemble_pdf(
         domain=domain,
     )
 
-    print("adding map to pdf")
     # ADD MAP TO PDF
     projection, cross_dateline = get_projection(
         plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
@@ -301,6 +320,7 @@ def assemble_pdf(
     return
 
 
+# @profile
 def generate_pdf(
     trajectory_dict,
     plot_info_dict,
