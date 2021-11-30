@@ -7,7 +7,6 @@ import os
 import cartopy.crs as ccrs
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER
 
 plt.rc("axes", labelsize=8)  # change the font size of the axis labels
 
@@ -160,7 +159,6 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
         + f"{key[4:7]}_"
         + f"{domain}"
     )
-    print(type(final_filename))
     return final_filename
 
 
@@ -196,7 +194,15 @@ def assemble_pdf(
     # DEFINE FIGURE PROPERTIES AND GRID SPECIFICATION
     # fig = plt.figure(figsize=(11.69, 8.27), dpi=200)  # A4 size
     fig = plt.figure(figsize=(16, 9), dpi=200)
-    widths = [10, 4]
+
+    if altitude_levels == 1:
+        altitude_levels = 9
+        one_start_altitude = True
+        widths = [1, 0.4]
+    else:
+        one_start_altitude = False
+        widths = [1, 0.4]
+
     heights = [0.5] + [1] * (altitude_levels)
     # create grid spec oject
     grid_specification = gs.GridSpec(
@@ -215,40 +221,71 @@ def assemble_pdf(
         domain=domain,
     )
 
+    print("adding map to pdf")
     # ADD MAP TO PDF
     projection, cross_dateline = get_projection(
         plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
     )
     map_ax = plt.subplot(grid_specification[1:, 0], projection=projection)
-    generate_map_plot(
-        cross_dateline=cross_dateline,
-        coord_dict=plot_dict,
-        side_traj=side_traj,
-        altitude_levels=altitude_levels,
-        domain=domain,
-        ax=map_ax,
-    )
+    if one_start_altitude:
+        generate_map_plot(
+            cross_dateline=cross_dateline,
+            coord_dict=plot_dict,
+            side_traj=side_traj,
+            altitude_levels=1,
+            domain=domain,
+            ax=map_ax,
+        )
+
+    else:
+        generate_map_plot(
+            cross_dateline=cross_dateline,
+            coord_dict=plot_dict,
+            side_traj=side_traj,
+            altitude_levels=altitude_levels,
+            domain=domain,
+            ax=map_ax,
+        )
 
     # ADD ALTITUDE PLOT TO PDF
-    alt_index = 1
-    while alt_index <= altitude_levels:
-        subplot_index = int(plot_dict["altitude_" + str(alt_index)]["subplot_index"])
-        tmp_ax = plt.subplot(grid_specification[subplot_index + 1, 1])
+    if one_start_altitude:
+
+        alt_ax = plt.subplot(grid_specification[4:6, 1])
         generate_altitude_plot(
             x=x,
             y=plot_dict,
             key=key,
             side_traj=side_traj,
-            altitude_levels=altitude_levels,
+            altitude_levels=1,
             language=language,
             max_start_altitude=max_start_altitude,
-            ax=tmp_ax,
-            alt_index=alt_index,
-            sub_index=subplot_index,
+            ax=alt_ax,
+            alt_index=1,
+            sub_index=0,
         )
 
-        # plot_dummy_altitude(ax=tmp_ax, plot_index=subplot_index, altitude_levels=altitude_levels)
-        alt_index += 1
+    else:
+        alt_index = 1
+        while alt_index <= altitude_levels:
+            subplot_index = int(
+                plot_dict["altitude_" + str(alt_index)]["subplot_index"]
+            )
+            tmp_ax = plt.subplot(grid_specification[subplot_index + 1, 1])
+            generate_altitude_plot(
+                x=x,
+                y=plot_dict,
+                key=key,
+                side_traj=side_traj,
+                altitude_levels=altitude_levels,
+                language=language,
+                max_start_altitude=max_start_altitude,
+                ax=tmp_ax,
+                alt_index=alt_index,
+                sub_index=subplot_index,
+            )
+
+            # plot_dummy_altitude(ax=tmp_ax, plot_index=subplot_index, altitude_levels=altitude_levels)
+            alt_index += 1
 
     # SAVE PDF
 
@@ -258,9 +295,8 @@ def assemble_pdf(
     )  # create plot folder if it doesn't already exist
 
     filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
-
-    for type in output_types:
-        plt.savefig(outpath + filename + "." + type)
+    for file_type in output_types:
+        plt.savefig(outpath + filename + "." + file_type)
     plt.close(fig)
     return
 
