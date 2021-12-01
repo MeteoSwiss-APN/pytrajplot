@@ -1,1 +1,5 @@
 click
+numpy
+pandas
+matplotlib
+cartopy
