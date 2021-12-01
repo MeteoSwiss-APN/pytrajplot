@@ -10,6 +10,14 @@ from .parse_data import check_input_dir
 from .utils import count_to_log_level
 
 
+# pylint: disable=W0613  # unused-argument (param)
+def print_version(ctx, param, value: bool) -> None:
+    """Print the version number and exit."""
+    if value:
+        click.echo(__version__)
+        ctx.exit(0)
+
+
 def interpret_options(start_prefix, traj_prefix, info_name, language):
     """Reformat command line inputs.
 
