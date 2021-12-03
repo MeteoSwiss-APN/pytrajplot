@@ -182,7 +182,7 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
     return final_filename
 
 
-def assemble_pdf(
+def assemble_pdf_original(
     plot_info_dict,
     x,
     plot_dict,
@@ -216,7 +216,8 @@ def assemble_pdf(
     fig = plt.figure(figsize=(16, 9), dpi=200)
 
     if altitude_levels == 1:
-        altitude_levels = 9
+        altitude_levels = 5
+        # altitude_levels = 9
         one_start_altitude = True
         widths = [1, 0.4]
     else:
@@ -269,7 +270,7 @@ def assemble_pdf(
     # ADD ALTITUDE PLOT TO PDF
     if one_start_altitude:
 
-        alt_ax = plt.subplot(grid_specification[4:6, 1])
+        alt_ax = plt.subplot(grid_specification[4:, 1])
         generate_altitude_plot(
             x=x,
             y=plot_dict,
@@ -320,6 +321,120 @@ def assemble_pdf(
     return
 
 
+def assemble_pdf(
+    plot_info_dict,
+    x,
+    plot_dict,
+    key,
+    side_traj,
+    output_dir,
+    altitude_levels,
+    language,
+    max_start_altitude,
+    domain,
+    output_types,
+):
+    """Assemble final output pdf/png.
+
+    Args:
+        plot_info_dict:         dict                Dictionary containing the information of the plot-info file
+        x:                      pandas series       Pandas Series (array-like) w/ the dates. x-axis information for the altitude plot
+        plot_dict:              dict                Dictionary containing the combined information of the start & trajectory file
+        key:                    str                 ID of the start and trajectory file
+        side_traj:              bool                Bool, to specify whether there are side trajectories or not
+        output_dir:             str                 Path to output directory
+        altitude_levels:        int                 Number of starting altitudes
+        language:               str                 Language of plot annotations
+        max_start_altitude:     float               Highest starting altitude
+        domain:                 str                 Domain of the map.
+        output_types:           tuple               Tuple containing the file types of the output files. (pdf and/or png)
+
+    """
+    # DEFINE FIGURE PROPERTIES AND GRID SPECIFICATION
+    # fig = plt.figure(figsize=(11.69, 8.27), dpi=200)  # A4 size
+    fig = plt.figure(figsize=(16, 9), dpi=200)
+
+    # create grid spec oject
+    grid_specification = gs.GridSpec(
+        nrows=2, ncols=2, width_ratios=[1, 0.4], height_ratios=[0.1, 1]
+    )
+
+    plt.subplots_adjust(
+        left=0.1,  # left margin = 0.1
+        bottom=0.08,
+        right=0.9,  # right margin = 0.1
+        top=0.92,
+        wspace=0.15,  # space between the first and second column
+        hspace=0.08,
+    )
+
+    gs_info = grid_specification[0, 0].subgridspec(
+        1, 3, width_ratios=[1.5, 1, 0.5]
+    )  # placement of info header optimal
+    gs_map = grid_specification[1, 0].subgridspec(10, 1)
+    gs_alt = grid_specification[1, 1].subgridspec(altitude_levels, 1)
+
+    origin = plot_dict["altitude_1"]["origin"]
+
+    # ADD INFO HEADER TO PDF
+    info_ax = plt.subplot(gs_info[:, 1:])
+    generate_info_header(
+        language=language,
+        plot_info=plot_info_dict,
+        plot_data=plot_dict,
+        ax=info_ax,
+        domain=domain,
+    )
+
+    # ADD MAP TO PDF
+    projection, cross_dateline = get_projection(
+        plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
+    )
+    map_ax = plt.subplot(gs_map[:, 0], projection=projection)
+    generate_map_plot(
+        cross_dateline=cross_dateline,
+        coord_dict=plot_dict,
+        side_traj=side_traj,
+        altitude_levels=altitude_levels,
+        domain=domain,
+        ax=map_ax,
+    )
+
+    alt_index = 1
+    while alt_index <= altitude_levels:
+        subplot_index = int(plot_dict["altitude_" + str(alt_index)]["subplot_index"])
+        tmp_ax = plt.subplot(gs_alt[subplot_index, 0])
+        generate_altitude_plot(
+            x=x,
+            y=plot_dict,
+            key=key,
+            side_traj=side_traj,
+            altitude_levels=altitude_levels,
+            language=language,
+            max_start_altitude=max_start_altitude,
+            ax=tmp_ax,
+            alt_index=alt_index,
+            sub_index=subplot_index,
+        )
+
+        # plot_dummy_altitude(ax=tmp_ax, plot_index=subplot_index, altitude_levels=altitude_levels)
+        alt_index += 1
+
+    # SAVE PDF
+
+    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
+    os.makedirs(
+        outpath, exist_ok=True
+    )  # create plot folder if it doesn't already exist
+
+    filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
+    for file_type in output_types:
+        plt.savefig(outpath + "new." + file_type)
+        # plt.savefig(outpath + filename + "." + file_type)
+    plt.close(fig)
+    return
+
+
 # @profile
 def generate_pdf(
     trajectory_dict,
@@ -344,6 +459,7 @@ def generate_pdf(
     """
     print("--- Assembling PDF")
     for key in trajectory_dict:  # iterate through the trajectory dict
+        print(key)
         trajectory_df = trajectory_dict[key]  # extract df for given key
         altitude_levels = trajectory_df["altitude_levels"].loc[0]
         trajectory_direction = trajectory_df["trajectory_direction"].loc[0]
