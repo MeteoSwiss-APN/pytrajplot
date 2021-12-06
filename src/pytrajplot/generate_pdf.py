@@ -263,7 +263,7 @@ def assemble_pdf(
     # ADD ALTITUDE PLOT TO PDF
     if altitude_levels <= 3:
         gs_alt = grid_specification[1, 1].subgridspec(
-            30, 1
+            32, 1
         )  # use this gs_alt only if altitude levels > 3, for 1-3 write separate functions
         alt_index = 1
         while alt_index <= altitude_levels:
@@ -272,19 +272,19 @@ def assemble_pdf(
             )
 
             if altitude_levels == 1:
-                tmp_ax = plt.subplot(gs_alt[21:, 0])
+                tmp_ax = plt.subplot(gs_alt[20:, 0])
             if altitude_levels == 2:
                 if subplot_index == 0:
-                    tmp_ax = plt.subplot(gs_alt[11:20, 0])
+                    tmp_ax = plt.subplot(gs_alt[10:20, 0])
                 if subplot_index == 1:
-                    tmp_ax = plt.subplot(gs_alt[21:, 0])
+                    tmp_ax = plt.subplot(gs_alt[20:, 0])
             if altitude_levels == 3:
                 if subplot_index == 0:
                     tmp_ax = plt.subplot(gs_alt[0:10, 0])
                 if subplot_index == 1:
-                    tmp_ax = plt.subplot(gs_alt[11:20, 0])
+                    tmp_ax = plt.subplot(gs_alt[11:21, 0])
                 if subplot_index == 2:
-                    tmp_ax = plt.subplot(gs_alt[21:, 0])
+                    tmp_ax = plt.subplot(gs_alt[22:, 0])
 
             generate_altitude_plot(
                 x=x,
