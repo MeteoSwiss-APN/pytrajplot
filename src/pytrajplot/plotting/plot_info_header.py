@@ -53,7 +53,7 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
             site = "$\it{Release}$ $\it{Site}:} $"
         if trajectory_direction == "B":
             title = f"Backward Trajectory from {origin} arriving on: {start_time}"
-            site = "$\it{Release}$ $\it{Site}:} $"
+            site = "$\it{Receptor}$ $\it{Site}:} $"
     else:
         if trajectory_direction == "F":
             title = f"Vorwärts Trajektorie von {origin} gestartet am: {start_time}"
