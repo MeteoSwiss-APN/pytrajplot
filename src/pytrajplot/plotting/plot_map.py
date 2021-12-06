@@ -95,24 +95,7 @@ def add_features(ax):
     gl.top_labels = False
     gl.right_labels = False
 
-    # Colors taken from: https://www.rapidtables.com/web/color/RGB_Color.html and https://www.color-hex.com/
-    # MintCream Original:   (245,255,250)
-    # MintCream Edit 1:     #F5FFC8 (245, 255, 200)
-    # MintCream Edit 2:     #F5FFE6 (245, 255, 230)
-    # Trial 01:             #DFE4E2 (223, 228, 226)
-    # Trial 02:             #E3E6E2
-    # Trial 03:             #F1E6E4
-    # Trial 04:             #E6DCE4
-    # Azure:                #F0FFFF
-    # Snow:                 #FFFAFA
-    # Google:               #F8F9FA
-    # Linen:                #FAF0E6
-    # Floral White:         #FFFAF0
-    # Ivory:             	#FFFFF0
-    # Old Lace:             #FDF5E6
-
-    ax.add_feature(cfeature.LAND, rasterized=True, color="#FDF5E6")
-    # ax.add_feature(cfeature.LAND, rasterized=True, color="#E0FFFF")
+    ax.add_feature(cfeature.LAND, rasterized=True, color="#FFFAF0")
     ax.add_feature(cfeature.COASTLINE, alpha=0.5, rasterized=True)
     ax.add_feature(cfeature.BORDERS, linestyle="--", alpha=0.5, rasterized=True)
     ax.add_feature(cfeature.OCEAN, rasterized=True)
