@@ -60,7 +60,7 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
             site = "$\it{Ursprungsort}$: $"
         if trajectory_direction == "B":
             title = f"Rückwärts Trajektorie von {origin} gestartet am: {start_time}"
-            site = "$\it{Ankunftsort}$: $"
+            site = "$\it{Ankunftsort}$: "
 
     ax.set_title(
         title,
@@ -88,7 +88,7 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
         )
     else:
         info = (
-            "$\it{Ursprungsort}$: "
+            site
             + f"{origin}"
             + "  |  "
             + "$\it{Koordinaten:}$"

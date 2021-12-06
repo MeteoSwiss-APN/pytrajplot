@@ -272,12 +272,12 @@ def assemble_pdf(
             )
 
             if altitude_levels == 1:
-                tmp_ax = plt.subplot(gs_alt[20:, 0])
+                tmp_ax = plt.subplot(gs_alt[22:, 0])
             if altitude_levels == 2:
                 if subplot_index == 0:
-                    tmp_ax = plt.subplot(gs_alt[10:20, 0])
+                    tmp_ax = plt.subplot(gs_alt[11:21, 0])
                 if subplot_index == 1:
-                    tmp_ax = plt.subplot(gs_alt[20:, 0])
+                    tmp_ax = plt.subplot(gs_alt[22:, 0])
             if altitude_levels == 3:
                 if subplot_index == 0:
                     tmp_ax = plt.subplot(gs_alt[0:10, 0])
@@ -363,7 +363,7 @@ def generate_pdf(
     """
     print("--- Assembling PDF")
     for key in trajectory_dict:  # iterate through the trajectory dict
-        print(key)
+        # print(key)
         trajectory_df = trajectory_dict[key]  # extract df for given key
         altitude_levels = trajectory_df["altitude_levels"].loc[0]
         trajectory_direction = trajectory_df["trajectory_direction"].loc[0]
