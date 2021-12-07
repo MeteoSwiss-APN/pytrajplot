@@ -1,6 +1,10 @@
 """Generate Map Plot Figure."""
 
+# Standard library
+from pathlib import Path
+
 # Third-party
+import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
@@ -83,6 +87,16 @@ def add_features(ax):
         ax:                 Axes       Current map to add features to
 
     """
+    # point cartopy to the folder containing the shapefiles for the features on the map
+    earth_data_path = Path(
+        Path.home(), "pytrajplot/src/pytrajplot/resources/naturalearth"
+    )
+    assert (
+        earth_data_path.exists()
+    ), f"The natural earth data could not be found at {earth_data_path}"
+    cartopy.config["pre_existing_data_dir"] = earth_data_path
+
+    # add grid & labels to map
     gl = ax.gridlines(
         crs=ccrs.PlateCarree(),
         draw_labels=True,
@@ -95,19 +109,20 @@ def add_features(ax):
     gl.top_labels = False
     gl.right_labels = False
 
+    # THESE FEATURES SHOULD BE GENERATED USING FILES WHICH HAVE BEEN DOWNLOADED RATHER THAN DOWNLOAD THEM EACH TIME
     ax.add_feature(cfeature.LAND, rasterized=True, color="#FFFAF0")
     ax.add_feature(cfeature.COASTLINE, alpha=0.5, rasterized=True)
     ax.add_feature(cfeature.BORDERS, linestyle="--", alpha=0.5, rasterized=True)
     ax.add_feature(cfeature.OCEAN, rasterized=True)
     ax.add_feature(cfeature.LAKES, rasterized=True)
     ax.add_feature(cfeature.RIVERS, rasterized=True)
-    # additional lakes & rivers on a smaller scale
-    rivers_10m = cfeature.NaturalEarthFeature(
-        "physical", "rivers_lake_centerlines", "10m"
-    )
-    ax.add_feature(
-        rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5, rasterized=True
-    )
+    # # additional lakes & rivers on a smaller scale
+    # rivers_10m = cfeature.NaturalEarthFeature(
+    #     "physical", "rivers_lake_centerlines", "10m"
+    # )
+    # ax.add_feature(
+    #     rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5, rasterized=True
+    # )
     return
 
 
@@ -429,7 +444,12 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    cities_df = pd.read_csv("src/pytrajplot/cities/worldcities.csv")
+    cities_data_path = Path(Path.home(), "pytrajplot/src/pytrajplot/resources/cities/")
+    assert (
+        cities_data_path.exists()
+    ), f"The natural earth data could not be found at {cities_data_path}"
+    cities_df = pd.read_csv(Path(cities_data_path, "worldcities.csv"))
+
     # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
     cities_df = cities_df.dropna()
 
