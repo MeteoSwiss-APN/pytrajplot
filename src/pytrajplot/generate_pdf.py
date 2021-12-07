@@ -60,6 +60,8 @@ def create_plot_dict(altitude_levels):
     while i < altitude_levels + 1:
         altitude_dict = {
             "origin": None,
+            "lon_precise": None,
+            "lat_precise": None,
             "y_surf": None,
             "y_type": None,
             "alt_level": None,
@@ -386,6 +388,10 @@ def generate_pdf(
             lower_row = row_index * number_of_times
             upper_row = row_index * number_of_times + number_of_times
             origin = trajectory_df["origin"].loc[lower_row]
+            # ~~~~~~~ NEW ~~~~~~~ #
+            lon_precise = trajectory_df["lon_precise"].loc[lower_row]
+            lat_precise = trajectory_df["lat_precise"].loc[lower_row]
+            # ~~~~~~~ NEW ~~~~~~~ #
             altitude_levels = trajectory_df["altitude_levels"].loc[lower_row]
             subplot_index = trajectory_df["subplot_index"].loc[lower_row]
             max_start_altitude = trajectory_df["max_start_altitude"].loc[lower_row]
@@ -393,6 +399,10 @@ def generate_pdf(
             if side_traj:
                 if separator not in origin:
                     plot_dict["altitude_" + str(alt_index)]["origin"] = origin
+                    # ~~~~~~~ NEW ~~~~~~~ #
+                    plot_dict["altitude_" + str(alt_index)]["lon_precise"] = lon_precise
+                    plot_dict["altitude_" + str(alt_index)]["lat_precise"] = lat_precise
+                    # ~~~~~~~ NEW ~~~~~~~ #
                     plot_dict["altitude_" + str(alt_index)]["y_surf"] = trajectory_df[
                         "hsurf"
                     ][lower_row:upper_row]
@@ -455,6 +465,10 @@ def generate_pdf(
 
             else:
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
+                # ~~~~~~~ NEW ~~~~~~~ #
+                plot_dict["altitude_" + str(alt_index)]["lon_precise"] = lon_precise
+                plot_dict["altitude_" + str(alt_index)]["lat_precise"] = lat_precise
+                # ~~~~~~~ NEW ~~~~~~~ #
                 plot_dict["altitude_" + str(alt_index)]["subplot_index"] = subplot_index
                 plot_dict["altitude_" + str(alt_index)][
                     "max_start_altitude"

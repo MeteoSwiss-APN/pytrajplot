@@ -24,8 +24,8 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
 
     origin = plot_data["altitude_1"]["origin"]
     y_type = plot_data["altitude_1"]["y_type"]
-    lon_0 = plot_data["altitude_1"]["traj_0"]["lon"].iloc[0]
-    lat_0 = plot_data["altitude_1"]["traj_0"]["lat"].iloc[0]
+    lon_0 = format(round(plot_data["altitude_1"]["lon_precise"], 3), ".3f")
+    lat_0 = format(round(plot_data["altitude_1"]["lat_precise"], 3), ".3f")
     model_name = plot_info["model_name"]
     trajectory_direction = plot_data["altitude_1"]["trajectory_direction"]
     elevation = ""
