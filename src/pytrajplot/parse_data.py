@@ -132,7 +132,6 @@ def read_startf(startf_path, separator):
     unique_origins_list = []
     unique_altitude_levels_dict = {}
 
-    # TODO
     if len(start_df) == 1:
         start_df["side_traj"] = 0  # 1 if there are side trajectories, else 0
         start_df[
@@ -172,9 +171,6 @@ def read_startf(startf_path, separator):
                             .loc[i : (i + 5 * altitude_levels) - 1]
                             .unique()
                         )
-
-                    # print(f'{origin}: rows {i} - {i + 5} correspond to altitude level {start_df["z"].loc[i]} {unit}')
-                    # print(f'Calling map_alt_&_suplots for {origin} w/ unit = {unit}, unique start alts = {unique_altitude_levels_dict[origin]} & current_alt = {start_df["z"].loc[i]}')
 
                     start_df["subplot_index"].loc[
                         i : i + 4
@@ -234,7 +230,6 @@ def read_startf(startf_path, separator):
                         tmp += 1
 
                     i += 4
-
     return start_df
 
 
@@ -408,6 +403,8 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     traj_df["origin"] = None  # add origin key to dataframe
     traj_df["side_traj"] = None  # add side trajectory key dataframe
     traj_df["start_altitude"] = np.NaN
+    traj_df["lon_precise"] = np.NaN
+    traj_df["lat_precise"] = np.NaN
     traj_df["altitude_levels"] = None
     traj_df["#trajectories"] = number_of_trajectories
     traj_df["block_length"] = number_of_times
@@ -422,9 +419,10 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     while tmp < number_of_trajectories:
         lower_row = tmp * number_of_times
         upper_row = tmp * number_of_times + number_of_times
-        # print(traj_df['time'][lower_row:upper_row]) # check which rows are being changed
         z_type = start_df["z_type"][tmp]
         origin = start_df["origin"][tmp]
+        lon_precise = start_df["lon"][tmp]
+        lat_precise = start_df["lat"][tmp]
         start_altitude = start_df["z"][tmp]
         side_traj = start_df["side_traj"][tmp]
         altitude_levels = start_df["altitude_levels"][tmp]
@@ -432,12 +430,13 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         max_start_altitude = start_df["max_start_altitude"][tmp]
         traj_df["z_type"].iloc[lower_row:upper_row] = z_type
         traj_df["origin"].iloc[lower_row:upper_row] = origin
+        traj_df["lon_precise"].iloc[lower_row:upper_row] = lon_precise
+        traj_df["lat_precise"].iloc[lower_row:upper_row] = lat_precise
         traj_df["side_traj"].iloc[lower_row:upper_row] = side_traj
         traj_df["altitude_levels"].iloc[lower_row:upper_row] = altitude_levels
         traj_df["start_altitude"].iloc[lower_row:upper_row] = start_altitude
         traj_df["subplot_index"].iloc[lower_row:upper_row] = subplot_index
         traj_df["max_start_altitude"].iloc[lower_row:upper_row] = max_start_altitude
-        # traj_df["trajectory_direction"].iloc[lower_row:upper_row] = trajectory_file_path[-1:]
         tmp += 1
 
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
