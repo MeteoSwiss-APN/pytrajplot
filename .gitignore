@@ -108,11 +108,6 @@ venv_*/
 # VS Code
 .vscode
 
-src/pytrajplot/docstring_template/default.mustache
-src/pytrajplot/docstring_template/google.mustache
-src/pytrajplot/docstring_template/meteoswiss.mustache
-src/pytrajplot/docstring_template/numpy.mustache
-src/pytrajplot/docstring_template/sphinx.mustache
 src/pytrajplot/scratch/scratch_assemble_pdf.py
 src/pytrajplot/scratch/scratch_combine_figures.py
 src/pytrajplot/scratch/scratch_dateline.py
