@@ -88,12 +88,11 @@ def add_features(ax):
 
     """
     # point cartopy to the folder containing the shapefiles for the features on the map
-    earth_data_path = Path(
-        Path.home(), "pytrajplot/src/pytrajplot/resources/naturalearth"
-    )
+    earth_data_path = Path(Path.home(), "pytrajplot/src/pytrajplot/resources/")
     assert (
         earth_data_path.exists()
     ), f"The natural earth data could not be found at {earth_data_path}"
+    # earth_data_path = str(earth_data_path)
     cartopy.config["pre_existing_data_dir"] = earth_data_path
 
     # add grid & labels to map
@@ -116,13 +115,17 @@ def add_features(ax):
     ax.add_feature(cfeature.OCEAN, rasterized=True)
     ax.add_feature(cfeature.LAKES, rasterized=True)
     ax.add_feature(cfeature.RIVERS, rasterized=True)
-    # # additional lakes & rivers on a smaller scale
-    # rivers_10m = cfeature.NaturalEarthFeature(
-    #     "physical", "rivers_lake_centerlines", "10m"
-    # )
-    # ax.add_feature(
-    #     rivers_10m, facecolor="None", edgecolor="lightblue", alpha=0.5, rasterized=True
-    # )
+    ax.add_feature(
+        cartopy.feature.NaturalEarthFeature(
+            category="physical",
+            name="lakes_europe",
+            scale="10m",
+            rasterized=True,
+        ),
+        rasterized=True,
+        color="#97b6e1",
+    )
+
     return
 
 
@@ -453,7 +456,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
     cities_df = cities_df.dropna()
 
-    add_w_town = False
+    add_w_town = True
 
     if add_w_town:
         if not cross_dateline:
@@ -462,7 +465,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 x=9.108376385221725,
                 y=47.1361694653364,
                 marker="1",
-                color="r",
+                color="grey",
                 transform=ccrs.PlateCarree(),
                 rasterized=True,
             )
@@ -470,6 +473,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 x=9.108376385221725 + 0.01,
                 y=47.1361694653364 + 0.01,
                 s="W-Town",
+                color="grey",
                 fontsize=5,
                 transform=ccrs.PlateCarree(),
                 rasterized=True,
