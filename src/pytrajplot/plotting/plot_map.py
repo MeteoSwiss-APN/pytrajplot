@@ -94,6 +94,7 @@ def add_features(ax):
     ), f"The natural earth data could not be found at {earth_data_path}"
     # earth_data_path = str(earth_data_path)
     cartopy.config["pre_existing_data_dir"] = earth_data_path
+    cartopy.config["data_dir"] = earth_data_path
 
     # add grid & labels to map
     gl = ax.gridlines(
