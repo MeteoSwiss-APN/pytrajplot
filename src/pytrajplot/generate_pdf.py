@@ -367,10 +367,10 @@ def generate_pdf(
     for key in trajectory_dict:  # iterate through the trajectory dict
         # print(key)
         trajectory_df = trajectory_dict[key]  # extract df for given key
-        altitude_levels = trajectory_df["altitude_levels"].loc[0]
-        trajectory_direction = trajectory_df["trajectory_direction"].loc[0]
-        number_of_times = number_of_times = trajectory_df["block_length"].iloc[0]
-        number_of_trajectories = trajectory_df["#trajectories"].iloc[0]
+        altitude_levels = int(trajectory_df["altitude_levels"].loc[0])
+        trajectory_direction = str(trajectory_df["trajectory_direction"].loc[0])
+        number_of_times = int(trajectory_df["block_length"].iloc[0])
+        number_of_trajectories = int(trajectory_df["#trajectories"].iloc[0])
 
         # time axis for altitude plots (= x-axis)
         time_axis = trajectory_df["datetime"].iloc[0:number_of_times]
@@ -388,10 +388,8 @@ def generate_pdf(
             lower_row = row_index * number_of_times
             upper_row = row_index * number_of_times + number_of_times
             origin = trajectory_df["origin"].loc[lower_row]
-            # ~~~~~~~ NEW ~~~~~~~ #
             lon_precise = trajectory_df["lon_precise"].loc[lower_row]
             lat_precise = trajectory_df["lat_precise"].loc[lower_row]
-            # ~~~~~~~ NEW ~~~~~~~ #
             altitude_levels = trajectory_df["altitude_levels"].loc[lower_row]
             subplot_index = trajectory_df["subplot_index"].loc[lower_row]
             max_start_altitude = trajectory_df["max_start_altitude"].loc[lower_row]
