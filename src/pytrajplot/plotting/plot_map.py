@@ -88,7 +88,7 @@ def add_features(ax):
 
     """
     # point cartopy to the folder containing the shapefiles for the features on the map
-    earth_data_path = Path(Path.home(), "pytrajplot/src/pytrajplot/resources/")
+    earth_data_path = Path("src/pytrajplot/resources/")
     assert (
         earth_data_path.exists()
     ), f"The natural earth data could not be found at {earth_data_path}"
@@ -448,10 +448,10 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    cities_data_path = Path(Path.home(), "pytrajplot/src/pytrajplot/resources/cities/")
+    cities_data_path = Path("src/pytrajplot/resources/cities/")
     assert (
         cities_data_path.exists()
-    ), f"The natural earth data could not be found at {cities_data_path}"
+    ), f"The cities data could not be found at {cities_data_path}"
     cities_df = pd.read_csv(Path(cities_data_path, "worldcities.csv"))
 
     # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
