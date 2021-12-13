@@ -137,3 +137,4 @@ tests/test_cosmo/plots/backward/20211102T033_Geneve_LAGRANTO-COSMO-1E_Trajektori
 tests/test_cosmo/plots/forward/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_alps.png
 tests/test_cosmo/plots/forward/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch_hd.png
 tests/test_cosmo/plots/forward/20211011T000_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch.png
+src/pytrajplot/scratch/scratch_errors.py
