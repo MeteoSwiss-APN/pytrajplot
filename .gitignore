@@ -174,3 +174,5 @@ src/pytrajplot/scratch/scratch_profile_parsing.py
 src/pytrajplot/scratch/scratch_profile_plotting.py
 tests/test_hres/4_altitudes/plot_info_dict.pkl
 tests/test_hres/4_altitudes/trajectory_dict.pkl
+tests/test_hres/4_altitudes/pickle_files/plot_info_dict.pkl
+tests/test_hres/4_altitudes/pickle_files/trajectory_dict.pkl
