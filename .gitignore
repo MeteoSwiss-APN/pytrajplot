@@ -170,3 +170,4 @@ tests/test_corrupt_folder_hres/more_traj_than_start/tra_geom_006-144F
 tests/test_corrupt_folder_hres/more_traj_than_start/tra_geom_012-144F
 tests/test_corrupt_folder_hres/more_traj_than_start/tra_geom_018-144F
 tests/test_corrupt_folder_hres/more_traj_than_start/tra_geom_144-000B
+src/pytrajplot/scratch/scratch_profile_parsing.py
