@@ -127,6 +127,17 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
     default=["pdf"],
     help="Choose data type(s) of final result. Default: pdf",
 )
+@click.command(
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+@click.option(
+    "--version",
+    "-V",
+    help="Print version and exit.",
+    is_flag=True,
+    expose_value=False,
+    callback=print_version,
+)
 def main(
     *,
     info_name: str,
