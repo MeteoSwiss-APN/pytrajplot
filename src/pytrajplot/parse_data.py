@@ -234,7 +234,7 @@ def read_startf(startf_path, separator):
 
 
 def traj_helper_fct(case, file_path, firstline, start_df):
-    """Handle the different type of trajectory files (COSMO/HRES).
+    """Handle the different type of trajectory files (COSMO/HRES). Compute the number of rows that make up one trajectory and the number of trajectories.
 
     Args:
         case (str): HRES/COSMO
@@ -273,12 +273,9 @@ def traj_helper_fct(case, file_path, firstline, start_df):
         for position, line in enumerate(f):
             if position in lines_to_read:
                 dt = float(line[3:7])
-                if (
-                    dt == 0.3
-                ):  # CAUTION: the decimal does neither correspond to #minutes, nor to the fraction of one hour...
+                if dt == 0.3:
                     dt = 0.5
 
-        # number_of_times = 1/dt * T + 1
         number_of_times = int(T / dt + 1)
 
     return number_of_trajectories, number_of_times
@@ -306,19 +303,12 @@ def convert_time(plot_info_dict, traj_df, case):
 
     traj_df["datetime"] = None
     for row in traj_df["time"]:
-        if case == "HRES":
-            delta_t = abs(row)
-            if ".3" in str(delta_t):
-                delta_t = delta_t + 0.2
-            if row < 0:
-                date = dt_object - timedelta(hours=delta_t)
-            else:
-                date = dt_object + timedelta(hours=delta_t)
-
-        if case == "COSMO":
-            delta_t = float(row)
-            date = dt_object + timedelta(hours=delta_t)
-
+        delta_t = float(row)
+        if ".3" in str(
+            delta_t
+        ):  # hres trajectories have a weird time discretisation where half an hour is discretised as 0.3
+            delta_t = delta_t + 0.2
+        date = dt_object + timedelta(hours=delta_t)
         traj_df["datetime"].loc[counter] = date
 
         counter += 1
