@@ -8,9 +8,9 @@ SHELL := /bin/bash
 
 CHAIN ?= 0#OPT Whether to chain targets, e.g., let test depend on install-test
 IGNORE_VENV ?= 0#OPT Don't create and/or use a virtual environment
-MSG ?= ""#OPT Message used as, e.g., tag annotation in version bump commands
+MSG ?= #OPT Message used as, e.g., tag annotation in version bump commands
 PYTHON ?= 3.8#OPT Python version used to create conda virtual environment
-VENV_DIR ?= ""#OPT Path to existing or new conda virtual environment (overrides VENV_NAME)
+VENV_DIR ?= #OPT Path to existing or new conda virtual environment (overrides VENV_NAME)
 VENV_NAME ?= pytrajplot#OPT Name of conda virtual environment (overridden by VENV_DIR)
 
 # Default values used below (caution: keep values in sync with above)
@@ -21,7 +21,7 @@ export DEFAULT_VENV_NAME
 
 # Options for all calls to up-do-date pip (i.e., AFTER `pip install -U pip`)
 # Example: `--use-feature=2020-resolver` before the new resolver became the default
-PIP_OPTS = --use-feature=in-tree-build
+PIP_OPTS = # --use-feature=in-tree-build is now default in pip
 export PIP_OPTS
 
 #
@@ -36,20 +36,23 @@ export PIP_OPTS
 # regardless of ${CHAIN}.
 #
 ifeq (${CHAIN}, 0)
-	_INSTALL :=
-	_INSTALL_EDIT :=
-	_INSTALL_DEV :=
+	_INSTALL := venv
+	_INSTALL_DEV := venv
 else
 	_INSTALL := install
-	_INSTALL_EDIT := install-edit
 	_INSTALL_DEV := install-dev
 endif
 export _INSTALL
-export _INSTALL_EDIT
 export _INSTALL_DEV
 
 _TMP_VENV := $(shell date +venv-tmp-%s)
 export _TMP_VENV
+
+# If conda base environment is active, ignore it
+ifeq (${CONDA_DEFAULT_ENV},base)
+	CONDA_DEFAULT_ENV := #
+	export CONDA_DEFAULT_ENV
+endif
 
 #==============================================================================
 # Python script: Print help
@@ -178,7 +181,7 @@ clean-test:
 clean-venv:
 ifeq (${IGNORE_VENV}, 0)
 	@# Do not ignore existing venv
-ifeq (${VENV_DIR},"")
+ifeq (${VENV_DIR},)
 	@# Path to conda venv has not been passed
 ifneq ($(shell conda list --name $(VENV_NAME) 2>/dev/null 1>&2; echo $$?),0)
 	@echo -e "\n[make clean-venv] no conda virtual environment '${VENV_NAME}' to remove"
@@ -235,14 +238,14 @@ ifneq (${VIRTUAL_ENV},)
 endif  # VIRTUAL_ENV
 ifeq (${IGNORE_VENV}, 0)
 	@# Don't ignore an existing conda env, and if there is none, create one
-ifeq (${VENV_DIR},"")
+ifeq (${VENV_DIR},)
 	@# Path VENV_DIR to conda env has NOT been passed
 	$(eval VENV_DIR = $(shell conda run --name $(VENV_NAME) python -c 'import pathlib, sys; print(pathlib.Path(sys.executable).parent.parent)'))
 	@export VENV_DIR
 else  # VENV_DIR
 	@# Path VENV_DIR to conda venv has been passed
 	$(eval VENV_DIR = $(shell conda run --prefix $(VENV_DIR) python -c 'import pathlib, sys; print(pathlib.Path(sys.executable).parent.parent)'))
-	@ export VENV_DIR
+	@export VENV_DIR
 ifneq (${VENV_NAME},${DEFAULT_VENV_NAME})
 	@# Name VENV_NAME of conda env has been passed alongside path VENV_DIR
 	@echo -e "[make venv] warning: VENV_DIR=${VENV_DIR} overrides VENV_NAME=${VENV_NAME}"
@@ -250,7 +253,6 @@ endif  # VENV_NAME
 endif  # VENV_DIR
 	$(eval PREFIX = ${VENV_DIR}/bin/)
 	@export PREFIX
-	${PREFIX}python -m pip install -U pip
 endif  # IGNORE_VENV
 	${PREFIX}python -V
 
@@ -263,7 +265,7 @@ ifeq (${IGNORE_VENV}, 0)
 	@# Do not ignore existing venv
 ifneq (${CONDA_DEFAULT_ENV},)
 	@# There already is an active conda environment, so use it (regardless of its name and path)
-	@echo -e "\n[make venv] found active conda environment '${CONDA_DEFAULT_ENV}' at '{CONDA_PREFIX}'"
+	@echo -e "\n[make venv] found active conda environment '${CONDA_DEFAULT_ENV}' at '${CONDA_PREFIX}'"
 ifneq (${CONDA_DEFAULT_ENV}, ${VENV_NAME})
 	@# The name of the active env does not match VENV_NAME, but we assume that's OK over override it
 	@echo -e "[make venv] warning: name of active venv '${CONDA_DEFAULT_ENV}' overrides VENV_NAME='${VENV_NAME}'"
@@ -272,7 +274,7 @@ ifneq (${CONDA_DEFAULT_ENV}, ${VENV_NAME})
 endif  # CONDA_DEFAULT_ENV
 ifneq (${CONDA_PREFIX}, ${VENV_DIR})
 	@# The path to the active env does not match VENV_DIR (if set), but we assume that's OK and override it
-ifneq (${VENV_DIR},"")
+ifneq (${VENV_DIR},)
 	@echo -e "[make venv] warning: path to active venv '${CONDA_PREFIX}' overrides VENV_DIR='${VENV_DIR}'"
 endif  # VENV_DIR
 	$(eval VENV_DIR = ${CONDA_PREFIX})
@@ -280,7 +282,7 @@ endif  # VENV_DIR
 endif  # CONDA_PREFIX
 else  # CONDA_DEFAULT_ENV
 	@# The is no active conda environment
-ifeq (${VENV_DIR},"")
+ifeq (${VENV_DIR},)
 	@# Path VENV_DIR to conda env has NOT been passed
 ifeq ($(shell conda list --name $(VENV_NAME) 2>/dev/null 1>&2; echo $$?),0)
 	@# Conda venv with name VENV_NAME already exists, so use it
@@ -322,7 +324,7 @@ install-dev: venv
 	# conda install --yes --prefix "${VENV_DIR}" --file requirements/dev-requirements.txt  # pinned
 	conda install --yes --prefix "${VENV_DIR}" --file requirements/requirements.in  # unpinned
 	conda install --yes --prefix "${VENV_DIR}" --file requirements/dev-requirements.in  # unpinned
-	${PREFIX}python -m pip install -e . ${PIP_OPTS}
+	${PREFIX}python -m pip install --editable . ${PIP_OPTS}
 	${PREFIX}pre-commit install
 	${PREFIX}pytrajplot -V
 
@@ -405,7 +407,7 @@ update-deps: update-run-dev-deps update-tox-deps update-precommit-deps
 
 .PHONY: bump-patch #CMD Increment patch component Z of version number X.Y.Z,\nincl. git commit and tag
 bump-patch: ${_INSTALL_DEV}
-ifeq ($(MSG), "")
+ifeq ($(MSG),)
 	@echo -e "\n[make bump-patch] Error: Please provide a description with MSG='...' (use '"'\\n'"' for multiple lines)"
 else
 	@echo -e "\n[make bump-patch] bumping version number: increment patch component\n"
@@ -421,8 +423,9 @@ endif
 
 .PHONY: bump-minor #CMD Increment minor component Y of version number X.Y.Z,\nincl. git commit and tag
 bump-minor: ${_INSTALL_DEV}
-ifeq ($(MSG), "")
+ifeq ($(MSG),)
 	@echo -e "\n[make bump-minor] Error: Please provide a description with MSG='...' (use '"'\\n'"' for multiple lines)"
+else
 	@echo -e '\nTag annotation:\n\n$(subst ',",$(MSG))\n'
 	@${PREFIX}bumpversion minor --verbose --no-commit --no-tag && echo
 	@${PREFIX}pre-commit run --files $$(git diff --name-only) && git add -u
@@ -430,14 +433,14 @@ ifeq ($(MSG), "")
 	@git tag -a v$$(cat VERSION) -m $$'$(subst ',",$(MSG))'
 	@echo -e "\ngit tag -n -l v$$(cat VERSION)" && git tag -n -l v$$(cat VERSION)
 	@echo -e "\ngit log -n1" && git log -n1
-else
 endif
 # ' (close quote that vim thinks is still open to get the syntax highlighting back in order)
 
 .PHONY: bump-major #CMD Increment major component X of version number X.Y.Z,\nincl. git commit and tag
 bump-major: ${_INSTALL_DEV}
-ifeq ($(MSG), "")
+ifeq ($(MSG),)
 	@echo -e "\n[make bump-major] Error: Please provide a description with MSG='...' (use '"'\\n'"' for multiple lines)"
+else
 	@echo -e '\nTag annotation:\n\n$(subst ',",$(MSG))\n'
 	@${PREFIX}bumpversion major --verbose --no-commit --no-tag && echo
 	@${PREFIX}pre-commit run --files $$(git diff --name-only) && git add -u
@@ -445,7 +448,6 @@ ifeq ($(MSG), "")
 	@git tag -a v$$(cat VERSION) -m $$'$(subst ',",$(MSG))'
 	@echo -e "\ngit tag -n -l v$$(cat VERSION)" && git tag -n -l v$$(cat VERSION)
 	@echo -e "\ngit log -n1" && git log -n1
-else
 endif
 # ' (close quote that vim thinks is still open to get the syntax highlighting back in order)
 
@@ -518,7 +520,7 @@ test-check: ${_INSTALL_DEV}
 # 	$(MAKE) -C docs clean
 # 	$(MAKE) -C docs html
 # 	${browser} docs/_build/html/index.html
-  
+
 # .PHONY: servedocs #CMD Compile the docs watching for changes.
 # servedocs: docs
 # 	@echo -e "\n[make servedocs] continuously regenerating HTML documentation"
