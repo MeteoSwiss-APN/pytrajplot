@@ -2,4 +2,5 @@ click
 numpy
 pandas
 matplotlib
-cartopy==0.18.0 # version is relevant for this package, due to dependencies on underlying packages (shapely)
+cartopy
+shapely==1.7.1
