@@ -229,7 +229,7 @@ def assemble_pdf(
     subfigs[0].suptitle(
         f"MeteoSwiss 2021 ©",
         fontdict={
-            "fontsize": 10,
+            "size": 10,
             "color": "#eeeeee",
         },
     )
