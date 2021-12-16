@@ -246,38 +246,109 @@ def assemble_pdf(
     )
 
     # ADD ALTITUDE PLOT
-    # TODO: reconsider the case for 1-3 altitude subplots!
-    # TODO: reconsider the aspect ratio for the various domains!
-    axsnest1 = subfigsnest[1].subplots(altitude_levels, 1)
+    subplot_dict = {}
+
+    if altitude_levels < 3:
+        axsnest1 = subfigsnest[1].subplots(3, 1)
+
+        # collect references to subplots
+        for nn, ax in enumerate(axsnest1):
+            if altitude_levels == 1:
+                if nn == 0 or nn == 1:
+                    ax.axis("off")  # create a blank plot for subplots 0 and 1
+                else:
+                    generate_altitude_plot(
+                        x=x,
+                        y=plot_dict,
+                        key=key,
+                        side_traj=side_traj,
+                        altitude_levels=1,
+                        language=language,
+                        max_start_altitude=max_start_altitude,
+                        ax=ax,
+                        alt_index=1,
+                        sub_index=0,
+                    )
+
+            if altitude_levels == 2:
+                if nn == 0:
+                    subplot_dict[nn] = ax.axis(
+                        "off"
+                    )  # create a blank plot for suplot 0
+                else:
+                    subplot_dict[nn] = ax  # create a regular plot for subplots 1 and 2
+
+        # create 2 altitude plots
+        if altitude_levels == 2:
+            alt_index = 1
+            while alt_index <= 2:
+                print(alt_index)
+                if int(plot_dict["altitude_" + str(alt_index)]["subplot_index"]) == 0:
+                    subplot_index = 1
+                    tmp_ax = subplot_dict[subplot_index]
+                    generate_altitude_plot(
+                        x=x,
+                        y=plot_dict,
+                        key=key,
+                        side_traj=side_traj,
+                        altitude_levels=2,
+                        language=language,
+                        max_start_altitude=max_start_altitude,
+                        ax=tmp_ax,
+                        alt_index=alt_index,
+                        sub_index=0,
+                    )
+
+                if int(plot_dict["altitude_" + str(alt_index)]["subplot_index"]) == 1:
+                    subplot_index = 2
+                    tmp_ax = subplot_dict[subplot_index]
+                    generate_altitude_plot(
+                        x=x,
+                        y=plot_dict,
+                        key=key,
+                        side_traj=side_traj,
+                        altitude_levels=2,
+                        language=language,
+                        max_start_altitude=max_start_altitude,
+                        ax=tmp_ax,
+                        alt_index=alt_index,
+                        sub_index=1,
+                    )
+
+                alt_index += 1
+
+    # if altitude_levels >= 3:
+    else:
+        axsnest1 = subfigsnest[1].subplots(altitude_levels, 1)
+        # collect references to subplots
+
+        for nn, ax in enumerate(axsnest1):
+            subplot_dict[nn] = ax
+
+        alt_index = 1
+        while alt_index <= altitude_levels:
+            subplot_index = int(
+                plot_dict["altitude_" + str(alt_index)]["subplot_index"]
+            )
+            tmp_ax = subplot_dict[subplot_index]
+            generate_altitude_plot(
+                x=x,
+                y=plot_dict,
+                key=key,
+                side_traj=side_traj,
+                altitude_levels=altitude_levels,
+                language=language,
+                max_start_altitude=max_start_altitude,
+                ax=tmp_ax,
+                alt_index=alt_index,
+                sub_index=subplot_index,
+            )
+            alt_index += 1
 
     if False:
         subfigs[0].set_facecolor("0.75")  # header
         subfigsnest[0].set_facecolor("0.70")  # map
         subfigsnest[1].set_facecolor("0.65")  # altitude
-
-    # collect references to subplots
-    subplot_dict = {}
-    for nn, ax in enumerate(axsnest1):
-        subplot_dict[nn] = ax
-
-    alt_index = 1
-    while alt_index <= altitude_levels:
-        subplot_index = int(plot_dict["altitude_" + str(alt_index)]["subplot_index"])
-        tmp_ax = subplot_dict[subplot_index]
-        generate_altitude_plot(
-            x=x,
-            y=plot_dict,
-            key=key,
-            side_traj=side_traj,
-            altitude_levels=altitude_levels,
-            language=language,
-            max_start_altitude=max_start_altitude,
-            ax=tmp_ax,
-            alt_index=alt_index,
-            sub_index=subplot_index,
-        )
-        alt_index += 1
-
     for domain in domains:
         # ADD INFO HEADER
         axTop = subfigs[0].subplots()
