@@ -5,6 +5,8 @@ import cProfile
 import io
 import os
 import pstats
+import time
+from pathlib import Path
 
 # Third-party
 import cartopy.crs as ccrs
@@ -194,7 +196,7 @@ def assemble_pdf(
     altitude_levels,
     language,
     max_start_altitude,
-    domain,
+    domains,
     output_types,
 ):
     """Assemble final output pdf/png.
@@ -209,139 +211,111 @@ def assemble_pdf(
         altitude_levels:        int                 Number of starting altitudes
         language:               str                 Language of plot annotations
         max_start_altitude:     float               Highest starting altitude
-        domain:                 str                 Domain of the map.
+        domains:                str                 Domain of the map.
         output_types:           tuple               Tuple containing the file types of the output files. (pdf and/or png)
 
     """
-    # DEFINE FIGURE PROPERTIES AND GRID SPECIFICATION
-    # fig = plt.figure(figsize=(11.69, 8.27), dpi=200)  # A4 size
-    fig = plt.figure(figsize=(16, 9), dpi=200)
-
-    # create grid spec oject
-    grid_specification = gs.GridSpec(
-        nrows=2, ncols=2, width_ratios=[1, 0.4], height_ratios=[0.1, 1]
-    )
-
-    # optimise placement of sub gridspec objects
-    plt.subplots_adjust(
-        left=0.1,  # left margin = 0.1
-        bottom=0.08,
-        right=0.9,  # right margin = 0.1
-        top=0.92,
-        wspace=0.15,  # space between the first and second column
-        hspace=0.08,
-    )
-
-    # ADD INFO HEADER TO PDF
-    gs_info = grid_specification[0, 0].subgridspec(
-        1, 3, width_ratios=[1.5, 1, 0.5]
-    )  # placement of info header optimal
-    info_ax = plt.subplot(gs_info[:, 1:])
-    generate_info_header(
-        language=language,
-        plot_info=plot_info_dict,
-        plot_data=plot_dict,
-        ax=info_ax,
-        domain=domain,
-    )
-
-    # ADD MAP TO PDF
-    gs_map = grid_specification[1, 0].subgridspec(
-        10, 1
-    )  # size of map, as of now not optimal in my opinion
-    projection, cross_dateline = get_projection(
-        plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
-    )
-    map_ax = plt.subplot(gs_map[:, 0], projection=projection)
-    generate_map_plot(
-        cross_dateline=cross_dateline,
-        coord_dict=plot_dict,
-        side_traj=side_traj,
-        altitude_levels=altitude_levels,
-        domain=domain,
-        ax=map_ax,
-    )
-
-    # ADD ALTITUDE PLOT TO PDF
-    if altitude_levels <= 3:
-        gs_alt = grid_specification[1, 1].subgridspec(
-            32, 1
-        )  # use this gs_alt only if altitude levels > 3, for 1-3 write separate functions
-        alt_index = 1
-        while alt_index <= altitude_levels:
-            subplot_index = int(
-                plot_dict["altitude_" + str(alt_index)]["subplot_index"]
-            )
-
-            if altitude_levels == 1:
-                tmp_ax = plt.subplot(gs_alt[22:, 0])
-            if altitude_levels == 2:
-                if subplot_index == 0:
-                    tmp_ax = plt.subplot(gs_alt[11:21, 0])
-                if subplot_index == 1:
-                    tmp_ax = plt.subplot(gs_alt[22:, 0])
-            if altitude_levels == 3:
-                if subplot_index == 0:
-                    tmp_ax = plt.subplot(gs_alt[0:10, 0])
-                if subplot_index == 1:
-                    tmp_ax = plt.subplot(gs_alt[11:21, 0])
-                if subplot_index == 2:
-                    tmp_ax = plt.subplot(gs_alt[22:, 0])
-
-            generate_altitude_plot(
-                x=x,
-                y=plot_dict,
-                key=key,
-                side_traj=side_traj,
-                altitude_levels=altitude_levels,
-                language=language,
-                max_start_altitude=max_start_altitude,
-                ax=tmp_ax,
-                alt_index=alt_index,
-                sub_index=subplot_index,
-            )
-            alt_index += 1
-
-    if altitude_levels > 3:
-        gs_alt = grid_specification[1, 1].subgridspec(
-            altitude_levels, 1
-        )  # use this gs_alt only if altitude levels > 3, for 1-3 write separate functions
-        alt_index = 1
-        while alt_index <= altitude_levels:
-            subplot_index = int(
-                plot_dict["altitude_" + str(alt_index)]["subplot_index"]
-            )
-            tmp_ax = plt.subplot(gs_alt[subplot_index, 0])
-            generate_altitude_plot(
-                x=x,
-                y=plot_dict,
-                key=key,
-                side_traj=side_traj,
-                altitude_levels=altitude_levels,
-                language=language,
-                max_start_altitude=max_start_altitude,
-                ax=tmp_ax,
-                alt_index=alt_index,
-                sub_index=subplot_index,
-            )
-            alt_index += 1
-
-    # SAVE PDF
+    # generate the output directory if it doesn't exist
     origin = plot_dict["altitude_1"]["origin"]
-    outpath = os.getcwd() + "/" + output_dir + "/plots/" + key + "/"
-    os.makedirs(
-        outpath, exist_ok=True
-    )  # create plot folder if it doesn't already exist
+    output_dir = Path(output_dir)
+    outpath = Path(output_dir / "plots" / key)
+    outpath.mkdir(parents=True, exist_ok=True)
 
-    filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
-    for file_type in output_types:
-        # plt.savefig(outpath + "new." + file_type)
-        plt.savefig(outpath + filename + "." + file_type)
+    fig = plt.figure(tight_layout=False, figsize=(16, 9))
+
+    subfigs = fig.subfigures(2, 1, height_ratios=[0.2, 1])
+
+    # add watermark / copyright disclaimer
+    subfigs[0].suptitle(
+        f"MeteoSwiss 2021 ©",
+        fontdict={
+            "fontsize": 10,
+            "color": "#eeeeee",
+        },
+    )
+
+    subfigsnest = subfigs[1].subfigures(1, 2, width_ratios=[1, 0.4])
+
+    plt.subplots_adjust(
+        left=0.08,
+        right=0.92,
+        bottom=0.1,
+        top=0.99,
+        wspace=0.5,  # space between the first and second column
+        hspace=0.05,
+    )
+
+    # ADD ALTITUDE PLOT
+    # TODO: reconsider the case for 1-3 altitude subplots!
+    # TODO: reconsider the aspect ratio for the various domains!
+    axsnest1 = subfigsnest[1].subplots(altitude_levels, 1)
+
+    if False:
+        subfigs[0].set_facecolor("0.75")  # header
+        subfigsnest[0].set_facecolor("0.70")  # map
+        subfigsnest[1].set_facecolor("0.65")  # altitude
+
+    # collect references to subplots
+    subplot_dict = {}
+    for nn, ax in enumerate(axsnest1):
+        subplot_dict[nn] = ax
+
+    alt_index = 1
+    while alt_index <= altitude_levels:
+        subplot_index = int(plot_dict["altitude_" + str(alt_index)]["subplot_index"])
+        tmp_ax = subplot_dict[subplot_index]
+        generate_altitude_plot(
+            x=x,
+            y=plot_dict,
+            key=key,
+            side_traj=side_traj,
+            altitude_levels=altitude_levels,
+            language=language,
+            max_start_altitude=max_start_altitude,
+            ax=tmp_ax,
+            alt_index=alt_index,
+            sub_index=subplot_index,
+        )
+        alt_index += 1
+
+    for domain in domains:
+        # ADD INFO HEADER
+        axTop = subfigs[0].subplots()
+        generate_info_header(
+            language=language,
+            plot_info=plot_info_dict,
+            plot_data=plot_dict,
+            domain=domain,
+            ax=axTop,
+        )
+
+        # ADD MAP
+        projection, cross_dateline = get_projection(
+            plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
+        )
+        map_ax = subfigsnest[0].add_subplot(111, projection=projection)
+        generate_map_plot(
+            cross_dateline=cross_dateline,
+            coord_dict=plot_dict,
+            side_traj=side_traj,
+            altitude_levels=altitude_levels,
+            domain=domain,
+            ax=map_ax,
+        )
+
+        # SAVE FIGURE
+        filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
+        for file_type in output_types:
+            # plt.savefig(outpath + "new." + file_type)
+            plt.savefig(str(outpath) + f"/{filename}.{file_type}")
+
+        # CLEAR HEADER/MAP AXES FOR NEXT ITERATION
+        map_ax.remove()
+        axTop.remove()
+
     plt.close(fig)
-    return
 
 
-# @profile
 def generate_pdf(
     trajectory_dict,
     plot_info_dict,
@@ -397,10 +371,8 @@ def generate_pdf(
             if side_traj:
                 if separator not in origin:
                     plot_dict["altitude_" + str(alt_index)]["origin"] = origin
-                    # ~~~~~~~ NEW ~~~~~~~ #
                     plot_dict["altitude_" + str(alt_index)]["lon_precise"] = lon_precise
                     plot_dict["altitude_" + str(alt_index)]["lat_precise"] = lat_precise
-                    # ~~~~~~~ NEW ~~~~~~~ #
                     plot_dict["altitude_" + str(alt_index)]["y_surf"] = trajectory_df[
                         "hsurf"
                     ][lower_row:upper_row]
@@ -445,28 +417,29 @@ def generate_pdf(
 
                 if alt_index > altitude_levels:
                     alt_index = 1
-
-                    for domain in domains:
-                        assemble_pdf(
-                            plot_info_dict=plot_info_dict,
-                            x=time_axis,
-                            plot_dict=plot_dict,
-                            key=key,
-                            side_traj=side_traj,
-                            output_dir=output_dir,
-                            altitude_levels=altitude_levels,
-                            language=language,
-                            max_start_altitude=max_start_altitude,
-                            domain=domain,
-                            output_types=output_types,
-                        )
+                    start_tmp = time.perf_counter()
+                    assemble_pdf(
+                        plot_info_dict=plot_info_dict,
+                        x=time_axis,
+                        plot_dict=plot_dict,
+                        key=key,
+                        side_traj=side_traj,
+                        output_dir=output_dir,
+                        altitude_levels=altitude_levels,
+                        language=language,
+                        max_start_altitude=max_start_altitude,
+                        domains=domains,
+                        output_types=output_types,
+                    )
+                    end_tmp = time.perf_counter()
+                    print(
+                        f"Assemble pdf took {end_tmp-start_tmp} sec from the whole generate_pdf pipeline."
+                    )
 
             else:
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
-                # ~~~~~~~ NEW ~~~~~~~ #
                 plot_dict["altitude_" + str(alt_index)]["lon_precise"] = lon_precise
                 plot_dict["altitude_" + str(alt_index)]["lat_precise"] = lat_precise
-                # ~~~~~~~ NEW ~~~~~~~ #
                 plot_dict["altitude_" + str(alt_index)]["subplot_index"] = subplot_index
                 plot_dict["altitude_" + str(alt_index)][
                     "max_start_altitude"
@@ -526,18 +499,17 @@ def generate_pdf(
                 alt_index += 1
                 if alt_index > altitude_levels:
                     alt_index = 1
-                    for domain in domains:
-                        assemble_pdf(
-                            plot_info_dict=plot_info_dict,
-                            x=time_axis,
-                            plot_dict=plot_dict,
-                            key=key,
-                            side_traj=side_traj,
-                            output_dir=output_dir,
-                            altitude_levels=altitude_levels,
-                            language=language,
-                            max_start_altitude=max_start_altitude,
-                            domain=domain,
-                            output_types=output_types,
-                        )
+                    assemble_pdf(
+                        plot_info_dict=plot_info_dict,
+                        x=time_axis,
+                        plot_dict=plot_dict,
+                        key=key,
+                        side_traj=side_traj,
+                        output_dir=output_dir,
+                        altitude_levels=altitude_levels,
+                        language=language,
+                        max_start_altitude=max_start_altitude,
+                        domains=domains,
+                        output_types=output_types,
+                    )
     return

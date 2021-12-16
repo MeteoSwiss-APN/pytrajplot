@@ -50,26 +50,18 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
     if language == "en":
         if trajectory_direction == "F":
             title = f"Forward Trajectory from {origin} departing on: {start_time}"
-            site = "$\it{Release}$ $\it{Site}:} $"
+            site = "$\it{Release}$ $\it{Site}:}$"
         if trajectory_direction == "B":
             title = f"Backward Trajectory from {origin} arriving on: {start_time}"
-            site = "$\it{Receptor}$ $\it{Site}:} $"
+            site = "$\it{Receptor}$ $\it{Site}:}$"
     else:
         if trajectory_direction == "F":
             title = f"Vorwärts-Trajektorie von {origin} gestartet am: {start_time}"
-            site = "$\it{Ursprungsort}$: $"
+            site = "$\it{Ursprungsort}$:$"
         if trajectory_direction == "B":
             title = f"Rückwärts-Trajektorie von {origin} gestartet am: {start_time}"
-            site = "$\it{Ankunftsort}$: "
+            site = "$\it{Ankunftsort}$:"
 
-    ax.set_title(
-        title,
-        fontdict={
-            "fontsize": 20,
-            "color": "grey",
-            "verticalalignment": "baseline",
-        },
-    )
     if language == "en":
         info = (
             site
@@ -103,12 +95,40 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
             + f" {elevation} {unit} ({y_type})"
         )
 
+    # title
     ax.text(
         x=0.5,
-        y=0.5,
+        y=0.6,
+        s=title,
+        transform=ax.transAxes,
+        va="center",
+        ha="center",
+        weight="bold",
+        fontdict={
+            "fontsize": 25,
+            "color": "black",
+            # "verticalalignment": "baseline",
+        },
+    )
+
+    # props = dict(
+    #     boxstyle= 'square', # 'round',
+    #     facecolor="#FFFAF0",
+    #     alpha=1,
+    # )
+    # description
+    ax.text(
+        x=0.5,
+        y=0.15,
         s=info,
         transform=ax.transAxes,
         va="center",
         ha="center",
+        fontdict={
+            "fontsize": 15,
+            "color": "black",
+            "verticalalignment": "baseline",
+        },
+        # bbox=props
     )
     return ax
