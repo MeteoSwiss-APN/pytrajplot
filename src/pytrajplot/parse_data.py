@@ -257,12 +257,9 @@ def convert_time(plot_info_dict, traj_df, case):
     init_time = plot_info_dict["mbt"][:16]
     format = "%Y-%m-%d %H:%M"
     dt_object = datetime.datetime.strptime(init_time, format)
-    if case == "HRES":
-        counter = 0
-    else:
-        counter = 2
 
     traj_df["datetime"] = None
+    counter = 0
     for row in traj_df["time"]:
         delta_t = float(row)
         if ".3" in str(
@@ -329,9 +326,8 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         skipinitialspace=True,
     )
 
-    if (
-        case == "COSMO"
-    ):  # clean up the df in case its generated from a COSMO trajectory file
+    # clean up the df in case its generated from a COSMO trajectory file
+    if case == "COSMO":
         traj_df.loc[(traj_df["z"] < 0), "z"] = np.NaN
         traj_df.loc[(traj_df["hsurf"] < 0), "hsurf"] = np.NaN
         # traj_df["z"] = traj_df["z"].clip(lower=0)  # remove negative values in z column
@@ -339,10 +335,10 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         traj_df.dropna(
             subset=["lon"], inplace=True
         )  # remove rows containing only the origin/z_type
+        traj_df.reset_index(inplace=True)
 
-    if (
-        case == "HRES"
-    ):  # clean up the df in case its generated from a HRES trajectory file
+    # clean up the df in case its generated from a HRES trajectory file
+    if case == "HRES":
 
         traj_df.loc[(traj_df["lon"] == -999.00), "lon"] = np.NaN
         traj_df.loc[(traj_df["lat"] == -999.00), "lat"] = np.NaN
@@ -357,6 +353,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     traj_df["altitude_levels"] = None
     traj_df["#trajectories"] = number_of_trajectories
     traj_df["block_length"] = number_of_times
+    # print(f"#Trajectories: {number_of_trajectories}; #Lines/Trajectory: {number_of_times}")
     traj_df["trajectory_direction"] = trajectory_file_path[
         -1:
     ]  # the last letter of the trajectorys file name is either B (backward) or F (forward)
@@ -368,6 +365,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     while tmp < number_of_trajectories:
         lower_row = tmp * number_of_times
         upper_row = tmp * number_of_times + number_of_times
+        # print(f"tmp = {tmp}, lower row = {lower_row}, upper row = {upper_row}")
         z_type = start_df["z_type"][tmp]
         origin = start_df["origin"][tmp]
         lon_precise = start_df["lon"][tmp]
@@ -405,8 +403,6 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         tmp += 1
 
     traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
-    traj_df.reset_index(drop=True, inplace=True)
-
     if False:
         traj_df.to_csv("ground_truth_trajdf.csv", index=True)
         start_df.to_csv("ground_truth_startf.csv", index=True)
