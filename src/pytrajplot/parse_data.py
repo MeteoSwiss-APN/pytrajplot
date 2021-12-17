@@ -242,13 +242,13 @@ def traj_helper_fct(case, file_path, firstline, start_df):
     return number_of_trajectories, number_of_times
 
 
-def convert_time(plot_info_dict, traj_df, case):
+def convert_time(plot_info_dict, traj_df, key):
     """Convert time steps into datetime objects.
 
     Args:
         plot_info_dict (dict): Dict containing the information of plot_info file. Esp. the trajectory initialisation time
         traj_df (df): Trajectory dataframe containing the time step column (parsed form the trajectory file)
-        case (str): HRES/COSMO.
+        key (str): Key, containing information about the runtime
 
     Returns:
         traj_df (df): Trajectory dataframe w/ added datetime column.
@@ -257,6 +257,10 @@ def convert_time(plot_info_dict, traj_df, case):
     init_time = plot_info_dict["mbt"][:16]
     format = "%Y-%m-%d %H:%M"
     dt_object = datetime.datetime.strptime(init_time, format)
+    direction = key[-1:]
+
+    if direction == "B":
+        dt_object = dt_object + timedelta(hours=int(key[0:3]))
 
     traj_df["datetime"] = None
     counter = 0
@@ -268,9 +272,8 @@ def convert_time(plot_info_dict, traj_df, case):
             delta_t = delta_t + 0.2
         date = dt_object + timedelta(hours=delta_t)
         traj_df.loc[counter, "datetime"] = date
-
         counter += 1
-
+    print(f"traj_df['datetime'] =\n{traj_df['datetime']}")
     return traj_df
 
 
@@ -402,7 +405,12 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
 
         tmp += 1
 
-    traj_df = convert_time(plot_info_dict=plot_info_dict, traj_df=traj_df, case=case)
+    traj_df = convert_time(
+        plot_info_dict=plot_info_dict,
+        traj_df=traj_df,
+        case=case,
+        key=trajectory_file_path[-8:],
+    )
     if False:
         traj_df.to_csv("ground_truth_trajdf.csv", index=True)
         start_df.to_csv("ground_truth_startf.csv", index=True)
