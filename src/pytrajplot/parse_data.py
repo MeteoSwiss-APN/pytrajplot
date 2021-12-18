@@ -273,7 +273,6 @@ def convert_time(plot_info_dict, traj_df, key):
         date = dt_object + timedelta(hours=delta_t)
         traj_df.loc[counter, "datetime"] = date
         counter += 1
-    print(f"traj_df['datetime'] =\n{traj_df['datetime']}")
     return traj_df
 
 
@@ -408,7 +407,6 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     traj_df = convert_time(
         plot_info_dict=plot_info_dict,
         traj_df=traj_df,
-        case=case,
         key=trajectory_file_path[-8:],
     )
     if False:

@@ -29,6 +29,7 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
     model_name = plot_info["model_name"]
     trajectory_direction = plot_data["altitude_1"]["trajectory_direction"]
     elevation = ""
+    start_time = str(plot_data["altitude_1"]["start_time"])
 
     for key in plot_data:
         if plot_data[key]["subplot_index"] == (len(plot_data.keys()) - 1):
@@ -44,8 +45,6 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
         unit = "hPA"
     else:
         unit = "m"
-
-    start_time = plot_info["mbt"]
 
     if language == "en":
         if trajectory_direction == "F":

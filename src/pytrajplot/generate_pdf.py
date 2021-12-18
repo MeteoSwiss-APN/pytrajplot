@@ -61,6 +61,7 @@ def create_plot_dict(altitude_levels):
     i = 1
     while i < altitude_levels + 1:
         altitude_dict = {
+            "start_time": None,
             "origin": None,
             "lon_precise": None,
             "lat_precise": None,
@@ -167,20 +168,24 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
         final_filename:    str          Name of output file
 
     """
+    start_time = plot_dict["altitude_1"]["start_time"]
+
     date = (
         plot_info_dict["mbt"][0:4]
         + plot_info_dict["mbt"][5:7]
         + plot_info_dict["mbt"][8:10]
     )
+    # cleaner, but sligthly slower way to define date: date = start_time.strftime('%Y%m%d') (1.6114674508571625e-05 seconds vs. 1.7564743757247925e-06 seconds)
+    runtime = int(key[4:7]) - int(start_time.hour)
     trajectory_direction = plot_dict["altitude_1"]["trajectory_direction"]
     final_filename = (
         date
-        + f"T{key[0:3]}"
+        + f"T{start_time.hour}"
         + f"_{origin}_"
         + f"LAGRANTO-{plot_info_dict['model_name']}_"
         + f"Trajektorien_"
         + f"{trajectory_direction}_"
-        + f"{key[4:7]}_"
+        + f"{runtime:03}_"
         + f"{domain}"
     )
     return final_filename
@@ -412,6 +417,7 @@ def generate_pdf(
     for key in trajectory_dict:  # iterate through the trajectory dict
         # print(key)
         trajectory_df = trajectory_dict[key]  # extract df for given key
+        start_time = trajectory_df["datetime"].loc[0]
         altitude_levels = int(trajectory_df["altitude_levels"].loc[0])
         trajectory_direction = str(trajectory_df["trajectory_direction"].loc[0])
         number_of_times = int(trajectory_df["block_length"].iloc[0])
@@ -439,6 +445,7 @@ def generate_pdf(
             subplot_index = trajectory_df["subplot_index"].loc[lower_row]
             max_start_altitude = trajectory_df["max_start_altitude"].loc[lower_row]
             side_traj = trajectory_df["side_traj"].loc[lower_row]
+
             if side_traj:
                 if separator not in origin:
                     plot_dict["altitude_" + str(alt_index)]["origin"] = origin
@@ -460,6 +467,7 @@ def generate_pdf(
                 plot_dict["altitude_" + str(alt_index)][
                     "trajectory_direction"
                 ] = trajectory_direction
+                plot_dict["altitude_" + str(alt_index)]["start_time"] = start_time
                 plot_dict["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
                     "start_altitude"
                 ][lower_row]
@@ -524,6 +532,7 @@ def generate_pdf(
                 plot_dict["altitude_" + str(alt_index)][
                     "trajectory_direction"
                 ] = trajectory_direction
+                plot_dict["altitude_" + str(alt_index)]["start_time"] = start_time
 
                 # traj_0 -> relevant information
                 plot_dict["altitude_" + str(alt_index)]["y_surf"] = trajectory_df[
