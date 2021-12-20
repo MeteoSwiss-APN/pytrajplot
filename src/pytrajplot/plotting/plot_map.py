@@ -1,6 +1,8 @@
 """Generate Map Plot Figure."""
 
 # Standard library
+# TMP
+import time
 from pathlib import Path
 
 # Third-party
@@ -212,7 +214,8 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
                             bool       True if city is of interest, else false
 
     """
-    if False:
+    # this code corresponds to the new version of the function add_cities() and is only used for the dynamic domain
+    if True:
         if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
             is_capital = capital_type == "primary"
             if capital_type == "admin":
@@ -544,7 +547,7 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
             return (is_capital or is_large) and not is_excluded
 
 
-def add_cities(ax, domain_boundaries, domain, cross_dateline):
+def add_cities_old(ax, domain_boundaries, domain, cross_dateline):
     """Add cities to map.
 
     Args:
@@ -639,7 +642,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
             )
 
 
-def add_cities_tmp(ax, domain_boundaries, domain, cross_dateline):
+def add_cities(ax, domain_boundaries, domain, cross_dateline):
     """Add cities to map.
 
     Args:
@@ -652,6 +655,7 @@ def add_cities_tmp(ax, domain_boundaries, domain, cross_dateline):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    start = time.perf_counter()
     add_w_town = True
     if add_w_town:
         if not cross_dateline:
@@ -673,6 +677,8 @@ def add_cities_tmp(ax, domain_boundaries, domain, cross_dateline):
                 transform=ccrs.PlateCarree(),
                 rasterized=True,
             )
+    end = time.perf_counter()
+    print(f"adding w-town to plot takes: {end-start} seconds")
 
     if domain == "dynamic":
         cities_data_path = Path("src/pytrajplot/resources/cities/")
@@ -831,7 +837,7 @@ def add_cities_tmp(ax, domain_boundaries, domain, cross_dateline):
             }
 
         if domain == "centraleurope":
-            {
+            cities_list = {
                 "Paris": {"lon": 2.3522, "lat": 48.8566},
                 "Vienna": {"lon": 16.3731, "lat": 48.2083},
                 "Brussels": {"lon": 4.3333, "lat": 50.8333},
@@ -1204,6 +1210,7 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
     far_east = 150 <= np.max(lon_maxs) <= 180
     far_west = -180 <= np.min(lon_mins) <= -150
 
+    # dynamic boundaries w/ crossing dateline
     if far_east and far_west:  # if True > trajectory *must* cross dateline somehow
         central_longitude = 180  # shift the central longitude
 
@@ -1253,6 +1260,7 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
         cross_dateline = True
         return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
 
+    # dynamic boundaries w/o crossing dateline
     else:
         right_boundary = np.max(lon_maxs)  # most eastern point
         left_boundary = np.min(lon_mins)  # most western point
@@ -1306,11 +1314,6 @@ def generate_map_plot(
         ax=ax, domain=domain, custom_domain_boundaries=custom_domain_boundaries
     )  # sets extent of map
 
-    print(f"Domain boundaries: {domain_boundaries}")
-    print(
-        f"Aspect ratio of dynamic domain:\n\t{(domain_boundaries[1]-domain_boundaries[0])}:{(domain_boundaries[3]-domain_boundaries[2])} = {(domain_boundaries[1]-domain_boundaries[0])/(domain_boundaries[3]-domain_boundaries[2])}"
-    )
-
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
     lon = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lon"], columns=["lon"])
@@ -1333,12 +1336,15 @@ def generate_map_plot(
 
     add_features(ax=ax)
 
+    start = time.perf_counter()
     add_cities(
         ax=ax,
         domain_boundaries=domain_boundaries,
         domain=domain,
         cross_dateline=cross_dateline,
     )
+    end = time.perf_counter()
+    print(f"Adding cities took: {end-start} seconds")
 
     subplot_properties_dict = {
         0: "k-",
