@@ -145,8 +145,12 @@ def get_projection(plot_dict, altitude_levels, side_traj):
         )
         projection = ccrs.PlateCarree(central_longitude=central_longitude)
     else:
-        # case = "COSMO"
+        # case = "COSMO" --> the model domain for COSMO is only defined within europe, thus the dateline can't get crossed for COSMO
+        # central_longitude, domain_boundaries, _, cross_dateline = get_dynamic_domain(
+        #     coord_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
+        # )
         cross_dateline = False
+        domain_boundaries = [0, 0, 0, 0]
         projection = ccrs.RotatedPole(
             pole_longitude=-170, pole_latitude=43
         )  # define rotation of COSMO model
