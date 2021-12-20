@@ -284,3 +284,11 @@ tests/test_hres/lagranto_f/plots/012-060F/20211218T012_WienerHuette_LAGRANTO-IFS
 tests/test_hres/lagranto_f/plots/012-060F/20211218T012_Zuerich_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_060_europe.png
 tests/test_hres/lagranto_f/plots/012-060F/20211218T012_Zurzach_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_060_europe.png
 tests/test_hres/lagranto_f/plots/012-060F/20211218T012_Zwettl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_060_europe.png
+src/pytrajplot/scratch/generate_pdf_old.py
+tests/test_hres/fix_aspect_ratio/plot_info
+tests/test_hres/fix_aspect_ratio/startf_000-144F
+tests/test_hres/fix_aspect_ratio/tra_geom_000-144F
+tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Bagdad_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
+tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Bushehr_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
+tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
+tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Teheran_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
