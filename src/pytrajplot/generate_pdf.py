@@ -358,6 +358,7 @@ def assemble_pdf(
         subfigs[0].set_facecolor("0.75")  # header
         subfigsnest[0].set_facecolor("0.70")  # map
         subfigsnest[1].set_facecolor("0.65")  # altitude
+
     for domain in domains:
         # ADD INFO HEADER
         axTop = subfigs[0].subplots()
@@ -385,8 +386,10 @@ def assemble_pdf(
 
         # SAVE FIGURE
         filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
+
         for file_type in output_types:
             # plt.savefig(outpath + "new." + file_type)
+            print(f"key:{key}, domain:{domain}, origin:{origin}")
             plt.savefig(str(outpath) + f"/{filename}.{file_type}")
 
         # CLEAR HEADER/MAP AXES FOR NEXT ITERATION

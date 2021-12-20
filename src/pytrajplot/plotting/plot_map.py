@@ -212,114 +212,115 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
                             bool       True if city is of interest, else false
 
     """
-    if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
-        is_capital = capital_type == "primary"
-        if capital_type == "admin":
-            if population > 5000000:
-                is_capital = True
-        is_large = population > 10000000
+    if False:
+        if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
+                if population > 5000000:
+                    is_capital = True
+            is_large = population > 10000000
 
-    if 40 <= lon <= 180:  # 40°E - 180°E (mainly Asia)
-        is_capital = capital_type == "primary"
-        if capital_type == "admin":
-            if population > 10000000:
-                is_capital = True
-        is_large = population > 12000000
+        if 40 <= lon <= 180:  # 40°E - 180°E (mainly Asia)
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
+                if population > 10000000:
+                    is_capital = True
+            is_large = population > 12000000
 
-    if -40 <= lon < 0:  # 40° W to 0° E/W (mainly Atlantic)
-        is_capital = capital_type == "primary"
-        if capital_type == "admin":
-            if population > 2500000:
-                is_capital = True
-        is_large = population > 3000000
+        if -40 <= lon < 0:  # 40° W to 0° E/W (mainly Atlantic)
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
+                if population > 2500000:
+                    is_capital = True
+            is_large = population > 3000000
 
-    if -180 <= lon < -40:  # 180° W to 40° W (mainly American Continent)
-        is_capital = capital_type == "primary"
-        if capital_type == "admin":
-            if population > 800000:
-                is_capital = True
-        is_large = population > 1100000
+        if -180 <= lon < -40:  # 180° W to 40° W (mainly American Continent)
+            is_capital = capital_type == "primary"
+            if capital_type == "admin":
+                if population > 800000:
+                    is_capital = True
+            is_large = population > 1100000
 
-    excluded_cities = [
-        "Casablanca",
-        "Fes",
-        "Hartford",
-        "Providence",
-        "Andorra La Vella",
-        "Indiana",
-        # East-, West-Europe and Asia
-        "Incheon",
-        "Duisburg",
-        "Essen",
-        "Dortmund",
-        "San Marino",
-        "Skopje",
-        "Bratislava",
-        "Pristina",
-        "Bursa",
-        "Yerevan",
-        "Gaziantep",
-        "Athens",
-        "The Hague",
-        "Tallinn",
-        "Podgorica",
-        "Ljubljana",
-        "Voronezh",
-        "Tunceli",
-        "Sanliurfa",
-        "Keren",
-        "Massawa",
-        "Elazig",
-        "Adiyaman",
-        "Erzincan",
-        "Giresun",
-        "Gumushane",
-        "Ryanzan",
-        "Luhansk",
-        "New Delhi",
-        "Manama",
-        "Osaka",
-        "Nagoya",
-        "Tongshan",
-        "Tianjin",
-        "Shijiazhuang",
-        "Heze",
-        "Guangzhou",
-        "Kolkata",
-        "Thimphu",
-        # United States & South America
-        "Carson City",
-        "Helena",
-        "St. Paul",
-        "Des Moines",
-        "Salt Lake City",
-        "Mexicali",
-        "Hermosillo",
-        "Little Rock",
-        "Oklahoma City",
-        "Jefferson City",
-        "Boise",
-        "Cheyenne",
-        "Topeka",
-        "Culiacan",
-        "Ciudad Victoria",
-        "Saltillo",
-        "Durango",
-        "Zacatecas",
-        "San Luis Potosi",
-        "Aguascalientes",
-        "Guanajuato",
-        "Leon de los Aldama",
-        "Wroclaw",
-        "Rotterdam",
-        "Indianapolis",
-        "Raleigh",
-    ]
-    is_excluded = name in excluded_cities
-    return (is_capital or is_large) and not is_excluded
+        excluded_cities = [
+            "Casablanca",
+            "Fes",
+            "Hartford",
+            "Providence",
+            "Andorra La Vella",
+            "Indiana",
+            # East-, West-Europe and Asia
+            "Incheon",
+            "Duisburg",
+            "Essen",
+            "Dortmund",
+            "San Marino",
+            "Skopje",
+            "Bratislava",
+            "Pristina",
+            "Bursa",
+            "Yerevan",
+            "Gaziantep",
+            "Athens",
+            "The Hague",
+            "Tallinn",
+            "Podgorica",
+            "Ljubljana",
+            "Voronezh",
+            "Tunceli",
+            "Sanliurfa",
+            "Keren",
+            "Massawa",
+            "Elazig",
+            "Adiyaman",
+            "Erzincan",
+            "Giresun",
+            "Gumushane",
+            "Ryanzan",
+            "Luhansk",
+            "New Delhi",
+            "Manama",
+            "Osaka",
+            "Nagoya",
+            "Tongshan",
+            "Tianjin",
+            "Shijiazhuang",
+            "Heze",
+            "Guangzhou",
+            "Kolkata",
+            "Thimphu",
+            # United States & South America
+            "Carson City",
+            "Helena",
+            "St. Paul",
+            "Des Moines",
+            "Salt Lake City",
+            "Mexicali",
+            "Hermosillo",
+            "Little Rock",
+            "Oklahoma City",
+            "Jefferson City",
+            "Boise",
+            "Cheyenne",
+            "Topeka",
+            "Culiacan",
+            "Ciudad Victoria",
+            "Saltillo",
+            "Durango",
+            "Zacatecas",
+            "San Luis Potosi",
+            "Aguascalientes",
+            "Guanajuato",
+            "Leon de los Aldama",
+            "Wroclaw",
+            "Rotterdam",
+            "Indianapolis",
+            "Raleigh",
+        ]
+        is_excluded = name in excluded_cities
+        return (is_capital or is_large) and not is_excluded
 
     # this code has become obsolete, because I added the cities for all predefined domains to a list in the add_cities function
-    if False:
+    if True:
         if domain == "dynamic":
             if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
                 is_capital = capital_type == "primary"
@@ -543,7 +544,7 @@ def is_of_interest(name, capital_type, population, domain, lon) -> bool:
             return (is_capital or is_large) and not is_excluded
 
 
-def add_cities_old(ax, domain_boundaries, domain, cross_dateline):
+def add_cities(ax, domain_boundaries, domain, cross_dateline):
     """Add cities to map.
 
     Args:
@@ -638,7 +639,7 @@ def add_cities_old(ax, domain_boundaries, domain, cross_dateline):
             )
 
 
-def add_cities(ax, domain_boundaries, domain, cross_dateline):
+def add_cities_tmp(ax, domain_boundaries, domain, cross_dateline):
     """Add cities to map.
 
     Args:
@@ -1250,7 +1251,6 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
             upper_boundary,
         ]
         cross_dateline = True
-        # TODO: check the aspect ratio of the dynamically created domain --> adapt if necessary
         return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
 
     else:
@@ -1264,7 +1264,6 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
             upper_boundary,
         ]
         cross_dateline = False
-        # TODO: check the aspect raito fo the dynamically created domain --> adapt if necessary
         return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
 
 
@@ -1287,6 +1286,7 @@ def generate_map_plot(
         ax:                 Axes       Axes to generate the map on. Defaults to None.
 
     """
+    # TODO: check the aspect ratio of the dynamically created domain --> adapt if necessary
     if domain == "dynamic":
         (_, custom_domain_boundaries, _, _,) = get_dynamic_domain(
             coord_dict, altitude_levels=altitude_levels, side_traj=side_traj
@@ -1305,6 +1305,11 @@ def generate_map_plot(
     domain_boundaries = crop_map(
         ax=ax, domain=domain, custom_domain_boundaries=custom_domain_boundaries
     )  # sets extent of map
+
+    print(f"Domain boundaries: {domain_boundaries}")
+    print(
+        f"Aspect ratio of dynamic domain:\n\t{(domain_boundaries[1]-domain_boundaries[0])}:{(domain_boundaries[3]-domain_boundaries[2])} = {(domain_boundaries[1]-domain_boundaries[0])/(domain_boundaries[3]-domain_boundaries[2])}"
+    )
 
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
