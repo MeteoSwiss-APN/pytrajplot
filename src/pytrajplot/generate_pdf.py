@@ -140,7 +140,7 @@ def get_projection(plot_dict, altitude_levels, side_traj):
     if plot_dict["altitude_1"]["y_type"] == "hpa":
         # case = "HRES"
         # check if dateline is crossed or not
-        central_longitude, _, _, cross_dateline = get_dynamic_domain(
+        central_longitude, domain_boundaries, _, cross_dateline = get_dynamic_domain(
             coord_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
         )
         projection = ccrs.PlateCarree(central_longitude=central_longitude)
@@ -151,7 +151,7 @@ def get_projection(plot_dict, altitude_levels, side_traj):
             pole_longitude=-170, pole_latitude=43
         )  # define rotation of COSMO model
 
-    return projection, cross_dateline
+    return projection, cross_dateline, domain_boundaries
 
 
 def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
@@ -175,11 +175,9 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
         + plot_info_dict["mbt"][5:7]
         + plot_info_dict["mbt"][8:10]
     )
-    # cleaner, but sligthly slower way to define date: date = start_time.strftime('%Y%m%d') (1.6114674508571625e-05 seconds vs. 1.7564743757247925e-06 seconds)
-    if key[-1] == "F":
-        runtime = int(key[4:7]) - int(start_time.hour)
-    else:
-        runtime = int(key[:3]) - int(start_time.hour)
+
+    # model run time = absolute difference between the two numbers in key
+    runtime = abs(int(key[4:7]) - int(key[0:3]))
 
     trajectory_direction = plot_dict["altitude_1"]["trajectory_direction"]
     final_filename = (
@@ -354,6 +352,7 @@ def assemble_pdf(
             )
             alt_index += 1
 
+    # add facecolor to subfigures
     if False:
         subfigs[0].set_facecolor("0.75")  # header
         subfigsnest[0].set_facecolor("0.70")  # map
@@ -371,7 +370,7 @@ def assemble_pdf(
         )
 
         # ADD MAP
-        projection, cross_dateline = get_projection(
+        projection, cross_dateline, dynamic_domain_boundaries = get_projection(
             plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
         )
         map_ax = subfigsnest[0].add_subplot(111, projection=projection)
@@ -381,6 +380,7 @@ def assemble_pdf(
             side_traj=side_traj,
             altitude_levels=altitude_levels,
             domain=domain,
+            dynamic_domain_boundaries=dynamic_domain_boundaries,
             ax=map_ax,
         )
 

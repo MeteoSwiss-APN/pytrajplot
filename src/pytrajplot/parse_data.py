@@ -257,10 +257,18 @@ def convert_time(plot_info_dict, traj_df, key):
     init_time = plot_info_dict["mbt"][:16]
     format = "%Y-%m-%d %H:%M"
     dt_object = datetime.datetime.strptime(init_time, format)
-    direction = key[-1:]
 
-    if direction == "B":
-        dt_object = dt_object + timedelta(hours=int(key[0:3]))
+    # ~~~~~~~~~~~~~~~~~~~~ NEW ~~~~~~~~~~~~~~~~~~~~ #
+    # add leadtime to model base time
+    dt_object = dt_object + timedelta(hours=int(key[0:3]))
+    # ~~~~~~~~~~~~~~~~~~~~ NEW ~~~~~~~~~~~~~~~~~~~~ #
+
+    # direction = key[-1:]
+    # # add the start-up time (i.e. for 006-144F 6 hours) to the dt_object, based on init_time
+    # if direction == "F":
+    #     dt_object = dt_object + timedelta(hours=int(key[0:3]))
+    # if direction == "B":
+    #     dt_object = dt_object + timedelta(hours=int(key[0:3]))
 
     traj_df["datetime"] = None
     counter = 0
