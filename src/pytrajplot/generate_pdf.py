@@ -176,11 +176,15 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
         + plot_info_dict["mbt"][8:10]
     )
     # cleaner, but sligthly slower way to define date: date = start_time.strftime('%Y%m%d') (1.6114674508571625e-05 seconds vs. 1.7564743757247925e-06 seconds)
-    runtime = int(key[4:7]) - int(start_time.hour)
+    if key[-1] == "F":
+        runtime = int(key[4:7]) - int(start_time.hour)
+    else:
+        runtime = int(key[:3]) - int(start_time.hour)
+
     trajectory_direction = plot_dict["altitude_1"]["trajectory_direction"]
     final_filename = (
         date
-        + f"T{start_time.hour}"
+        + f"T{int(start_time.hour):02}"
         + f"_{origin}_"
         + f"LAGRANTO-{plot_info_dict['model_name']}_"
         + f"Trajektorien_"
