@@ -292,3 +292,9 @@ tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Bagdad_LAGRANTO-IFS-
 tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Bushehr_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
 tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
 tests/test_hres/fix_aspect_ratio/plots/000-144F/20211218T00_Teheran_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
+tests/test_cosmo/000/plot_info
+tests/test_cosmo/000/startf_000-033F
+tests/test_cosmo/000/startf_003-033F
+tests/test_cosmo/000/tra_geom_000-033F
+tests/test_cosmo/000/tra_geom_003-033F
+tests/test_hres/dateline/plots/006-144F/20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png

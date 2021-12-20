@@ -263,6 +263,7 @@ def convert_time(plot_info_dict, traj_df, key):
     dt_object = dt_object + timedelta(hours=int(key[0:3]))
     # ~~~~~~~~~~~~~~~~~~~~ NEW ~~~~~~~~~~~~~~~~~~~~ #
 
+    # TODO: remove this obsolete code if everything works as desired
     # direction = key[-1:]
     # # add the start-up time (i.e. for 006-144F 6 hours) to the dt_object, based on init_time
     # if direction == "F":
