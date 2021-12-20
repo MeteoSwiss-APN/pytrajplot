@@ -655,7 +655,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    start = time.perf_counter()
     add_w_town = True
     if add_w_town:
         if not cross_dateline:
@@ -677,8 +676,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 transform=ccrs.PlateCarree(),
                 rasterized=True,
             )
-    end = time.perf_counter()
-    print(f"adding w-town to plot takes: {end-start} seconds")
 
     if domain == "dynamic":
         cities_data_path = Path("src/pytrajplot/resources/cities/")
@@ -1207,12 +1204,13 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
     upper_boundary = np.max(lat_maxs)
 
     # check dateline crossing
-    far_east = 150 <= np.max(lon_maxs) <= 180
-    far_west = -180 <= np.min(lon_mins) <= -150
+    far_east = 170 <= np.max(lon_maxs) <= 180
+    far_west = -180 <= np.min(lon_mins) <= -170
 
     # dynamic boundaries w/ crossing dateline
     if far_east and far_west:  # if True > trajectory *must* cross dateline somehow
         central_longitude = 180  # shift the central longitude
+        cross_dateline = True
 
         # reset altitude index
         alt_index = 1
@@ -1251,27 +1249,72 @@ def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
                 traj_index += 1
             alt_index += 1
 
+        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
+        if False:
+            map_aspect_ratio = 1.4346
+            dynamic_aspect_ratio = (right_boundary - left_boundary) / (
+                upper_boundary - lower_boundary
+            )
+            print(
+                f"(old) dynamic aspect ratio: {dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
+            )
+            if dynamic_aspect_ratio > 2.2:
+                right_boundary = 1 / map_aspect_ratio * right_boundary
+                left_boundary = 1 / map_aspect_ratio * left_boundary
+                new_dynamic_aspect_ratio = (right_boundary - left_boundary) / (
+                    upper_boundary - lower_boundary
+                )
+                print(
+                    f"(new) dynamic aspect ratio: {new_dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
+                )
+        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
+
         domain_boundaries = [
             left_boundary,
             right_boundary,
             lower_boundary,
             upper_boundary,
         ]
-        cross_dateline = True
+
         return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
 
     # dynamic boundaries w/o crossing dateline
     else:
+        cross_dateline = False
+        central_longitude = 0
         right_boundary = np.max(lon_maxs)  # most eastern point
         left_boundary = np.min(lon_mins)  # most western point
-        central_longitude = 0
+
+        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
+        if False:
+            # check aspect ratio of the dynamically created domain boundaries;
+            # if they are 'too different' from the fixed aspect ratio of the map
+            # (≃ 1.4346 --> ≃ 1.5), re-scale the lower-&upper boundary
+            map_aspect_ratio = 1.4346
+            dynamic_aspect_ratio = (right_boundary - left_boundary) / (
+                upper_boundary - lower_boundary
+            )
+            print(
+                f"(old) dynamic aspect ratio: {dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
+            )
+            if dynamic_aspect_ratio > 2.2:
+                right_boundary = 1 / map_aspect_ratio * right_boundary
+                left_boundary = 1 / map_aspect_ratio * left_boundary
+                new_dynamic_aspect_ratio = (right_boundary - left_boundary) / (
+                    upper_boundary - lower_boundary
+                )
+                print(
+                    f"(new) dynamic aspect ratio: {new_dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
+                )
+        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
+
         domain_boundaries = [
             left_boundary,
             right_boundary,
             lower_boundary,
             upper_boundary,
         ]
-        cross_dateline = False
+
         return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
 
 
@@ -1281,37 +1324,28 @@ def generate_map_plot(
     side_traj,
     altitude_levels,
     domain,
+    dynamic_domain_boundaries,
     ax=None,
 ):
     """Generate Map Plot.
 
     Args:
-        cross_dateline:     bool       Bool, to specify whether the dateline was crossed or not
-        coord_dict:         dict       Dictionary containing the lan/lot data & other plot properties
-        side_traj:          int        0/1 --> necessary for choosing the correct loop
-        altitude_levels:    int        # altitude levels
-        domain:             str        Domain for map
-        ax:                 Axes       Axes to generate the map on. Defaults to None.
+        cross_dateline:             bool       Bool, to specify whether the dateline was crossed or not
+        coord_dict:                 dict       Dictionary containing the lan/lot data & other plot properties
+        side_traj:                  int        0/1 --> necessary for choosing the correct loop
+        altitude_levels:            int        # altitude levels
+        domain:                     str        Domain for map
+        dynamic_domain_boundaries:  array      array w/ dynamic domain boundaries
+        ax:                         Axes       Axes to generate the map on. Defaults to None.
 
     """
-    # TODO: check the aspect ratio of the dynamically created domain --> adapt if necessary
-    if domain == "dynamic":
-        (_, custom_domain_boundaries, _, _,) = get_dynamic_domain(
-            coord_dict, altitude_levels=altitude_levels, side_traj=side_traj
-        )
-
-    else:
-        custom_domain_boundaries = [0, 0, 0, 0]
-        cross_dateline = False
-
     ax = ax or plt.gca()
-
     ax.set_aspect(
         "auto"
     )  # scales the map, so that the aspeact ratio of fig & axes match
 
     domain_boundaries = crop_map(
-        ax=ax, domain=domain, custom_domain_boundaries=custom_domain_boundaries
+        ax=ax, domain=domain, custom_domain_boundaries=dynamic_domain_boundaries
     )  # sets extent of map
 
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
@@ -1336,15 +1370,15 @@ def generate_map_plot(
 
     add_features(ax=ax)
 
-    start = time.perf_counter()
+    # start = time.perf_counter()
     add_cities(
         ax=ax,
         domain_boundaries=domain_boundaries,
         domain=domain,
         cross_dateline=cross_dateline,
     )
-    end = time.perf_counter()
-    print(f"Adding cities took: {end-start} seconds")
+    # end = time.perf_counter()
+    # print(f"Adding cities took: {end-start} seconds")
 
     subplot_properties_dict = {
         0: "k-",
