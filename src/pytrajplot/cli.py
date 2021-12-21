@@ -96,11 +96,27 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
 @click.option(
     "--domain",
     type=click.Choice(
-        ["ch_hd", "ch", "europe", "centraleurope", "alps", "dynamic"],
+        [
+            # "ch_hd", # this domain has become obsolete
+            "ch",
+            "europe",
+            "centraleurope",
+            "alps",
+            "dynamic",
+            "dynamic_zoom",
+        ],
         case_sensitive=False,
     ),
     multiple=True,
-    default=("centraleurope", "europe", "dynamic", "ch_hd", "ch", "alps"),
+    # TODO: add dynamic_zoom domain to default domains, after having implemented this domain
+    default=(
+        "centraleurope",
+        "europe",
+        "dynamic",
+        # "ch_hd",
+        "ch",
+        "alps",
+    ),
     help="Choose domains for map plots. Default: centraleurope, europe, dynamic",
 )
 @click.option(
@@ -127,9 +143,6 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
     default=["pdf"],
     help="Choose data type(s) of final result. Default: pdf",
 )
-# @click.command(
-#     context_settings={"help_option_names": ["-h", "--help"]},
-# )
 @click.option(
     "--version",
     "-V",
