@@ -154,7 +154,8 @@ def crop_map(ax, domain, custom_domain_boundaries):
         "alps": {"domain": [0.7, 16.5, 42.3, 50]},  # optimised boundaries
         # "europe": {"domain": [-12.5, 50.5, 35, 65]},      # optimised boundaries
         "europe": {"domain": [-10, 47, 35, 65]},  # original boundaries
-        "ch_hd": {"domain": [2.8, 13.2, 44.1, 49.4]},  # optimised boundaries
+        # the domain ch_hd has been removed
+        # "ch_hd": {"domain": [2.8, 13.2, 44.1, 49.4]},  # optimised boundaries
         # "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},     # original boundaries
         "dynamic": {
             "domain": [
@@ -200,446 +201,124 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
         return False
 
 
-def is_of_interest(name, capital_type, population, domain, lon) -> bool:
+def is_of_interest(name, capital_type, population, lon) -> bool:
     """Check if a city fulfils certain importance criteria.
 
     Args:
         name                str        Name of city
         capital_type        str        primary/admin/minor (label for "relevance" of city)
         population          int        Population of city (there are conditions based on population)
-        domain              str        Map domain. Different domains have different conditions to determine interest.
         lon                 float      Longitude of city  (there are conditions based on longitude)
 
     Returns:
                             bool       True if city is of interest, else false
 
     """
-    # this code corresponds to the new version of the function add_cities() and is only used for the dynamic domain
-    if True:
-        if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
-            is_capital = capital_type == "primary"
-            if capital_type == "admin":
-                if population > 5000000:
-                    is_capital = True
-            is_large = population > 10000000
-
-        if 40 <= lon <= 180:  # 40°E - 180°E (mainly Asia)
-            is_capital = capital_type == "primary"
-            if capital_type == "admin":
-                if population > 10000000:
-                    is_capital = True
-            is_large = population > 12000000
-
-        if -40 <= lon < 0:  # 40° W to 0° E/W (mainly Atlantic)
-            is_capital = capital_type == "primary"
-            if capital_type == "admin":
-                if population > 2500000:
-                    is_capital = True
-            is_large = population > 3000000
-
-        if -180 <= lon < -40:  # 180° W to 40° W (mainly American Continent)
-            is_capital = capital_type == "primary"
-            if capital_type == "admin":
-                if population > 800000:
-                    is_capital = True
-            is_large = population > 1100000
-
-        excluded_cities = [
-            "Casablanca",
-            "Fes",
-            "Hartford",
-            "Providence",
-            "Andorra La Vella",
-            "Indiana",
-            # East-, West-Europe and Asia
-            "Incheon",
-            "Duisburg",
-            "Essen",
-            "Dortmund",
-            "San Marino",
-            "Skopje",
-            "Bratislava",
-            "Pristina",
-            "Bursa",
-            "Yerevan",
-            "Gaziantep",
-            "Athens",
-            "The Hague",
-            "Tallinn",
-            "Podgorica",
-            "Ljubljana",
-            "Voronezh",
-            "Tunceli",
-            "Sanliurfa",
-            "Keren",
-            "Massawa",
-            "Elazig",
-            "Adiyaman",
-            "Erzincan",
-            "Giresun",
-            "Gumushane",
-            "Ryanzan",
-            "Luhansk",
-            "New Delhi",
-            "Manama",
-            "Osaka",
-            "Nagoya",
-            "Tongshan",
-            "Tianjin",
-            "Shijiazhuang",
-            "Heze",
-            "Guangzhou",
-            "Kolkata",
-            "Thimphu",
-            # United States & South America
-            "Carson City",
-            "Helena",
-            "St. Paul",
-            "Des Moines",
-            "Salt Lake City",
-            "Mexicali",
-            "Hermosillo",
-            "Little Rock",
-            "Oklahoma City",
-            "Jefferson City",
-            "Boise",
-            "Cheyenne",
-            "Topeka",
-            "Culiacan",
-            "Ciudad Victoria",
-            "Saltillo",
-            "Durango",
-            "Zacatecas",
-            "San Luis Potosi",
-            "Aguascalientes",
-            "Guanajuato",
-            "Leon de los Aldama",
-            "Wroclaw",
-            "Rotterdam",
-            "Indianapolis",
-            "Raleigh",
-        ]
-        is_excluded = name in excluded_cities
-        return (is_capital or is_large) and not is_excluded
-
-    # this code has become obsolete, because I added the cities for all predefined domains to a list in the add_cities function
-    if True:
-        if domain == "dynamic":
-            if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
-                is_capital = capital_type == "primary"
-                if capital_type == "admin":
-                    if population > 5000000:
-                        is_capital = True
-                is_large = population > 10000000
-
-            if 40 <= lon <= 180:  # 40°E - 180°E (mainly Asia)
-                is_capital = capital_type == "primary"
-                if capital_type == "admin":
-                    if population > 10000000:
-                        is_capital = True
-                is_large = population > 12000000
-
-            if -40 <= lon < 0:  # 40° W to 0° E/W (mainly Atlantic)
-                is_capital = capital_type == "primary"
-                if capital_type == "admin":
-                    if population > 2500000:
-                        is_capital = True
-                is_large = population > 3000000
-
-            if -180 <= lon < -40:  # 180° W to 40° W (mainly American Continent)
-                is_capital = capital_type == "primary"
-                if capital_type == "admin":
-                    if population > 800000:
-                        is_capital = True
-                is_large = population > 1100000
-
-            excluded_cities = [
-                "Casablanca",
-                "Fes",
-                "Hartford",
-                "Providence",
-                "Andorra La Vella",
-                "Indiana",
-                # East-, West-Europe and Asia
-                "Incheon",
-                "Duisburg",
-                "Essen",
-                "Dortmund",
-                "San Marino",
-                "Skopje",
-                "Bratislava",
-                "Pristina",
-                "Bursa",
-                "Yerevan",
-                "Gaziantep",
-                "Athens",
-                "The Hague",
-                "Tallinn",
-                "Podgorica",
-                "Ljubljana",
-                "Voronezh",
-                "Tunceli",
-                "Sanliurfa",
-                "Keren",
-                "Massawa",
-                "Elazig",
-                "Adiyaman",
-                "Erzincan",
-                "Giresun",
-                "Gumushane",
-                "Ryanzan",
-                "Luhansk",
-                "New Delhi",
-                "Manama",
-                "Osaka",
-                "Nagoya",
-                "Tongshan",
-                "Tianjin",
-                "Shijiazhuang",
-                "Heze",
-                "Guangzhou",
-                "Kolkata",
-                "Thimphu",
-                # United States & South America
-                "Carson City",
-                "Helena",
-                "St. Paul",
-                "Des Moines",
-                "Salt Lake City",
-                "Mexicali",
-                "Hermosillo",
-                "Little Rock",
-                "Oklahoma City",
-                "Jefferson City",
-                "Boise",
-                "Cheyenne",
-                "Topeka",
-                "Culiacan",
-                "Ciudad Victoria",
-                "Saltillo",
-                "Durango",
-                "Zacatecas",
-                "San Luis Potosi",
-                "Aguascalientes",
-                "Guanajuato",
-                "Leon de los Aldama",
-                "Wroclaw",
-                "Rotterdam",
-                "Indianapolis",
-                "Raleigh",
-            ]
-            is_excluded = name in excluded_cities
-            return (is_capital or is_large) and not is_excluded
-
+    if 0 <= lon <= 40:  # 0°E - 40°E (mainly Europe)
         is_capital = capital_type == "primary"
-
-        if domain == "europe":
-            is_large = population > 2000000
-            excluded_cities = [
-                "Tbilisi",
-                "Yerevan",
-                "Ljubljana",
-                "Bratislava",
-                "San Marino",
-                "Podgorica",
-                "Pristina",
-                "Helsinki",
-                "The Hague",
-                "Andorra la Vella",
-                "Athens",
-                "Gaziantep",
-                "Tallinn",
-                "Bursa",
-                "Adana",
-                "Skopje",
-                "Vaduz",
-                "Konya",
-            ]
-            is_excluded = name in excluded_cities
-            return (is_capital or is_large) and not is_excluded
-
-        if domain == "centraleurope":
-            is_large = population > 500000
-            excluded_cities = [
-                "Bratislava",
-                "San Marino",
-                "Nice",
-                "Wroclaw",
-                "Essen",
-                "Dortmund",
-                "Rotterdam",
-            ]
-            is_excluded = name in excluded_cities
-            return (is_capital or is_large) and not is_excluded
-
-        if domain == "ch":
-            is_large = population > 200000
-            if capital_type == "admin":
+        if capital_type == "admin":
+            if population > 5000000:
                 is_capital = True
-            excluded_cities = [
-                "Neuchatel",
-                "Stans",
-                "Sarnen",
-                "Schwyz",
-                "Triesenberg",
-                "Schaan",
-                "Delemont",
-                "Liestal",
-                "Planken",
-                "Ruggell",
-                "Bregenz",
-                "Eschen",
-                "Schellenberg",
-                "Gamprin",
-                "Mauren",
-            ]
-            is_excluded = name in excluded_cities
-            return (is_capital or is_large) and not is_excluded
+        is_large = population > 10000000
 
-        if domain == "ch_hd":
-            is_large = population > 200000
-            if capital_type == "admin":
-                if population > 50000:
-                    is_capital = True
-            excluded_cities = [
-                "Metz",
-                "Freiburg im Breisgau",
-                "Augsburg",
-                "Stuttgart",
-                "Sankt Gallen",
-                "Venice",
-                "Mulhouse",
-                "Karlsruhe",
-                "Padova",
-            ]
-            is_excluded = name in excluded_cities
-            return (is_capital or is_large) and not is_excluded
+    if 40 <= lon <= 180:  # 40°E - 180°E (mainly Asia)
+        is_capital = capital_type == "primary"
+        if capital_type == "admin":
+            if population > 10000000:
+                is_capital = True
+        is_large = population > 12000000
 
-        if domain == "alps":
-            is_large = population > 200000
-            if capital_type == "admin":
-                if population > 50000:
-                    is_capital = True
-            excluded_cities = [
-                "Metz",
-                "Freiburg im Breisgau",
-                "Augsburg",
-                "Stuttgart",
-                "Sankt Gallen",
-                "Venice",
-                "Mulhouse",
-                "Karlsruhe",
-                "Padova",
-                "Plzen",
-                "Mainz",
-                "Mannheim",
-                "Salzburg",
-                "Trieste",
-                "Ancona",
-                "San Marino",
-                "Nice",
-                "Lucerne",
-                "Maribor",
-                "Kranj",
-                "L'Aquila",
-            ]
-            is_excluded = name in excluded_cities
-            return (is_capital or is_large) and not is_excluded
+    if -40 <= lon < 0:  # 40° W to 0° E/W (mainly Atlantic)
+        is_capital = capital_type == "primary"
+        if capital_type == "admin":
+            if population > 2500000:
+                is_capital = True
+        is_large = population > 3000000
 
+    if -180 <= lon < -40:  # 180° W to 40° W (mainly American Continent)
+        is_capital = capital_type == "primary"
+        if capital_type == "admin":
+            if population > 800000:
+                is_capital = True
+        is_large = population > 1100000
 
-def add_cities_old(ax, domain_boundaries, domain, cross_dateline):
-    """Add cities to map.
-
-    Args:
-        ax:                 Axes       current map to crop
-        domain_boundaries:  list       lon/lat range of domain
-        domain:             str        Map domain. Different domains have different conditions to determine interest.
-        cross_dateline:     bool       if cross_dateline --> western lon values need to be shifted
-
-    """
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-    cities_data_path = Path("src/pytrajplot/resources/cities/")
-    assert (
-        cities_data_path.exists()
-    ), f"The cities data could not be found at {cities_data_path}"
-    cities_df = pd.read_csv(Path(cities_data_path, "worldcities.csv"))
-
-    # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
-    cities_df = cities_df.dropna()
-
-    add_w_town = True
-
-    if add_w_town:
-        if not cross_dateline:
-            # add Weesen to maps
-            ax.scatter(
-                x=9.108376385221725,
-                y=47.1361694653364,
-                marker="1",
-                color="grey",
-                transform=ccrs.PlateCarree(),
-                rasterized=True,
-            )
-            ax.text(
-                x=9.108376385221725 + 0.01,
-                y=47.1361694653364 + 0.01,
-                s="W-Town",
-                color="grey",
-                fontsize=5,
-                transform=ccrs.PlateCarree(),
-                rasterized=True,
-            )
-
-    for i, row in cities_df.iterrows():
-        city = row["city_ascii"]
-        lon = row["lng"]
-        lat = row["lat"]
-        capital_type = row["capital"]
-        population = row["population"]
-
-        if is_visible(
-            lat=lat,
-            lon=lon,
-            domain_boundaries=domain_boundaries,
-            cross_dateline=cross_dateline,
-        ) and is_of_interest(
-            name=city,
-            capital_type=capital_type,
-            population=population,
-            domain=domain,
-            lon=lon,
-        ):
-
-            if cross_dateline:
-                if lon < 0:
-                    lon = 360 - abs(lon)
-
-            ax.scatter(
-                x=lon,
-                y=lat,
-                s=2,
-                marker="o",
-                facecolors="k",
-                edgecolors="k",
-                transform=ccrs.PlateCarree(),
-                rasterized=True,
-            )
-
-            text_shift = 0.05
-
-            if domain == "ch":
-                text_shift = 0.01
-
-            ax.text(
-                x=lon + text_shift,
-                y=lat + text_shift,
-                s=city,
-                fontsize=8,
-                transform=ccrs.PlateCarree(),
-                rasterized=True,
-            )
+    excluded_cities = [
+        "Casablanca",
+        "Fes",
+        "Hartford",
+        "Providence",
+        "Andorra La Vella",
+        "Indiana",
+        # East-, West-Europe and Asia
+        "Incheon",
+        "Duisburg",
+        "Essen",
+        "Dortmund",
+        "San Marino",
+        "Skopje",
+        "Bratislava",
+        "Pristina",
+        "Bursa",
+        "Yerevan",
+        "Gaziantep",
+        "Athens",
+        "The Hague",
+        "Tallinn",
+        "Podgorica",
+        "Ljubljana",
+        "Voronezh",
+        "Tunceli",
+        "Sanliurfa",
+        "Keren",
+        "Massawa",
+        "Elazig",
+        "Adiyaman",
+        "Erzincan",
+        "Giresun",
+        "Gumushane",
+        "Ryanzan",
+        "Luhansk",
+        "New Delhi",
+        "Manama",
+        "Osaka",
+        "Nagoya",
+        "Tongshan",
+        "Tianjin",
+        "Shijiazhuang",
+        "Heze",
+        "Guangzhou",
+        "Kolkata",
+        "Thimphu",
+        # United States & South America
+        "Carson City",
+        "Helena",
+        "St. Paul",
+        "Des Moines",
+        "Salt Lake City",
+        "Mexicali",
+        "Hermosillo",
+        "Little Rock",
+        "Oklahoma City",
+        "Jefferson City",
+        "Boise",
+        "Cheyenne",
+        "Topeka",
+        "Culiacan",
+        "Ciudad Victoria",
+        "Saltillo",
+        "Durango",
+        "Zacatecas",
+        "San Luis Potosi",
+        "Aguascalientes",
+        "Guanajuato",
+        "Leon de los Aldama",
+        "Wroclaw",
+        "Rotterdam",
+        "Indianapolis",
+        "Raleigh",
+    ]
+    is_excluded = name in excluded_cities
+    return (is_capital or is_large) and not is_excluded
 
 
 def add_cities(ax, domain_boundaries, domain, cross_dateline):
@@ -703,7 +382,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 name=city,
                 capital_type=capital_type,
                 population=population,
-                domain=domain,
                 lon=lon,
             ):
 
@@ -760,31 +438,31 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 "Appenzell": {"lon": 9.4086, "lat": 47.3306},
             }
 
-        if domain == "ch_hd":
-            cities_list = {
-                "Munich": {"lon": 11.5755, "lat": 48.1372},
-                "Milan": {"lon": 9.19, "lat": 45.4669},
-                "Bern": {"lon": 7.4474, "lat": 46.948},
-                "Vaduz": {"lon": 9.5215, "lat": 47.1415},
-                "Turin": {"lon": 7.7, "lat": 45.0667},
-                "Grenoble": {"lon": 5.7224, "lat": 45.1715},
-                "Genoa": {"lon": 8.934, "lat": 44.4072},
-                "Lyon": {"lon": 4.84, "lat": 45.76},
-                "Strasbourg": {"lon": 7.7458, "lat": 48.5833},
-                "Nancy": {"lon": 6.1846, "lat": 48.6936},
-                "Zurich": {"lon": 8.54, "lat": 47.3786},
-                "Bologna": {"lon": 11.3428, "lat": 44.4939},
-                "Verona": {"lon": 10.9928, "lat": 45.4386},
-                "Geneva": {"lon": 6.15, "lat": 46.2},
-                "Basel": {"lon": 7.5906, "lat": 47.5606},
-                "Saarbrucken": {"lon": 7.0, "lat": 49.2333},
-                "Dijon": {"lon": 5.0167, "lat": 47.3167},
-                "Salzburg": {"lon": 13.0477, "lat": 47.7972},
-                "Lausanne": {"lon": 6.6333, "lat": 46.5333},
-                "Innsbruck": {"lon": 11.3933, "lat": 47.2683},
-                "Trento": {"lon": 11.1167, "lat": 46.0667},
-                "Lucerne": {"lon": 8.3059, "lat": 47.0523},
-            }
+        # if domain == "ch_hd":
+        #     cities_list = {
+        #         "Munich": {"lon": 11.5755, "lat": 48.1372},
+        #         "Milan": {"lon": 9.19, "lat": 45.4669},
+        #         "Bern": {"lon": 7.4474, "lat": 46.948},
+        #         "Vaduz": {"lon": 9.5215, "lat": 47.1415},
+        #         "Turin": {"lon": 7.7, "lat": 45.0667},
+        #         "Grenoble": {"lon": 5.7224, "lat": 45.1715},
+        #         "Genoa": {"lon": 8.934, "lat": 44.4072},
+        #         "Lyon": {"lon": 4.84, "lat": 45.76},
+        #         "Strasbourg": {"lon": 7.7458, "lat": 48.5833},
+        #         "Nancy": {"lon": 6.1846, "lat": 48.6936},
+        #         "Zurich": {"lon": 8.54, "lat": 47.3786},
+        #         "Bologna": {"lon": 11.3428, "lat": 44.4939},
+        #         "Verona": {"lon": 10.9928, "lat": 45.4386},
+        #         "Geneva": {"lon": 6.15, "lat": 46.2},
+        #         "Basel": {"lon": 7.5906, "lat": 47.5606},
+        #         "Saarbrucken": {"lon": 7.0, "lat": 49.2333},
+        #         "Dijon": {"lon": 5.0167, "lat": 47.3167},
+        #         "Salzburg": {"lon": 13.0477, "lat": 47.7972},
+        #         "Lausanne": {"lon": 6.6333, "lat": 46.5333},
+        #         "Innsbruck": {"lon": 11.3933, "lat": 47.2683},
+        #         "Trento": {"lon": 11.1167, "lat": 46.0667},
+        #         "Lucerne": {"lon": 8.3059, "lat": 47.0523},
+        #     }
 
         if domain == "alps":
             cities_list = {
