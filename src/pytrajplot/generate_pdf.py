@@ -12,6 +12,7 @@ from pathlib import Path
 import cartopy.crs as ccrs
 import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def profile(func):
@@ -175,7 +176,6 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
     start_time = plot_dict["altitude_1"]["start_time"]
 
     date = plot_dict["altitude_1"]["start_time"]
-    print(f"date = {date}, type(date) = {type(date)}")
     date = date.strftime("%Y%m%d")
 
     # model run time = absolute difference between the two numbers in key
@@ -230,13 +230,30 @@ def assemble_pdf(
     outpath = Path(output_dir / "plots" / key)
     outpath.mkdir(parents=True, exist_ok=True)
 
+    # compute the trajectory shift for side trajectories, if there are any
+    # traj_index - shift_direction mapping: 0=main, 1=east, 2=north, 3=west, 4=south
+    if side_traj:
+        # L = π*R*a/180; L - arc length [km]; R - radius of a circle [km]; a - angle [degrees].
+        R = 6371  # [km], average radius of the earth
+        lat0 = plot_dict["altitude_1"]["traj_0"]["lat"].iloc[
+            0
+        ]  # latitude of main trajectory origin
+        lat1 = plot_dict["altitude_1"]["traj_1"]["lat"].iloc[
+            0
+        ]  # latitude of side trajectory origin (shifted to the east w.r.t to main trajectory)
+        traj_shift_degrees = abs(lat1 - lat0)
+        traj_shift = int(np.pi * R * traj_shift_degrees / 180)
+
+    lt = int(key[0:3])  # lead time
+
     fig = plt.figure(tight_layout=False, figsize=(16, 9))
 
     subfigs = fig.subfigures(2, 1, height_ratios=[0.2, 1])
 
-    # add watermark / copyright disclaimer
+    # empty title for correct alignment of header
+    # TODO: remove this and check layout change
     subfigs[0].suptitle(
-        f"MeteoSwiss 2021 ©",
+        f" ",
         fontdict={
             "size": 10,
             "color": "#eeeeee",
@@ -361,13 +378,67 @@ def assemble_pdf(
         subfigsnest[1].set_facecolor("0.65")  # altitude
 
     for domain in domains:
-        # ADD INFO HEADER
+        # ADD FOOTER
+        if language == "en":
+            if side_traj:
+                footer = (
+                    "$\it{Domain:}$"
+                    + f" {domain}  |  "
+                    + "$\it{Model:}$"
+                    + f" {plot_info_dict['model_name']}  |  "
+                    + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
+                    + "$\it{Lead\;Time:}$ "
+                    f"{lt} h  |  " + f"MeteoSwiss ©"
+                )
+            else:
+                footer = (
+                    "$\it{Domain:}$"
+                    + f" {domain}  |  "
+                    + "$\it{Model:}$"
+                    + f" {plot_info_dict['model_name']}  |  "
+                    + "$\it{Lead\;Time:}$ "
+                    f"{lt} h  |  " + f"MeteoSwiss 2021 ©"
+                )
+
+        if language == "de":
+            if side_traj:
+                footer = (
+                    "$\it{Domäne:}$"
+                    + f" {domain}  |  "
+                    + "$\it{Model:}$"
+                    + f" {plot_info_dict['model_name']}  |  "
+                    + f"Zus. traj. @ {traj_shift} km N/E/S/W  |  "
+                    + "$\it{Lead\;Time:}$ "
+                    f"{lt} h  |  " + f"MeteoSwiss 2021 ©"
+                )
+            else:
+                footer = (
+                    "$\it{Domäne:}$"
+                    + f" {domain}  |  "
+                    + "$\it{Model:}$"
+                    + f" {plot_info_dict['model_name']}  |  "
+                    + "$\it{Lead\;Time:}$ "
+                    f"{lt} h  |  " + f"MeteoSwiss 2021 ©"
+                )
+
+        subfigsnest[0].suptitle(
+            footer,
+            x=0.08,
+            y=0.04,
+            horizontalalignment="left",  # 'center', 'left', 'right'; default: center
+            verticalalignment="top",  # 'top', 'center', 'bottom', 'baseline'; default: top
+            fontdict={
+                "size": 6,
+                "color": "k",
+                # "color": "#5B5B5B",
+            },
+        )
+
+        # ADD INFO HEADER & TITLE
         axTop = subfigs[0].subplots()
         generate_info_header(
             language=language,
-            plot_info=plot_info_dict,
             plot_data=plot_dict,
-            domain=domain,
             ax=axTop,
         )
 
@@ -391,7 +462,7 @@ def assemble_pdf(
 
         for file_type in output_types:
             # plt.savefig(outpath + "new." + file_type)
-            print(f"key:{key}, domain:{domain}, origin:{origin}")
+            # print(f"key:{key}, domain:{domain}, origin:{origin}")
             plt.savefig(str(outpath) + f"/{filename}.{file_type}")
 
         # CLEAR HEADER/MAP AXES FOR NEXT ITERATION
@@ -426,6 +497,9 @@ def generate_pdf(
     for key in trajectory_dict:  # iterate through the trajectory dict
         # print(key)
         trajectory_df = trajectory_dict[key]  # extract df for given key
+        # ~~~~~~~~~~~~~~~~~~~~ save dataframe ~~~~~~~~~~~~~~~~~~~~ #
+        # trajectory_df.to_csv(f'{key}_df.csv', index = False)
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         start_time = trajectory_df["datetime"].loc[0]
         altitude_levels = int(trajectory_df["altitude_levels"].loc[0])
         trajectory_direction = str(trajectory_df["trajectory_direction"].loc[0])

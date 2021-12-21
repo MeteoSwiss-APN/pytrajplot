@@ -298,3 +298,13 @@ tests/test_cosmo/000/startf_003-033F
 tests/test_cosmo/000/tra_geom_000-033F
 tests/test_cosmo/000/tra_geom_003-033F
 tests/test_hres/dateline/plots/006-144F/20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png
+trajectory_df.csv
+tests/test_hres/4_altitudes/plots/000-048F/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png
+tests/test_hres/lagranto_c/plots/000-144F/20211220T00_Bushehr_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
+tests/test_hres/lagranto_c/plots/000-144F/20211220T00_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_144_dynamic.png
+tests/test_hres/lagranto_c/tmp/startf_006-144F
+tests/test_hres/lagranto_c/tmp/startf_012-144F
+tests/test_hres/lagranto_c/tmp/startf_018-144F
+tests/test_hres/lagranto_c/tmp/tra_geom_006-144F
+tests/test_hres/lagranto_c/tmp/tra_geom_012-144F
+tests/test_hres/lagranto_c/tmp/tra_geom_018-144F
