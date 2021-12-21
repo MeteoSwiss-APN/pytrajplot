@@ -3,14 +3,12 @@
 # Standard library
 import cProfile
 import io
-import os
 import pstats
 import time
 from pathlib import Path
 
 # Third-party
 import cartopy.crs as ccrs
-import matplotlib.gridspec as gs
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -244,21 +242,11 @@ def assemble_pdf(
         traj_shift_degrees = abs(lat1 - lat0)
         traj_shift = int(np.pi * R * traj_shift_degrees / 180)
 
-    lt = int(key[0:3])  # lead time
+    base_time = plot_info_dict["mbt"][0:13] + " " + plot_info_dict["mbt"][-3:]
 
     fig = plt.figure(tight_layout=False, figsize=(16, 9))
 
     subfigs = fig.subfigures(2, 1, height_ratios=[0.2, 1])
-
-    # empty title for correct alignment of header
-    # TODO: remove this and check layout change
-    subfigs[0].suptitle(
-        f" ",
-        fontdict={
-            "size": 10,
-            "color": "#eeeeee",
-        },
-    )
 
     subfigsnest = subfigs[1].subfigures(1, 2, width_ratios=[1, 0.4])
 
@@ -270,6 +258,12 @@ def assemble_pdf(
         wspace=0.5,  # space between the first and second column
         hspace=0.05,
     )
+
+    # add facecolor to subfigures
+    if False:
+        subfigs[0].set_facecolor("0.75")  # header
+        subfigsnest[0].set_facecolor("0.70")  # map
+        subfigsnest[1].set_facecolor("0.65")  # altitude
 
     # ADD ALTITUDE PLOT
     subplot_dict = {}
@@ -371,60 +365,39 @@ def assemble_pdf(
             )
             alt_index += 1
 
-    # add facecolor to subfigures
-    if False:
-        subfigs[0].set_facecolor("0.75")  # header
-        subfigsnest[0].set_facecolor("0.70")  # map
-        subfigsnest[1].set_facecolor("0.65")  # altitude
-
     for domain in domains:
         # ADD FOOTER
+        # TODO: unify cases w/ & w/o
         if language == "en":
             if side_traj:
                 footer = (
-                    "$\it{Domain:}$"
-                    + f" {domain}  |  "
-                    + "$\it{Model:}$"
-                    + f" {plot_info_dict['model_name']}  |  "
+                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
                     + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
-                    + "$\it{Lead\;Time:}$ "
-                    f"{lt} h  |  " + f"MeteoSwiss ©"
+                    + f"MeteoSwiss ©"
                 )
             else:
                 footer = (
-                    "$\it{Domain:}$"
-                    + f" {domain}  |  "
-                    + "$\it{Model:}$"
-                    + f" {plot_info_dict['model_name']}  |  "
-                    + "$\it{Lead\;Time:}$ "
-                    f"{lt} h  |  " + f"MeteoSwiss 2021 ©"
+                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
+                    + f"MeteoSwiss ©"
                 )
 
         if language == "de":
             if side_traj:
                 footer = (
-                    "$\it{Domäne:}$"
-                    + f" {domain}  |  "
-                    + "$\it{Model:}$"
-                    + f" {plot_info_dict['model_name']}  |  "
-                    + f"Zus. traj. @ {traj_shift} km N/E/S/W  |  "
-                    + "$\it{Lead\;Time:}$ "
-                    f"{lt} h  |  " + f"MeteoSwiss 2021 ©"
+                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                    + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
+                    + f"MeteoSwiss ©"
                 )
             else:
                 footer = (
-                    "$\it{Domäne:}$"
-                    + f" {domain}  |  "
-                    + "$\it{Model:}$"
-                    + f" {plot_info_dict['model_name']}  |  "
-                    + "$\it{Lead\;Time:}$ "
-                    f"{lt} h  |  " + f"MeteoSwiss 2021 ©"
+                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                    + f"MeteoSwiss ©"
                 )
 
         subfigsnest[0].suptitle(
             footer,
             x=0.08,
-            y=0.04,
+            y=0.035,
             horizontalalignment="left",  # 'center', 'left', 'right'; default: center
             verticalalignment="top",  # 'top', 'center', 'bottom', 'baseline'; default: top
             fontdict={
@@ -445,6 +418,9 @@ def assemble_pdf(
         # ADD MAP
         projection, cross_dateline, dynamic_domain_boundaries = get_projection(
             plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
+        )
+        print(
+            f"projection: {projection} \ncross_dateline: {cross_dateline} \ndynamic_domain_boundaries: {dynamic_domain_boundaries}"
         )
         map_ax = subfigsnest[0].add_subplot(111, projection=projection)
         generate_map_plot(
