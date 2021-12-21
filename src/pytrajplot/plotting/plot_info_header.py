@@ -4,14 +4,12 @@
 import matplotlib.pyplot as plt
 
 
-def generate_info_header(language, plot_info, plot_data, domain, ax=None):
-    """Summary - First line should end with a period.
+def generate_info_header(language, plot_data, ax=None):
+    """Generate info header.
 
     Args:
         language            str        language for plot annotations
-        plot_info           dict       Dict w/ information for info header (taken from info file)
         plot_data           dict       Dict w/ information for info header (taken from start/traj files)
-        domain              str        domain of current plot
 
         ax (Axes): Axes to plot the info header on. Defaults to None.
 
@@ -26,14 +24,13 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
     y_type = plot_data["altitude_1"]["y_type"]
     lon_0 = format(round(plot_data["altitude_1"]["lon_precise"], 3), ".3f")
     lat_0 = format(round(plot_data["altitude_1"]["lat_precise"], 3), ".3f")
-    model_name = plot_info["model_name"]
     trajectory_direction = plot_data["altitude_1"]["trajectory_direction"]
     elevation = ""
     start_time = str(plot_data["altitude_1"]["start_time"])
 
     for key in plot_data:
         if plot_data[key]["subplot_index"] == (len(plot_data.keys()) - 1):
-            elevation = plot_data[key]["y_surf"].iloc[0]
+            elevation = int(plot_data[key]["y_surf"].iloc[0])
 
     if not elevation:
         if language == "en":
@@ -42,42 +39,36 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
             elevation = "nicht verfügbar"
 
     if y_type == "hpa":
-        unit = "hPA"
+        unit = "hPa"
     else:
         unit = "m"
 
     if language == "en":
         if trajectory_direction == "F":
             title = f"Forward Trajectory from {origin} departing on: {start_time}"
-            site = "$\it{Release}$ $\it{Site}:}$"
+            site = "$\it{Release\;Site:}$ "
         if trajectory_direction == "B":
             title = f"Backward Trajectory from {origin} arriving on: {start_time}"
-            site = "$\it{Receptor}$ $\it{Site}:}$"
-    else:
-        if trajectory_direction == "F":
-            title = f"Vorwärts-Trajektorie von {origin} gestartet am: {start_time}"
-            site = "$\it{Ursprungsort}$:$"
-        if trajectory_direction == "B":
-            title = f"Rückwärts-Trajektorie von {origin} gestartet am: {start_time}"
-            site = "$\it{Ankunftsort}$:"
-
-    if language == "en":
+            site = "$\it{Receptor\;Site:}$ "
         info = (
             site
             + f"{origin}"
             + "  |  "
-            + "$\it{Coordinates:}$"
+            + "$\it{Coordinates:}$ "
             + f" {lat_0}"
             + "°N, "
             + f"{lon_0}°E  |  "
-            + "$\it{Domain:}$"
-            + f" {domain}  |  "
-            + "$\it{Model:}$"
-            + f" {model_name}  |  "
-            + "$\it{Elevation: }$"
-            + f" {elevation} {unit} ({y_type})"
+            + "$\it{Elevation:}$ "
+            + f" {elevation} {unit}"
         )
+
     else:
+        if trajectory_direction == "F":
+            title = f"Vorwärts-Trajektorie von {origin} gestartet am: {start_time}"
+            site = "$\it{Ursprungsort:}$ "
+        if trajectory_direction == "B":
+            title = f"Rückwärts-Trajektorie von {origin} gestartet am: {start_time}"
+            site = "$\it{Ankunftsort:}$ "
         info = (
             site
             + f"{origin}"
@@ -86,12 +77,8 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
             + f" {lat_0}"
             + "°N, "
             + f"{lon_0}°E  |  "
-            + "$\it{Domäne:}$"
-            + f" {domain}  |  "
-            + "$\it{Model:}$"
-            + f" {model_name}  |  "
-            + "$\it{Elevation: }$"
-            + f" {elevation} {unit} ({y_type})"
+            + "$\it{Elevation:}$"
+            + f" {elevation} {unit}"
         )
 
     # title
@@ -110,11 +97,11 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
         },
     )
 
-    # props = dict(
-    #     boxstyle= 'square', # 'round',
-    #     facecolor="#FFFAF0",
-    #     alpha=1,
-    # )
+    props = dict(
+        boxstyle="square",  # 'round',
+        facecolor="#FFFAF0",
+        alpha=1,
+    )
     # description
     ax.text(
         x=0.5,
@@ -126,8 +113,7 @@ def generate_info_header(language, plot_info, plot_data, domain, ax=None):
         fontdict={
             "fontsize": 15,
             "color": "black",
-            "verticalalignment": "baseline",
         },
-        # bbox=props
+        bbox=props,
     )
     return ax
