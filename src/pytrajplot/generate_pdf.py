@@ -174,11 +174,9 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
     """
     start_time = plot_dict["altitude_1"]["start_time"]
 
-    date = (
-        plot_info_dict["mbt"][0:4]
-        + plot_info_dict["mbt"][5:7]
-        + plot_info_dict["mbt"][8:10]
-    )
+    date = plot_dict["altitude_1"]["start_time"]
+    print(f"date = {date}, type(date) = {type(date)}")
+    date = date.strftime("%Y%m%d")
 
     # model run time = absolute difference between the two numbers in key
     runtime = abs(int(key[4:7]) - int(key[0:3]))
