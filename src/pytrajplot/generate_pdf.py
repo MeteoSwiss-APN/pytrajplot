@@ -339,7 +339,7 @@ def assemble_pdf(
 
     for domain in domains:
         # ADD FOOTER
-        start = time.perf_counter()
+        # start = time.perf_counter()
         if language == "en":
             if side_traj:
                 footer = (
@@ -378,22 +378,22 @@ def assemble_pdf(
                 # "color": "#5B5B5B",
             },
         )
-        end = time.perf_counter()
-        print(f"Adding footer took:\t\t{end-start} seconds")
+        # end = time.perf_counter()
+        # print(f"Adding footer took:\t\t{end-start} seconds")
 
         # ADD INFO HEADER & TITLE
-        start = time.perf_counter()
+        # start = time.perf_counter()
         axTop = subfigs[0].subplots()
         generate_info_header(
             language=language,
             plot_data=plot_dict,
             ax=axTop,
         )
-        end = time.perf_counter()
-        print(f"Adding info header took:\t{end-start} seconds")
+        # end = time.perf_counter()
+        # print(f"Adding info header took:\t{end-start} seconds")
 
         # ADD MAP
-        start = time.perf_counter()
+        # start = time.perf_counter()
         map_ax = subfigsnest[0].add_subplot(111, projection=projection)
         generate_map_plot(
             cross_dateline=cross_dateline,
@@ -405,18 +405,18 @@ def assemble_pdf(
             ax=map_ax,
             central_longitude=central_longitude,
         )
-        end = time.perf_counter()
-        print(f"Adding map took:\t\t{end-start} seconds")
+        # end = time.perf_counter()
+        # print(f"Adding map took:\t\t{end-start} seconds")
 
         # SAVE FIGURE
         filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
 
         for file_type in output_types:
             # print(f"key:{key}, domain:{domain}, origin:{origin}")
-            start = time.perf_counter()
+            # start = time.perf_counter()
             plt.savefig(str(outpath) + f"/{filename}.{file_type}")
-            end = time.perf_counter()
-            print(f"Saving plot took:\t\t{end-start} seconds")
+            # end = time.perf_counter()
+            # print(f"Saving plot took:\t\t{end-start} seconds")
 
         # CLEAR HEADER/MAP AXES FOR NEXT ITERATION
         map_ax.remove()
@@ -548,7 +548,7 @@ def generate_pdf(
                     alt_index += 1
 
                 if alt_index > altitude_levels:
-                    start = time.perf_counter()
+                    # start = time.perf_counter()
                     (
                         central_longitude,
                         projection,
@@ -559,11 +559,11 @@ def generate_pdf(
                         lat=trajectory_latitude_expansion,
                         case=model,
                     )
-                    # print(f"central_longitude = {central_longitude}, projection = {projection}, traj expansion = {trajectory_expansion}, cross_dateline = {cross_dateline}")
-                    end = time.perf_counter()
-                    print(f"Computing dynamic domain took\t{end-start} seconds.")
+                    # end = time.perf_counter()
+                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
-                    start_tmp = time.perf_counter()
+
+                    # start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -581,15 +581,17 @@ def generate_pdf(
                         trajectory_expansion=trajectory_expansion,
                         cross_dateline=cross_dateline,
                     )
+
                     # reset the traj_expansion pandas series before next iteration
                     trajectory_longitude_expansion, trajectory_latitude_expansion = (
                         pd.Series(),
                         pd.Series(),
                     )
-                    end_tmp = time.perf_counter()
-                    print(
-                        f"Assemble pdf took\t\t{end_tmp-start_tmp} sec from the whole generate_pdf pipeline."
-                    )
+
+                    # end = time.perf_counter()
+                    # print(
+                    # f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
+                    # )
 
             else:
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
@@ -661,7 +663,7 @@ def generate_pdf(
                 row_index += 1
                 alt_index += 1
                 if alt_index > altitude_levels:
-                    start = time.perf_counter()
+                    # start = time.perf_counter()
                     (
                         central_longitude,
                         projection,
@@ -672,11 +674,11 @@ def generate_pdf(
                         lat=trajectory_latitude_expansion,
                         case=model,
                     )
-                    end = time.perf_counter()
-                    print(f"Computing dynamic domain took\t{end-start} seconds.")
+                    # end = time.perf_counter()
+                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
 
-                    start_tmp = time.perf_counter()
+                    # start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -700,10 +702,10 @@ def generate_pdf(
                         pd.Series(),
                     )
 
-                    end_tmp = time.perf_counter()
-                    print(
-                        f"Assemble pdf took\t\t{end_tmp-start_tmp} sec from the whole generate_pdf pipeline."
-                    )
+                    # end = time.perf_counter()
+                    # print(
+                    #     f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
+                    # )
     return
 
 
