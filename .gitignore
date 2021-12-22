@@ -328,3 +328,4 @@ tests/test_hres/4_altitudes/plots/000-048F/20210503T12_Linate_LAGRANTO-IFS-HRES-
 tests/test_hres/backward/plots/036-000B/20210505T00_Geneve_LAGRANTO-IFS-HRES-Europe_Trajektorien_B_036_europe.png
 tests/test_hres/dateline/german/plots/006-144F/20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_europe.png
 tests/test_hres/no_side_traj/plots/000-048F/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png
+000-144F_df.csv
