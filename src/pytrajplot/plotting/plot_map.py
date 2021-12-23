@@ -334,7 +334,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     add_w_town = True
     if add_w_town:
-        if not cross_dateline:
+        if domain in ["ch", "alps", "europe", "centraleurope"]:
             # add Weesen to maps
             ax.scatter(
                 x=9.108376385221725,
