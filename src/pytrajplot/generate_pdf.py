@@ -412,7 +412,7 @@ def assemble_pdf(
         filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
 
         for file_type in output_types:
-            # print(f"key:{key}, domain:{domain}, origin:{origin}")
+            print(f"key:{key}, domain:{domain}, origin:{origin}")
             # start = time.perf_counter()
             plt.savefig(str(outpath) + f"/{filename}.{file_type}")
             # end = time.perf_counter()

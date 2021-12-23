@@ -906,7 +906,6 @@ def generate_map_plot(
         "lon": coord_dict["altitude_1"]["traj_0"]["lon"].iloc[0],
         "lat": coord_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
     }
-    print(origin_coordinates)
 
     domain_boundaries = crop_map(
         ax=ax,
