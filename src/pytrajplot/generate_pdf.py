@@ -11,6 +11,7 @@ from pathlib import Path
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 
 def profile(func):
@@ -36,7 +37,6 @@ plt.rc("axes", labelsize=8)  # change the font size of the axis labels
 from .plotting.plot_altitude import generate_altitude_plot
 from .plotting.plot_info_header import generate_info_header
 from .plotting.plot_map import generate_map_plot
-from .plotting.plot_map import get_dynamic_domain
 
 
 def create_plot_dict(altitude_levels):
@@ -122,41 +122,6 @@ def create_plot_dict(altitude_levels):
     return plot_dict
 
 
-def get_projection(plot_dict, altitude_levels, side_traj):
-    """Define the projection (PlateCarree for HRES or RotatedPole for COSMO).
-
-    Args:
-    plot_dict:              dict                        Dictionary containing the combined information of the start & trajectory file
-    altitude_levels:        int                         Number of starting altitudes
-    side_traj:              bool                        Bool, to specify whether there are side trajectories or not
-
-    Returns:
-        projection:         cartopy.crs.<projection>    Projection of the cartopy GeoAxes
-        cross_dateline:     bool                        Bool to specify whether the dateline gets crossed or not
-
-    """
-    # check if HRES or COSMO
-    if plot_dict["altitude_1"]["y_type"] == "hpa":
-        # case = "HRES"
-        # check if dateline is crossed or not
-        central_longitude, domain_boundaries, _, cross_dateline = get_dynamic_domain(
-            coord_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
-        )
-        projection = ccrs.PlateCarree(central_longitude=central_longitude)
-    else:
-        # case = "COSMO" --> the model domain for COSMO is only defined within europe, thus the dateline can't get crossed for COSMO
-        # central_longitude, domain_boundaries, _, cross_dateline = get_dynamic_domain(
-        #     coord_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
-        # )
-        cross_dateline = False
-        domain_boundaries = [0, 0, 0, 0]
-        projection = ccrs.RotatedPole(
-            pole_longitude=-170, pole_latitude=43
-        )  # define rotation of COSMO model
-
-    return projection, cross_dateline, domain_boundaries
-
-
 def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
     """Generate the filename of the output file.
 
@@ -205,6 +170,10 @@ def assemble_pdf(
     max_start_altitude,
     domains,
     output_types,
+    central_longitude,
+    projection,
+    trajectory_expansion,
+    cross_dateline,
 ):
     """Assemble final output pdf/png.
 
@@ -220,6 +189,10 @@ def assemble_pdf(
         max_start_altitude:     float               Highest starting altitude
         domains:                str                 Domain of the map.
         output_types:           tuple               Tuple containing the file types of the output files. (pdf and/or png)
+        central_longitude:      float               Central Longitude for PlateCarree Projection
+        projection:             cartopy projection  Projection of map
+        trajectory_expansion:   list                Expansion of trajectory (formerly called dynamic_boundaries)
+        cross_dateline:         bool                True/False if dateline gets crossed
 
     """
     # generate the output directory if it doesn't exist
@@ -302,7 +275,6 @@ def assemble_pdf(
         if altitude_levels == 2:
             alt_index = 1
             while alt_index <= 2:
-                print(alt_index)
                 if int(plot_dict["altitude_" + str(alt_index)]["subplot_index"]) == 0:
                     subplot_index = 1
                     tmp_ax = subplot_dict[subplot_index]
@@ -367,7 +339,7 @@ def assemble_pdf(
 
     for domain in domains:
         # ADD FOOTER
-        # TODO: unify cases w/ & w/o
+        # start = time.perf_counter()
         if language == "en":
             if side_traj:
                 footer = (
@@ -406,22 +378,22 @@ def assemble_pdf(
                 # "color": "#5B5B5B",
             },
         )
+        # end = time.perf_counter()
+        # print(f"Adding footer took:\t\t{end-start} seconds")
 
         # ADD INFO HEADER & TITLE
+        # start = time.perf_counter()
         axTop = subfigs[0].subplots()
         generate_info_header(
             language=language,
             plot_data=plot_dict,
             ax=axTop,
         )
+        # end = time.perf_counter()
+        # print(f"Adding info header took:\t{end-start} seconds")
 
         # ADD MAP
-        projection, cross_dateline, dynamic_domain_boundaries = get_projection(
-            plot_dict=plot_dict, altitude_levels=altitude_levels, side_traj=side_traj
-        )
-        print(
-            f"projection: {projection} \ncross_dateline: {cross_dateline} \ndynamic_domain_boundaries: {dynamic_domain_boundaries}"
-        )
+        # start = time.perf_counter()
         map_ax = subfigsnest[0].add_subplot(111, projection=projection)
         generate_map_plot(
             cross_dateline=cross_dateline,
@@ -429,23 +401,71 @@ def assemble_pdf(
             side_traj=side_traj,
             altitude_levels=altitude_levels,
             domain=domain,
-            dynamic_domain_boundaries=dynamic_domain_boundaries,
+            trajectory_expansion=trajectory_expansion,
             ax=map_ax,
+            central_longitude=central_longitude,
         )
+        # end = time.perf_counter()
+        # print(f"Adding map took:\t\t{end-start} seconds")
 
         # SAVE FIGURE
         filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
 
         for file_type in output_types:
-            # plt.savefig(outpath + "new." + file_type)
-            # print(f"key:{key}, domain:{domain}, origin:{origin}")
+            print(f"key:{key}, domain:{domain}, origin:{origin}")
+            # start = time.perf_counter()
             plt.savefig(str(outpath) + f"/{filename}.{file_type}")
+            # end = time.perf_counter()
+            # print(f"Saving plot took:\t\t{end-start} seconds")
 
         # CLEAR HEADER/MAP AXES FOR NEXT ITERATION
         map_ax.remove()
         axTop.remove()
 
     plt.close(fig)
+
+
+def get_map_settings(lon, lat, case):
+    # TODO: add docstring to this function
+    if case == "COSMO":
+        central_longitude = 0
+        cross_dateline = False
+        trajectory_expansion = [0, 0, 0, 0]
+        projection = ccrs.RotatedPole(
+            pole_longitude=-170, pole_latitude=43
+        )  # define rotation of COSMO model
+        return central_longitude, projection, trajectory_expansion, cross_dateline
+
+    if case == "HRES":
+        max_lon, min_lon, max_lat, min_lat = (
+            np.max(lon),
+            np.min(lon),
+            np.max(lat),
+            np.min(lat),
+        )
+
+        far_east = 175 <= max_lon <= 180
+        far_west = -175 >= min_lon >= -180
+
+        if far_east and far_west:
+            cross_dateline = True
+            central_longitude = 180  # shift central longitude of PlateCarree Projection to +- 180° s.t. dateline is in centre of map
+
+            for i, longitude in enumerate(lon):
+                if longitude < 0:
+                    lon.iloc[i] = 180 + (180 - abs(longitude))
+
+            min_lon = np.min(lon)
+            max_lon = np.max(lon)
+
+        else:  # trajectories dont't cross dateline
+            cross_dateline = False
+            central_longitude = 0
+
+        trajectory_expansion = [min_lon, max_lon, min_lat, max_lat]
+        projection = ccrs.PlateCarree(central_longitude=central_longitude)
+
+        return central_longitude, projection, trajectory_expansion, cross_dateline
 
 
 def generate_pdf(
@@ -474,7 +494,7 @@ def generate_pdf(
         # print(key)
         trajectory_df = trajectory_dict[key]  # extract df for given key
         # ~~~~~~~~~~~~~~~~~~~~ save dataframe ~~~~~~~~~~~~~~~~~~~~ #
-        # trajectory_df.to_csv(f'{key}_df.csv', index = False)
+        # trajectory_df.to_csv(f'{output_dir}{key}_df.csv', index = False)
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         start_time = trajectory_df["datetime"].loc[0]
         altitude_levels = int(trajectory_df["altitude_levels"].loc[0])
@@ -482,19 +502,26 @@ def generate_pdf(
         number_of_times = int(trajectory_df["block_length"].iloc[0])
         number_of_trajectories = int(trajectory_df["#trajectories"].iloc[0])
 
+        if "HRES" in plot_info_dict["model_name"]:
+            model = "HRES"
+        else:
+            model = "COSMO"
+
         # time axis for altitude plots (= x-axis)
         time_axis = trajectory_df["datetime"].iloc[0:number_of_times]
 
         plot_dict = create_plot_dict(altitude_levels=altitude_levels)
 
-        row_index = 0
-        alt_index = (
-            1  # altitude 1,2,3,4,... (however many starting altitudes there are)
+        trajectory_longitude_expansion, trajectory_latitude_expansion = (
+            pd.Series(),
+            pd.Series(),
         )
+
+        row_index = 0
+        alt_index = 1  # altitude 1,2,3,4,...
         traj_index = 0  # 0=main, 1=east, 2=north, 3=west, 4=south
 
         while row_index < number_of_trajectories:
-
             lower_row = row_index * number_of_times
             upper_row = row_index * number_of_times + number_of_times
             origin = trajectory_df["origin"].loc[lower_row]
@@ -533,12 +560,22 @@ def generate_pdf(
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "z"
                 ] = trajectory_df["z"][lower_row:upper_row]
+
+                # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "lon"
                 ] = trajectory_df["lon"][lower_row:upper_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "lat"
                 ] = trajectory_df["lat"][lower_row:upper_row]
+                trajectory_latitude_expansion = trajectory_latitude_expansion.append(
+                    trajectory_df["lat"][lower_row:upper_row], ignore_index=True
+                )
+                trajectory_longitude_expansion = trajectory_longitude_expansion.append(
+                    trajectory_df["lon"][lower_row:upper_row], ignore_index=True
+                )
+                # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
+
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "time"
                 ] = trajectory_df["time"][lower_row:upper_row]
@@ -554,8 +591,22 @@ def generate_pdf(
                     alt_index += 1
 
                 if alt_index > altitude_levels:
+                    # start = time.perf_counter()
+                    (
+                        central_longitude,
+                        projection,
+                        trajectory_expansion,
+                        cross_dateline,
+                    ) = get_map_settings(
+                        lon=trajectory_longitude_expansion,
+                        lat=trajectory_latitude_expansion,
+                        case=model,
+                    )
+                    # end = time.perf_counter()
+                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
-                    start_tmp = time.perf_counter()
+
+                    # start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -568,11 +619,34 @@ def generate_pdf(
                         max_start_altitude=max_start_altitude,
                         domains=domains,
                         output_types=output_types,
+                        central_longitude=central_longitude,
+                        projection=projection,
+                        trajectory_expansion=trajectory_expansion,
+                        cross_dateline=cross_dateline,
                     )
-                    end_tmp = time.perf_counter()
-                    print(
-                        f"Assemble pdf took {end_tmp-start_tmp} sec from the whole generate_pdf pipeline."
+
+                    # ~~~~~~~~~~~ NEW: check if #altitude levels is variable within one traj-file ~~~~~~~~~~~ #
+                    if row_index < (number_of_trajectories - 1):
+                        next_number_of_altitudes = trajectory_df["altitude_levels"].loc[
+                            (row_index + 1) * number_of_times
+                        ]
+                        if next_number_of_altitudes is not altitude_levels:
+                            altitude_levels = next_number_of_altitudes
+                            plot_dict = create_plot_dict(
+                                altitude_levels=altitude_levels
+                            )
+                    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+                    # reset the traj_expansion pandas series before next iteration
+                    trajectory_longitude_expansion, trajectory_latitude_expansion = (
+                        pd.Series(),
+                        pd.Series(),
                     )
+
+                    # end = time.perf_counter()
+                    # print(
+                    # f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
+                    # )
 
             else:
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
@@ -601,30 +675,37 @@ def generate_pdf(
                     "z"
                 ][lower_row:upper_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
+                    "time"
+                ] = trajectory_df["time"][lower_row:upper_row]
+                # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
+                plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "lon"
                 ] = trajectory_df["lon"][lower_row:upper_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "lat"
                 ] = trajectory_df["lat"][lower_row:upper_row]
-                plot_dict["altitude_" + str(alt_index)]["traj_0"][
-                    "time"
-                ] = trajectory_df["time"][lower_row:upper_row]
-                # traj_1 -> empty
+                trajectory_latitude_expansion = trajectory_latitude_expansion.append(
+                    trajectory_df["lat"][lower_row:upper_row], ignore_index=True
+                )
+                trajectory_longitude_expansion = trajectory_longitude_expansion.append(
+                    trajectory_df["lon"][lower_row:upper_row], ignore_index=True
+                )
+                # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
+
+                # keys for trajectories 1-4 remain empty
                 plot_dict["altitude_" + str(alt_index)]["traj_1"]["z"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_1"]["lon"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_1"]["lat"] = []
-                # traj_2 -> empty
                 plot_dict["altitude_" + str(alt_index)]["traj_2"]["z"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_2"]["lon"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_2"]["lat"] = []
-                # traj_3 -> empty
                 plot_dict["altitude_" + str(alt_index)]["traj_3"]["z"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_3"]["lon"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_3"]["lat"] = []
-                # traj_4 -> empty
                 plot_dict["altitude_" + str(alt_index)]["traj_4"]["z"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_4"]["lon"] = []
                 plot_dict["altitude_" + str(alt_index)]["traj_4"]["lat"] = []
+
                 # further empty keys
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "z_type"
@@ -637,7 +718,22 @@ def generate_pdf(
                 row_index += 1
                 alt_index += 1
                 if alt_index > altitude_levels:
+                    # start = time.perf_counter()
+                    (
+                        central_longitude,
+                        projection,
+                        trajectory_expansion,
+                        cross_dateline,
+                    ) = get_map_settings(
+                        lon=trajectory_longitude_expansion,
+                        lat=trajectory_latitude_expansion,
+                        case=model,
+                    )
+                    # end = time.perf_counter()
+                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
+
+                    # start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -650,5 +746,19 @@ def generate_pdf(
                         max_start_altitude=max_start_altitude,
                         domains=domains,
                         output_types=output_types,
+                        central_longitude=central_longitude,
+                        projection=projection,
+                        trajectory_expansion=trajectory_expansion,
+                        cross_dateline=cross_dateline,
                     )
+                    # reset the traj_expansion pandas series before next iteration
+                    trajectory_longitude_expansion, trajectory_latitude_expansion = (
+                        pd.Series(),
+                        pd.Series(),
+                    )
+
+                    # end = time.perf_counter()
+                    # print(
+                    #     f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
+                    # )
     return

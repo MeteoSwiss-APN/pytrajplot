@@ -1,8 +1,6 @@
 """Generate Map Plot Figure."""
 
 # Standard library
-# TMP
-import time
 from pathlib import Path
 
 # Third-party
@@ -10,7 +8,6 @@ import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 
@@ -132,7 +129,7 @@ def add_features(ax):
     return
 
 
-def crop_map(ax, domain, custom_domain_boundaries):
+def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
     """Crop map to given domain (i.e. centraleurope).
 
     Args:
@@ -140,12 +137,22 @@ def crop_map(ax, domain, custom_domain_boundaries):
         domain              str        key for the domain_dict to retrieve correct domain boundaries
         custom_domain_boundaries
                             list       list, containing the domain for these specifc trajectories (created dynamically)
+        origin_coordinates  dict       dict, containing the lon/lat values of the origin
 
     Returns:
         domain_boundaries   list       [lat0,lat1,lon0,lon1]
 
     """
-    padding = 5  # padding on each side, for the dynamically created plots
+    left_boundary, right_boundary, lower_boundary, upper_boundary = 0, 0, 0, 0
+    if domain == "dynamic_zoom":
+        (
+            left_boundary,
+            right_boundary,
+            lower_boundary,
+            upper_boundary,
+        ) = get_dynamic_zoom_boundary(custom_domain_boundaries, origin_coordinates)
+
+    padding = 1  # padding on each side, for the dynamically created plots
 
     domain_dict = {
         "centraleurope": {"domain": [2, 18, 42.5, 51.5]},  # optimised boundaries
@@ -165,12 +172,49 @@ def crop_map(ax, domain, custom_domain_boundaries):
                 round(custom_domain_boundaries[3]) + padding,
             ]
         },
+        "dynamic_zoom": {
+            "domain": [
+                round(left_boundary),
+                round(right_boundary),
+                round(lower_boundary),
+                round(upper_boundary),
+            ]
+        },
     }
 
     domain_boundaries = domain_dict[domain]["domain"]
     ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree())
 
     return domain_boundaries
+
+
+def get_dynamic_zoom_boundary(custom_domain_boundaries, origin_coordinates):
+    # case 1: trajectory expansion mainly towards the east from origin
+    if abs(custom_domain_boundaries[0] - origin_coordinates["lon"]) <= 10:
+        left_boundary = origin_coordinates["lon"] - 5
+        right_boundary = origin_coordinates["lon"] + 15
+    # case 2: trajectory expansion mainly towards the west from origin
+    if abs(custom_domain_boundaries[1] - origin_coordinates["lon"]) <= 10:
+        left_boundary = origin_coordinates["lon"] - 15
+        right_boundary = origin_coordinates["lon"] + 5
+    # case 3: trajectory expansion to both east&west from origin
+    else:
+        left_boundary = origin_coordinates["lon"] - 10
+        right_boundary = origin_coordinates["lon"] + 10
+
+    # case 1: trajectory expansion mainly towards the north from origin
+    if abs(custom_domain_boundaries[2] - origin_coordinates["lat"]) <= 10:
+        lower_boundary = origin_coordinates["lat"] - 5
+        upper_boundary = origin_coordinates["lat"] + 10
+    # case 2: trajectory expansion mainly towards the south from origin
+    if abs(custom_domain_boundaries[3] - origin_coordinates["lat"]) <= 10:
+        lower_boundary = origin_coordinates["lat"] - 10
+        upper_boundary = origin_coordinates["lat"] + 5
+    # case 3: trajectory expansion to both south&north from origin
+    else:
+        lower_boundary = origin_coordinates["lat"] - 7.5
+        upper_boundary = origin_coordinates["lat"] + 7.5
+    return left_boundary, right_boundary, lower_boundary, upper_boundary
 
 
 def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
@@ -336,7 +380,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     add_w_town = True
     if add_w_town:
-        if not cross_dateline:
+        if domain in ["ch", "alps", "europe", "centraleurope"]:
             # add Weesen to maps
             ax.scatter(
                 x=9.108376385221725,
@@ -356,7 +400,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 rasterized=True,
             )
 
-    if domain == "dynamic":
+    if "dynamic" in domain:
         cities_data_path = Path("src/pytrajplot/resources/cities/")
         assert (
             cities_data_path.exists()
@@ -690,7 +734,13 @@ def retrieve_interval_points(coord_dict, altitude_index):
 
 
 def add_trajectories(
-    coord_dict, side_traj, altitude_levels, ax, subplot_properties_dict
+    cross_dateline,
+    coord_dict,
+    side_traj,
+    altitude_levels,
+    ax,
+    subplot_properties_dict,
+    central_longitude,
 ):
     """Add trajectories to map.
 
@@ -700,6 +750,8 @@ def add_trajectories(
         altitude_levels:               int        # altitude levels
         ax:                            Axes       current map to crop
         subplot_properties_dict:       dict       Dictionary containing the mapping between the altitude levels and colours. Uniform w/ altitude plots.
+        central_longitude:             float      Central Longitude for PlateCarree Projection
+        cross_dateline:                bool       True/False if dateline gets crossed
 
     """
     i = 1
@@ -717,10 +769,17 @@ def add_trajectories(
             for traj in traj_index:
                 latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
+                if cross_dateline:
+                    longitude_new = []
+                    for lon in longitude:
+                        if lon < 0:
+                            lon = central_longitude + (180 - abs(lon))
+
+                        longitude_new.append(lon)
+                    longitude = pd.Series(longitude_new)
 
                 ystart = latitude.iloc[0]
                 xstart = longitude.iloc[0]
-
                 linestyle = subplot_properties_dict[sub_index]
                 alpha = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
 
@@ -769,6 +828,14 @@ def add_trajectories(
             latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
             longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
 
+            if cross_dateline:
+                longitude_new = []
+                for lon in longitude:
+                    if lon < 0:
+                        lon = central_longitude + (180 - abs(lon))
+                    longitude_new.append(lon)
+                longitude = longitude_new
+
             ystart = latitude.iloc[0]
             xstart = longitude.iloc[0]
 
@@ -807,202 +874,14 @@ def add_trajectories(
     return
 
 
-def get_dynamic_domain(coord_dict, altitude_levels, side_traj):
-    """Check wheter dateline is crossed or not and return dynamic domain boundaries.
-
-    Args:
-        coord_dict          dict       containing the lan/lot data & other plot properties
-        altitude_levels     int        # altitude levels
-        side_traj           bool       True if there are side trajectories, else false.
-
-    Returns:
-        central_longitude   float      0° or 180°. If dateline is crossed, the central longitude is shifted (as well as all lon values)
-        domain_boundaries   list       [lon0,lon1,lat0,lat1]
-        lon_df              df         single column dataframe containing the (shifted/unchanged) longitude values
-        cross_dateline      bool       bool, to remember if the dateline was crossed for a given trajectory
-
-    """
-    coord_dict_tmp = coord_dict.copy()
-
-    if side_traj:
-        max_traj_index = 4
-    else:
-        max_traj_index = 0
-
-    alt_index = 1
-
-    lat_mins = (
-        []
-    )  #  latitude minimum values for all trajectories starting at this origin (bottom/south)
-    lat_maxs = (
-        []
-    )  #  latitude maximum values for all trajectories starting at this origin (top/north)
-    lon_mins = (
-        []
-    )  # longitude minimum values for all trajectories starting at this origin (left/west)
-    lon_maxs = (
-        []
-    )  # longitude maximum values for all trajectories starting at this origin (right/east)
-
-    while alt_index <= altitude_levels:
-        traj_index = 0
-        while traj_index <= max_traj_index:
-            lat_mins.append(
-                np.min(
-                    coord_dict_tmp["altitude_" + str(alt_index)][
-                        "traj_" + str(traj_index)
-                    ]["lat"]
-                )
-            )
-            lat_maxs.append(
-                np.max(
-                    coord_dict_tmp["altitude_" + str(alt_index)][
-                        "traj_" + str(traj_index)
-                    ]["lat"]
-                )
-            )
-            lon_mins.append(
-                np.min(
-                    coord_dict_tmp["altitude_" + str(alt_index)][
-                        "traj_" + str(traj_index)
-                    ]["lon"]
-                )
-            )
-            lon_maxs.append(
-                np.max(
-                    coord_dict_tmp["altitude_" + str(alt_index)][
-                        "traj_" + str(traj_index)
-                    ]["lon"]
-                )
-            )
-            traj_index += 1
-        alt_index += 1
-
-    lower_boundary = np.min(lat_mins)
-    upper_boundary = np.max(lat_maxs)
-
-    # check dateline crossing
-    far_east = 170 <= np.max(lon_maxs) <= 180
-    far_west = -180 <= np.min(lon_mins) <= -170
-
-    # dynamic boundaries w/ crossing dateline
-    if far_east and far_west:  # if True > trajectory *must* cross dateline somehow
-        central_longitude = 180  # shift the central longitude
-        cross_dateline = True
-
-        # reset altitude index
-        alt_index = 1
-        while alt_index <= altitude_levels:
-            traj_index = 0
-            while traj_index <= max_traj_index:
-                lon = coord_dict_tmp["altitude_" + str(alt_index)][
-                    "traj_" + str(traj_index)
-                ]["lon"]
-                # extract western & eastern points
-                lon_west = np.where(lon < 0, lon, np.NaN)
-                lon_east = np.where(lon >= 0, lon, np.NaN)
-
-                # remove NaN values (not actually necessary)
-                lon_west = lon_west[np.logical_not(np.isnan(lon_west))]
-                lon_east = lon_east[np.logical_not(np.isnan(lon_east))]
-
-                left_boundary = np.min(lon_east)  # least eastern point
-
-                if lon_west.size == 0:
-                    right_boundary = np.max(lon_east)  # most eastern point
-
-                else:
-                    right_boundary = central_longitude + (
-                        180 - abs(np.max(lon_west))
-                    )  # least western point
-
-                if np.min(lon) < 0:
-                    i = 0
-                    while i < len(lon):
-                        if lon.iloc[i] < 0:
-                            lon.iloc[i] = central_longitude + (180 - abs(lon.iloc[i]))
-                            # make the lon data compatible with the shifted projection
-                        i += 1
-
-                traj_index += 1
-            alt_index += 1
-
-        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
-        if False:
-            map_aspect_ratio = 1.4346
-            dynamic_aspect_ratio = (right_boundary - left_boundary) / (
-                upper_boundary - lower_boundary
-            )
-            print(
-                f"(old) dynamic aspect ratio: {dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
-            )
-            if dynamic_aspect_ratio > 2.2:
-                right_boundary = 1 / map_aspect_ratio * right_boundary
-                left_boundary = 1 / map_aspect_ratio * left_boundary
-                new_dynamic_aspect_ratio = (right_boundary - left_boundary) / (
-                    upper_boundary - lower_boundary
-                )
-                print(
-                    f"(new) dynamic aspect ratio: {new_dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
-                )
-        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
-
-        domain_boundaries = [
-            left_boundary,
-            right_boundary,
-            lower_boundary,
-            upper_boundary,
-        ]
-
-        return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
-
-    # dynamic boundaries w/o crossing dateline
-    else:
-        cross_dateline = False
-        central_longitude = 0
-        right_boundary = np.max(lon_maxs)  # most eastern point
-        left_boundary = np.min(lon_mins)  # most western point
-
-        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
-        if False:
-            # check aspect ratio of the dynamically created domain boundaries;
-            # if they are 'too different' from the fixed aspect ratio of the map
-            # (≃ 1.4346 --> ≃ 1.5), re-scale the lower-&upper boundary
-            map_aspect_ratio = 1.4346
-            dynamic_aspect_ratio = (right_boundary - left_boundary) / (
-                upper_boundary - lower_boundary
-            )
-            print(
-                f"(old) dynamic aspect ratio: {dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
-            )
-            if dynamic_aspect_ratio > 2.2:
-                right_boundary = 1 / map_aspect_ratio * right_boundary
-                left_boundary = 1 / map_aspect_ratio * left_boundary
-                new_dynamic_aspect_ratio = (right_boundary - left_boundary) / (
-                    upper_boundary - lower_boundary
-                )
-                print(
-                    f"(new) dynamic aspect ratio: {new_dynamic_aspect_ratio}, corresponds to domain: [{left_boundary}, {right_boundary}, {lower_boundary}, {upper_boundary}]"
-                )
-        # ~~~~~~~~~~~~~~~~~~~~~~NEW~~~~~~~~~~~~~~~~~~~~~~ #
-
-        domain_boundaries = [
-            left_boundary,
-            right_boundary,
-            lower_boundary,
-            upper_boundary,
-        ]
-
-        return central_longitude, domain_boundaries, coord_dict_tmp, cross_dateline
-
-
 def generate_map_plot(
     cross_dateline,
     coord_dict,
     side_traj,
     altitude_levels,
     domain,
-    dynamic_domain_boundaries,
+    trajectory_expansion,
+    central_longitude,
     ax=None,
 ):
     """Generate Map Plot.
@@ -1013,7 +892,8 @@ def generate_map_plot(
         side_traj:                  int        0/1 --> necessary for choosing the correct loop
         altitude_levels:            int        # altitude levels
         domain:                     str        Domain for map
-        dynamic_domain_boundaries:  array      array w/ dynamic domain boundaries
+        trajectory_expansion:       array      array w/ dynamic domain boundaries
+        central_longitude:          float      Central longitude of PlateCarree projection
         ax:                         Axes       Axes to generate the map on. Defaults to None.
 
     """
@@ -1022,8 +902,16 @@ def generate_map_plot(
         "auto"
     )  # scales the map, so that the aspeact ratio of fig & axes match
 
+    origin_coordinates = {
+        "lon": coord_dict["altitude_1"]["traj_0"]["lon"].iloc[0],
+        "lat": coord_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
+    }
+
     domain_boundaries = crop_map(
-        ax=ax, domain=domain, custom_domain_boundaries=dynamic_domain_boundaries
+        ax=ax,
+        domain=domain,
+        custom_domain_boundaries=trajectory_expansion,
+        origin_coordinates=origin_coordinates,
     )  # sets extent of map
 
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
@@ -1071,11 +959,13 @@ def generate_map_plot(
         9: "lightgreen-",
     }
     add_trajectories(
+        cross_dateline=cross_dateline,
         coord_dict=coord_dict,
         side_traj=side_traj,
         altitude_levels=altitude_levels,
         ax=ax,
         subplot_properties_dict=subplot_properties_dict,
+        central_longitude=central_longitude,
     )
 
     ax.legend(fontsize=8)
