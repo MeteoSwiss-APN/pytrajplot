@@ -191,27 +191,31 @@ def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
 def get_dynamic_zoom_boundary(custom_domain_boundaries, origin_coordinates):
     # case 1: trajectory expansion mainly towards the east from origin
     if abs(custom_domain_boundaries[0] - origin_coordinates["lon"]) <= 10:
-        left_boundary = origin_coordinates["lon"] - 5
-        right_boundary = origin_coordinates["lon"] + 15
+        left_boundary = origin_coordinates["lon"] - 2
+        right_boundary = origin_coordinates["lon"] + 18
     # case 2: trajectory expansion mainly towards the west from origin
     if abs(custom_domain_boundaries[1] - origin_coordinates["lon"]) <= 10:
-        left_boundary = origin_coordinates["lon"] - 15
-        right_boundary = origin_coordinates["lon"] + 5
+        left_boundary = origin_coordinates["lon"] - 18
+        right_boundary = origin_coordinates["lon"] + 2
     # case 3: trajectory expansion to both east&west from origin
-    else:
+    if (abs(custom_domain_boundaries[0] - origin_coordinates["lon"]) > 10) and (
+        abs(custom_domain_boundaries[1] - origin_coordinates["lon"]) > 10
+    ):
         left_boundary = origin_coordinates["lon"] - 10
         right_boundary = origin_coordinates["lon"] + 10
 
     # case 1: trajectory expansion mainly towards the north from origin
     if abs(custom_domain_boundaries[2] - origin_coordinates["lat"]) <= 10:
-        lower_boundary = origin_coordinates["lat"] - 5
-        upper_boundary = origin_coordinates["lat"] + 10
+        lower_boundary = origin_coordinates["lat"] - 3
+        upper_boundary = origin_coordinates["lat"] + 12
     # case 2: trajectory expansion mainly towards the south from origin
     if abs(custom_domain_boundaries[3] - origin_coordinates["lat"]) <= 10:
-        lower_boundary = origin_coordinates["lat"] - 10
-        upper_boundary = origin_coordinates["lat"] + 5
+        lower_boundary = origin_coordinates["lat"] - 12
+        upper_boundary = origin_coordinates["lat"] + 3
     # case 3: trajectory expansion to both south&north from origin
-    else:
+    if (abs(custom_domain_boundaries[2] - origin_coordinates["lat"]) > 10) and (
+        abs(custom_domain_boundaries[3] - origin_coordinates["lat"]) > 10
+    ):
         lower_boundary = origin_coordinates["lat"] - 7.5
         upper_boundary = origin_coordinates["lat"] + 7.5
     return left_boundary, right_boundary, lower_boundary, upper_boundary
