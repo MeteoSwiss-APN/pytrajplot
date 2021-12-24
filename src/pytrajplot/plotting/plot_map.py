@@ -1,6 +1,7 @@
 """Generate Map Plot Figure."""
 
 # Standard library
+import time
 from pathlib import Path
 
 # Third-party
@@ -911,12 +912,15 @@ def generate_map_plot(
         "lat": coord_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
     }
 
+    start = time.perf_counter()
     domain_boundaries = crop_map(
         ax=ax,
         domain=domain,
         custom_domain_boundaries=trajectory_expansion,
         origin_coordinates=origin_coordinates,
     )  # sets extent of map
+    end = time.perf_counter()
+    print(f"Cropping map took:\t\t{end-start} seconds")
 
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
@@ -938,17 +942,20 @@ def generate_map_plot(
             rasterized=True,
         )
 
+    start = time.perf_counter()
     add_features(ax=ax)
+    end = time.perf_counter()
+    print(f"Adding features took:\t\t{end-start} seconds")
 
-    # start = time.perf_counter()
+    start = time.perf_counter()
     add_cities(
         ax=ax,
         domain_boundaries=domain_boundaries,
         domain=domain,
         cross_dateline=cross_dateline,
     )
-    # end = time.perf_counter()
-    # print(f"Adding cities took: {end-start} seconds")
+    end = time.perf_counter()
+    print(f"Adding cities took:\t\t{end-start} seconds")
 
     subplot_properties_dict = {
         0: "k-",
@@ -962,6 +969,7 @@ def generate_map_plot(
         8: "crimson-",
         9: "lightgreen-",
     }
+    start = time.perf_counter()
     add_trajectories(
         cross_dateline=cross_dateline,
         coord_dict=coord_dict,
@@ -971,6 +979,7 @@ def generate_map_plot(
         subplot_properties_dict=subplot_properties_dict,
         central_longitude=central_longitude,
     )
-
+    end = time.perf_counter()
+    print(f"Adding trajectories took:\t{end-start} seconds")
     ax.legend(fontsize=8)
     return ax

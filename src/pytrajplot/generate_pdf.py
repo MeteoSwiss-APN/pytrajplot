@@ -412,7 +412,7 @@ def assemble_pdf(
         filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
 
         for file_type in output_types:
-            print(f"key:{key}, domain:{domain}, origin:{origin}")
+            # print(f"key:{key}, domain:{domain}, origin:{origin}")
             # start = time.perf_counter()
             plt.savefig(str(outpath) + f"/{filename}.{file_type}")
             # end = time.perf_counter()
@@ -591,7 +591,7 @@ def generate_pdf(
                     alt_index += 1
 
                 if alt_index > altitude_levels:
-                    # start = time.perf_counter()
+                    start = time.perf_counter()
                     (
                         central_longitude,
                         projection,
@@ -602,11 +602,11 @@ def generate_pdf(
                         lat=trajectory_latitude_expansion,
                         case=model,
                     )
-                    # end = time.perf_counter()
-                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
+                    end = time.perf_counter()
+                    print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
 
-                    # start = time.perf_counter()
+                    start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -643,10 +643,10 @@ def generate_pdf(
                         pd.Series(),
                     )
 
-                    # end = time.perf_counter()
-                    # print(
-                    # f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
-                    # )
+                    end = time.perf_counter()
+                    print(
+                        f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
+                    )
 
             else:
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
