@@ -13,6 +13,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+# Local
+from .scratch.dateline.scratch_dateline import _analyse_trajectories
+from .scratch.dateline.scratch_dateline import _check_dateline_crossing
+from .scratch.dateline.scratch_dateline import _create_plot
+from .scratch.dateline.scratch_dateline import _get_traj_dict
+
 
 def profile(func):
     def wrapper(*args, **kwargs):
@@ -238,7 +244,7 @@ def assemble_pdf(
         subfigsnest[0].set_facecolor("0.70")  # map
         subfigsnest[1].set_facecolor("0.65")  # altitude
 
-    # ADD ALTITUDE PLOT
+    # ADD ALTITUDE PLOT; compute only once for given origin
     subplot_dict = {}
 
     if altitude_levels < 3:
@@ -337,6 +343,7 @@ def assemble_pdf(
             )
             alt_index += 1
 
+    # ADD MAP, HEADER & FOOTER; compute for each domain
     for domain in domains:
         # ADD FOOTER
         # start = time.perf_counter()
@@ -392,7 +399,7 @@ def assemble_pdf(
         # end = time.perf_counter()
         # print(f"Adding info header took:\t{end-start} seconds")
 
-        # ADD MAP
+        # ADD MAP & FOOTER
         # start = time.perf_counter()
         map_ax = subfigsnest[0].add_subplot(111, projection=projection)
         generate_map_plot(
@@ -425,8 +432,16 @@ def assemble_pdf(
     plt.close(fig)
 
 
-def get_map_settings(lon, lat, case):
-    # TODO: add docstring to this function
+def get_map_settings(lon, lat, case, number_of_times):
+    """Figure out, which map settings (projection, cross dateline,...) should be used and whether the dateline gets crossed.
+
+    Args:
+        lon (pandas series): longitude values
+        lat (pandas series): latitude values
+        case (str]): COSMO/HRES
+        number_of_times (int): #lines that make up one trajectory
+
+    """
     if case == "COSMO":
         central_longitude = 0
         cross_dateline = False
@@ -437,35 +452,53 @@ def get_map_settings(lon, lat, case):
         return central_longitude, projection, trajectory_expansion, cross_dateline
 
     if case == "HRES":
-        max_lon, min_lon, max_lat, min_lat = (
-            np.max(lon),
-            np.min(lon),
-            np.max(lat),
-            np.min(lat),
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # implement scratch_dateline.py (only relevant for HRES trajectories though)
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # 0) concat the longitude/latitude dataframes into a new dataframe
+        data = {
+            "lon": lon,
+            "lat": lat,
+        }
+
+        number_of_trajectories = int(len(lat) / number_of_times)
+
+        lon_lat_df = pd.concat(data, axis=1)
+
+        # 1) check if dateline gets crossed;
+        # if the dateline does not get crossed -->  longitude expansion = left & right boundary of trajectories
+        cross_dateline, longitude_expansion = _check_dateline_crossing(lon=lon)
+
+        # 2) split lon/lat lists into corresponding trajectories. for each trajectory one key should be assigned.
+        (
+            traj_dict,
+            dateline_crossing_trajectories,
+            latitude_expansion,
+            eastern_longitudes,
+        ) = _get_traj_dict(
+            data=lon_lat_df,
+            number_of_trajectories=number_of_trajectories,
+            traj_length=number_of_times,
         )
 
-        far_east = 175 <= max_lon <= 180
-        far_west = -175 >= min_lon >= -180
+        # 3) compute central longitude dynamic domain if dateline does not get crossed
+        central_longitude, dynamic_domain = _analyse_trajectories(
+            traj_dict=traj_dict,
+            cross_dateline=cross_dateline,
+            dateline_crossing_trajectories=dateline_crossing_trajectories,
+            latitude_expansion=latitude_expansion,
+            longitude_expansion=longitude_expansion,
+            eastern_longitudes=eastern_longitudes,
+        )
 
-        if far_east and far_west:
-            cross_dateline = True
-            central_longitude = 180  # shift central longitude of PlateCarree Projection to +- 180° s.t. dateline is in centre of map
-
-            for i, longitude in enumerate(lon):
-                if longitude < 0:
-                    lon.iloc[i] = 180 + (180 - abs(longitude))
-
-            min_lon = np.min(lon)
-            max_lon = np.max(lon)
-
-        else:  # trajectories dont't cross dateline
-            cross_dateline = False
-            central_longitude = 0
-
-        trajectory_expansion = [min_lon, max_lon, min_lat, max_lat]
         projection = ccrs.PlateCarree(central_longitude=central_longitude)
 
-        return central_longitude, projection, trajectory_expansion, cross_dateline
+        # TODO: remove later
+        # 5) plot trajectories & save plot (just temporarily to check wheter all information is correct)
+        # _create_plot(traj_dict, central_longitude, dynamic_domain)
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        return central_longitude, projection, dynamic_domain, cross_dateline
 
 
 def generate_pdf(
@@ -574,7 +607,7 @@ def generate_pdf(
                 trajectory_longitude_expansion = trajectory_longitude_expansion.append(
                     trajectory_df["lon"][lower_row:upper_row], ignore_index=True
                 )
-                # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
+                # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "time"
@@ -601,6 +634,7 @@ def generate_pdf(
                         lon=trajectory_longitude_expansion,
                         lat=trajectory_latitude_expansion,
                         case=model,
+                        number_of_times=number_of_times,
                     )
                     end = time.perf_counter()
                     print(f"Computing dynamic domain took\t{end-start} seconds.")
@@ -625,7 +659,7 @@ def generate_pdf(
                         cross_dateline=cross_dateline,
                     )
 
-                    # ~~~~~~~~~~~ NEW: check if #altitude levels is variable within one traj-file ~~~~~~~~~~~ #
+                    # ~~~~~~~~~~~~~~~~~ check if #altitude levels is variable within one traj-file ~~~~~~~~~~~ #
                     if row_index < (number_of_trajectories - 1):
                         next_number_of_altitudes = trajectory_df["altitude_levels"].loc[
                             (row_index + 1) * number_of_times
@@ -728,6 +762,7 @@ def generate_pdf(
                         lon=trajectory_longitude_expansion,
                         lat=trajectory_latitude_expansion,
                         case=model,
+                        number_of_times=number_of_times,
                     )
                     # end = time.perf_counter()
                     # print(f"Computing dynamic domain took\t{end-start} seconds.")
