@@ -184,7 +184,7 @@ def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
     }
 
     domain_boundaries = domain_dict[domain]["domain"]
-    ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree())
+    ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree(central_longitude=0))
 
     return domain_boundaries
 
@@ -433,11 +433,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 population=population,
                 lon=lon,
             ):
-
-                if cross_dateline:
-                    if lon < 0:
-                        lon = 360 - abs(lon)
-
                 ax.scatter(
                     x=lon,
                     y=lat,
@@ -454,7 +449,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                     y=lat + 0.05,
                     s=city,
                     fontsize=8,
-                    transform=ccrs.PlateCarree(),
+                    transform=ccrs.Geodetic(),
                     rasterized=True,
                 )
 
@@ -486,32 +481,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 "Glarus": {"lon": 9.0667, "lat": 47.0333},
                 "Appenzell": {"lon": 9.4086, "lat": 47.3306},
             }
-
-        # if domain == "ch_hd":
-        #     cities_list = {
-        #         "Munich": {"lon": 11.5755, "lat": 48.1372},
-        #         "Milan": {"lon": 9.19, "lat": 45.4669},
-        #         "Bern": {"lon": 7.4474, "lat": 46.948},
-        #         "Vaduz": {"lon": 9.5215, "lat": 47.1415},
-        #         "Turin": {"lon": 7.7, "lat": 45.0667},
-        #         "Grenoble": {"lon": 5.7224, "lat": 45.1715},
-        #         "Genoa": {"lon": 8.934, "lat": 44.4072},
-        #         "Lyon": {"lon": 4.84, "lat": 45.76},
-        #         "Strasbourg": {"lon": 7.7458, "lat": 48.5833},
-        #         "Nancy": {"lon": 6.1846, "lat": 48.6936},
-        #         "Zurich": {"lon": 8.54, "lat": 47.3786},
-        #         "Bologna": {"lon": 11.3428, "lat": 44.4939},
-        #         "Verona": {"lon": 10.9928, "lat": 45.4386},
-        #         "Geneva": {"lon": 6.15, "lat": 46.2},
-        #         "Basel": {"lon": 7.5906, "lat": 47.5606},
-        #         "Saarbrucken": {"lon": 7.0, "lat": 49.2333},
-        #         "Dijon": {"lon": 5.0167, "lat": 47.3167},
-        #         "Salzburg": {"lon": 13.0477, "lat": 47.7972},
-        #         "Lausanne": {"lon": 6.6333, "lat": 46.5333},
-        #         "Innsbruck": {"lon": 11.3933, "lat": 47.2683},
-        #         "Trento": {"lon": 11.1167, "lat": 46.0667},
-        #         "Lucerne": {"lon": 8.3059, "lat": 47.0523},
-        #     }
 
         if domain == "alps":
             cities_list = {
@@ -774,14 +743,6 @@ def add_trajectories(
             for traj in traj_index:
                 latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
-                if cross_dateline:
-                    longitude_new = []
-                    for lon in longitude:
-                        if lon < 0:
-                            lon = central_longitude + (180 - abs(lon))
-
-                        longitude_new.append(lon)
-                    longitude = pd.Series(longitude_new)
 
                 ystart = latitude.iloc[0]
                 xstart = longitude.iloc[0]
@@ -799,7 +760,7 @@ def add_trajectories(
                         linestyle,  # define linestyle
                         alpha=alpha,  # define line opacity
                         label=textstr,
-                        transform=ccrs.PlateCarree(),
+                        transform=ccrs.Geodetic(),
                         rasterized=True,
                     )
 
@@ -814,7 +775,7 @@ def add_trajectories(
                         markersize=10,
                         markeredgecolor="red",
                         markerfacecolor="white",
-                        transform=ccrs.PlateCarree(),
+                        transform=ccrs.Geodetic(),
                         rasterized=True,
                     )
 
@@ -825,21 +786,13 @@ def add_trajectories(
                         latitude,  # define y-axis
                         linestyle,  # define linestyle
                         alpha=alpha,  # define line opacity
-                        transform=ccrs.PlateCarree(),
+                        transform=ccrs.Geodetic(),
                         rasterized=True,
                     )
 
         else:  # no side traj
             latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
             longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
-
-            if cross_dateline:
-                longitude_new = []
-                for lon in longitude:
-                    if lon < 0:
-                        lon = central_longitude + (180 - abs(lon))
-                    longitude_new.append(lon)
-                longitude = longitude_new
 
             ystart = latitude.iloc[0]
             xstart = longitude.iloc[0]
@@ -854,7 +807,7 @@ def add_trajectories(
                 linestyle,  # define linestyle
                 alpha=alpha,  # define line opacity
                 label=textstr,
-                transform=ccrs.PlateCarree(),
+                transform=ccrs.Geodetic(),
                 rasterized=True,
             )
 
@@ -871,7 +824,7 @@ def add_trajectories(
                 markersize=10,
                 markeredgecolor="red",
                 markerfacecolor="white",
-                transform=ccrs.PlateCarree(),
+                transform=ccrs.Geodetic(),
                 rasterized=True,
             )
 
@@ -885,7 +838,7 @@ def generate_map_plot(
     side_traj,
     altitude_levels,
     domain,
-    trajectory_expansion,
+    trajectory_expansion,  # this is the dynamic domain
     central_longitude,
     ax=None,
 ):
