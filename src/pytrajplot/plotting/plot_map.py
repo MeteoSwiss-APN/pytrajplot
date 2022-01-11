@@ -708,13 +708,11 @@ def retrieve_interval_points(coord_dict, altitude_index):
 
 
 def add_trajectories(
-    cross_dateline,
     coord_dict,
     side_traj,
     altitude_levels,
     ax,
     subplot_properties_dict,
-    central_longitude,
 ):
     """Add trajectories to map.
 
@@ -724,8 +722,6 @@ def add_trajectories(
         altitude_levels:               int        # altitude levels
         ax:                            Axes       current map to crop
         subplot_properties_dict:       dict       Dictionary containing the mapping between the altitude levels and colours. Uniform w/ altitude plots.
-        central_longitude:             float      Central Longitude for PlateCarree Projection
-        cross_dateline:                bool       True/False if dateline gets crossed
 
     """
     i = 1
@@ -924,13 +920,11 @@ def generate_map_plot(
     }
     start = time.perf_counter()
     add_trajectories(
-        cross_dateline=cross_dateline,
         coord_dict=coord_dict,
         side_traj=side_traj,
         altitude_levels=altitude_levels,
         ax=ax,
         subplot_properties_dict=subplot_properties_dict,
-        central_longitude=central_longitude,
     )
     end = time.perf_counter()
     print(f"Adding trajectories took:\t{end-start} seconds")
