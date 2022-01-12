@@ -143,9 +143,7 @@ def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
 
     """
     start_time = plot_dict["altitude_1"]["start_time"]
-
-    date = plot_dict["altitude_1"]["start_time"]
-    date = date.strftime("%Y%m%d")
+    date = start_time.strftime("%Y%m%d")
 
     # model run time = absolute difference between the two numbers in key
     runtime = abs(int(key[4:7]) - int(key[0:3]))
@@ -410,7 +408,6 @@ def assemble_pdf(
             domain=domain,
             trajectory_expansion=trajectory_expansion,
             ax=map_ax,
-            central_longitude=central_longitude,
         )
         # end = time.perf_counter()
         # print(f"Adding map took:\t\t{end-start} seconds")
