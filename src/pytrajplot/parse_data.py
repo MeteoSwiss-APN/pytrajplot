@@ -242,13 +242,14 @@ def traj_helper_fct(case, file_path, firstline, start_df):
     return number_of_trajectories, number_of_times
 
 
-def convert_time(plot_info_dict, traj_df, key):
+def convert_time(plot_info_dict, traj_df, key, case):
     """Convert time steps into datetime objects.
 
     Args:
         plot_info_dict (dict): Dict containing the information of plot_info file. Esp. the trajectory initialisation time
         traj_df (df): Trajectory dataframe containing the time step column (parsed form the trajectory file)
         key (str): Key, containing information about the runtime
+        case (str): HRES / COSMO
 
     Returns:
         traj_df (df): Trajectory dataframe w/ added datetime column.
@@ -260,20 +261,11 @@ def convert_time(plot_info_dict, traj_df, key):
 
     # ~~~~~~~~~~~~~~~~~~~~ NEW ~~~~~~~~~~~~~~~~~~~~ #
     # add leadtime to model base time
-    dt_object = dt_object + timedelta(hours=int(key[0:3]))
-    # ~~~~~~~~~~~~~~~~~~~~ NEW ~~~~~~~~~~~~~~~~~~~~ #
-
-    # TODO: remove this obsolete code if everything works as desired
-    # direction = key[-1:]
-    # # add the start-up time (i.e. for 006-144F 6 hours) to the dt_object, based on init_time
-    # if direction == "F":
-    #     dt_object = dt_object + timedelta(hours=int(key[0:3]))
-    # if direction == "B":
-    #     dt_object = dt_object + timedelta(hours=int(key[0:3]))
+    if case == "HRES":
+        dt_object = dt_object + timedelta(hours=int(key[0:3]))
 
     traj_df["datetime"] = None
-    counter = 0
-    for row in traj_df["time"]:
+    for counter, row in enumerate(traj_df["time"]):
         delta_t = float(row)
         if ".3" in str(
             delta_t
@@ -281,7 +273,7 @@ def convert_time(plot_info_dict, traj_df, key):
             delta_t = delta_t + 0.2
         date = dt_object + timedelta(hours=delta_t)
         traj_df.loc[counter, "datetime"] = date
-        counter += 1
+
     return traj_df
 
 
@@ -417,6 +409,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         plot_info_dict=plot_info_dict,
         traj_df=traj_df,
         key=trajectory_file_path[-8:],
+        case=case,
     )
     if False:
         traj_df.to_csv("ground_truth_trajdf.csv", index=True)
