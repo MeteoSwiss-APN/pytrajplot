@@ -26,7 +26,9 @@ def generate_info_header(language, plot_data, ax=None):
     lat_0 = format(round(plot_data["altitude_1"]["lat_precise"], 3), ".3f")
     trajectory_direction = plot_data["altitude_1"]["trajectory_direction"]
     elevation = ""
-    start_time = str(plot_data["altitude_1"]["start_time"])
+    start_time = str(plot_data["altitude_1"]["start_time"])[
+        :-3
+    ]  # remove the seconds from the time in the header
 
     for key in plot_data:
         if plot_data[key]["subplot_index"] == (len(plot_data.keys()) - 1):
