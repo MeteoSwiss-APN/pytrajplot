@@ -835,7 +835,6 @@ def generate_map_plot(
     altitude_levels,
     domain,
     trajectory_expansion,  # this is the dynamic domain
-    central_longitude,
     ax=None,
 ):
     """Generate Map Plot.
@@ -847,7 +846,6 @@ def generate_map_plot(
         altitude_levels:            int        # altitude levels
         domain:                     str        Domain for map
         trajectory_expansion:       array      array w/ dynamic domain boundaries
-        central_longitude:          float      Central longitude of PlateCarree projection
         ax:                         Axes       Axes to generate the map on. Defaults to None.
 
     """
