@@ -621,7 +621,7 @@ def generate_pdf(
                     alt_index += 1
 
                 if alt_index > altitude_levels:
-                    start = time.perf_counter()
+                    # start = time.perf_counter()
                     (
                         central_longitude,
                         projection,
@@ -633,11 +633,11 @@ def generate_pdf(
                         case=model,
                         number_of_times=number_of_times,
                     )
-                    end = time.perf_counter()
-                    print(f"Computing dynamic domain took\t{end-start} seconds.")
+                    # end = time.perf_counter()
+                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
 
-                    start = time.perf_counter()
+                    # start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -674,10 +674,10 @@ def generate_pdf(
                         pd.Series(),
                     )
 
-                    end = time.perf_counter()
-                    print(
-                        f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
-                    )
+                    # end = time.perf_counter()
+                    # print(
+                    #     f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
+                    # )
 
             else:
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
