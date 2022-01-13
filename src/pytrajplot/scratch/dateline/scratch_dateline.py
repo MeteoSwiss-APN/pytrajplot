@@ -8,6 +8,7 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from numpy.lib.function_base import flip
 from numpy.lib.function_base import median
 
 
@@ -93,17 +94,24 @@ def _check_dateline_crossing(
     max_lon, min_lon = np.max(lon), np.min(lon)
     cross_dateline = False
 
-    if not ((max_lon > 0) and (min_lon < 0)):
+    lon = lon.values  # convert pandas series to array.
+    # 1) check if the sign gets flipped
+    sign_flip_indexes = np.where(np.sign(lon[:-1]) != np.sign(lon[1:]))[0] + 1
+
+    if len(sign_flip_indexes) == 0:
         return cross_dateline, [min_lon, max_lon]
 
     else:
-        lon = lon.values  # convert pandas series to array.
-        # 1) check if the sign gets flipped
-        sign_flip_indexes = np.where(np.sign(lon[:-1]) != np.sign(lon[1:]))[0] + 1
         # 2) check if the any of the sign_flips are relevant (i.e. not crossing the 0° longitude line)
         for flip_index in sign_flip_indexes:
-            if not (-5 < lon[flip_index] < 5):  # the dateline must have been crossed
-                return True, [None, None]
+            # print(f"@flip index {flip_index} the longitude is: {lon[flip_index]}")
+            if not np.isnan(lon[flip_index]) and not np.isnan(lon[flip_index - 1]):
+                if not (
+                    -5 < lon[flip_index] < 5
+                ):  # the dateline must have been crossed because the longitude value after the sign flip is not in the -5° - 5° longitude range.
+                    return True, [None, None]
+
+    return False, [min_lon, max_lon]
 
 
 def _get_central_longitude(
