@@ -107,8 +107,8 @@ def _check_dateline_crossing(
             # print(f"@flip index {flip_index} the longitude is: {lon[flip_index]}")
             if not np.isnan(lon[flip_index]) and not np.isnan(lon[flip_index - 1]):
                 if not (
-                    -5 < lon[flip_index] < 5
-                ):  # the dateline must have been crossed because the longitude value after the sign flip is not in the -5° - 5° longitude range.
+                    -20 < lon[flip_index] < 20
+                ):  # the dateline must have been crossed because the longitude value after the sign flip is not in the -20° - 20° longitude range.
                     return True, [None, None]
 
     return False, [min_lon, max_lon]
