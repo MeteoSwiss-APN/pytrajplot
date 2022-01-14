@@ -174,7 +174,6 @@ def assemble_pdf(
     max_start_altitude,
     domains,
     output_types,
-    central_longitude,
     projection,
     trajectory_expansion,
     cross_dateline,
@@ -193,7 +192,6 @@ def assemble_pdf(
         max_start_altitude:     float               Highest starting altitude
         domains:                str                 Domain of the map.
         output_types:           tuple               Tuple containing the file types of the output files. (pdf and/or png)
-        central_longitude:      float               Central Longitude for PlateCarree Projection
         projection:             cartopy projection  Projection of map
         trajectory_expansion:   list                Expansion of trajectory (formerly called dynamic_boundaries)
         cross_dateline:         bool                True/False if dateline gets crossed
@@ -316,8 +314,10 @@ def assemble_pdf(
     # if altitude_levels >= 3:
     else:
         axsnest1 = subfigsnest[1].subplots(altitude_levels, 1)
-        # collect references to subplots
 
+        plt.subplots_adjust(hspace=0.1)
+
+        # collect references to subplots
         for nn, ax in enumerate(axsnest1):
             subplot_dict[nn] = ax
 
@@ -650,7 +650,6 @@ def generate_pdf(
                         max_start_altitude=max_start_altitude,
                         domains=domains,
                         output_types=output_types,
-                        central_longitude=central_longitude,
                         projection=projection,
                         trajectory_expansion=trajectory_expansion,
                         cross_dateline=cross_dateline,
@@ -778,7 +777,6 @@ def generate_pdf(
                         max_start_altitude=max_start_altitude,
                         domains=domains,
                         output_types=output_types,
-                        central_longitude=central_longitude,
                         projection=projection,
                         trajectory_expansion=trajectory_expansion,
                         cross_dateline=cross_dateline,

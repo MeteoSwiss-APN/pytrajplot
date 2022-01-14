@@ -161,6 +161,8 @@ def generate_altitude_plot(
             )
 
             yaxis = y["altitude_" + str(alt_index)]["traj_" + str(traj)]["z"]
+            yaxis_masked = np.ma.masked_where(np.isnan(yaxis.values), yaxis.values)
+
             ystart = yaxis.iloc[0]
             xstart = x[0]
 
@@ -169,7 +171,7 @@ def generate_altitude_plot(
 
             ax.plot(
                 x,
-                yaxis,
+                yaxis_masked,  # yaxis,
                 linestyle,
                 alpha=alpha,
                 label=textstr,
@@ -179,10 +181,13 @@ def generate_altitude_plot(
             if (
                 y["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"] == 1
             ):  # only add legend & startpoint for the main trajectories
+
+                marker = "D"
+
                 ax.plot(
                     xstart,
                     ystart,
-                    marker="^",
+                    marker=marker,
                     markersize=10,
                     markeredgecolor="red",
                     markerfacecolor="white",
@@ -236,10 +241,11 @@ def generate_altitude_plot(
         )
 
         # plot starting marker
+        # TODO: implement solution analogous to
         ax.plot(
             xstart,
             ystart,
-            marker="^",
+            marker="D",
             markersize=10,
             markeredgecolor="red",
             markerfacecolor="white",
@@ -247,5 +253,8 @@ def generate_altitude_plot(
         )
         ax.legend(fontsize=8)
 
+    ax.set_xlim(left=x.iloc[0], right=x.iloc[-1])
+    # ax.set_xmargin(0.5)
+    # https://stackoverflow.com/questions/30445708/datetime-axis-spacing
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
     return ax
