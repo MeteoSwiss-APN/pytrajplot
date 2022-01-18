@@ -9,6 +9,7 @@ import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -156,15 +157,12 @@ def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
     padding = 1  # padding on each side, for the dynamically created plots
 
     domain_dict = {
-        "centraleurope": {"domain": [2, 18, 42.5, 51.5]},  # optimised boundaries
-        # "centraleurope": {"domain": [2, 18, 42, 52]},     # original boundaries
+        "centraleurope": {
+            "domain": [1, 20, 42.5, 51.5]
+        },  # added two degrees to the east
         "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},  # optimised boundaries
         "alps": {"domain": [0.7, 16.5, 42.3, 50]},  # optimised boundaries
-        # "europe": {"domain": [-12.5, 50.5, 35, 65]},      # optimised boundaries
         "europe": {"domain": [-10, 47, 35, 65]},  # original boundaries
-        # the domain ch_hd has been removed
-        # "ch_hd": {"domain": [2.8, 13.2, 44.1, 49.4]},  # optimised boundaries
-        # "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},     # original boundaries
         "dynamic": {
             "domain": [
                 round(custom_domain_boundaries[0]) - padding,
@@ -625,7 +623,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
 
 
 def add_time_interval_points(coord_dict, ax, i, linestyle):
-    """Summary - First line should end with a period.
+    """Add time interval points to map..
 
     Args:
         coord_dict:         dict       containing the lan/lot data & other plot properties
@@ -673,42 +671,22 @@ def retrieve_interval_points(coord_dict, altitude_index):
 
     """
     # create temporary dataframes
-    lat_df_tmp = pd.DataFrame(
-        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lat"].items()
-    )
-    lon_df_tmp = pd.DataFrame(
-        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lon"].items()
-    )
-    time_df_tmp = pd.DataFrame(
-        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["time"].items()
-    )
-    # delete index columns
-    del lon_df_tmp[0]
-    del lat_df_tmp[0]
-    del time_df_tmp[0]
-    # rename remaining column
-    lon_df = lon_df_tmp.rename(columns={1: "lon"})
-    lat_df = lat_df_tmp.rename(columns={1: "lat"})
-    time_df = time_df_tmp.rename(columns={1: "time"})
+    lat_df_tmp = coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lat"].values
+    lon_df_tmp = coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lon"].values
+    time_df_tmp = coord_dict["altitude_" + str(altitude_index)]["traj_0"]["time"].values
 
-    # NEW
-    time_df = time_df["time"].astype(
-        float
-    )  # ensure correct type for time column (difference w/ HRES & COSMO)
-    shift = time_df.values[0]
+    comb_df = pd.DataFrame(
+        data={"time": time_df_tmp, "lon": lon_df_tmp, "lat": lat_df_tmp},
+        dtype=np.float64,
+    )
+
+    shift = comb_df["time"].values[0]
     if shift > 0:
         # The time column of COSMO trajectories starts @ the lead time. I.e. the first entry for 003-033F would be 3.00.
         # The time column of HRES  trajectories starts w/ 0.00, ALWAYS. Thus when computing the modulo of the time column
         # of HRES trajectories, the 'interval' points get computet correctly. This shift in the COSMO data must be accounted
-        # for. Otherwise the interval points are wrong for COSMO trajectories, because modulo is applied.
-        time_df -= shift
-
-    # combine columns to one df
-    comb_df = pd.concat([lat_df, lon_df, time_df], axis=1, join="inner")
-    # TODO: see if this line is necessary anymore...should now have been implemented a few lines above
-    comb_df["time"] = comb_df["time"].astype(
-        float
-    )  # ensure correct type for time column (difference w/ HRES & COSMO)
+        # for by subtraction the time-shift from the time column, before applying %6
+        comb_df["time"] -= shift
 
     # extract position every 6 hours into important_points dataframe
     important_points_tmp = comb_df[comb_df["time"] % 6 == 0]

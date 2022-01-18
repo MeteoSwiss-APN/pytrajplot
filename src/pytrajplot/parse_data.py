@@ -415,11 +415,14 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         traj_df.to_csv("ground_truth_trajdf.csv", index=True)
         start_df.to_csv("ground_truth_startf.csv", index=True)
 
+    # change the lon/lat values where the trajectory leaves the domain from their domain-boundary values to np.NaN.
+    # necessary, because otherwise the interval points are added, even though the trajectory has left the comp. domain.
+    traj_df.loc[np.isnan(traj_df["z"]), ["lon", "lat"]] = np.NaN
+
     return traj_df
 
 
 def check_input_dir(input_dir, prefix_dict, separator):
-    # print("--- iterating through input directory")
     """Iterate through the input directory, containg all files to be parsed and plotted.
 
     Args:
