@@ -147,7 +147,7 @@ def _get_central_longitude(
             []
         )  # here, only flip indexes which correspond to dateline crossings, not 0°-line crossings
 
-        # 3) check, which flips refer to east-west flip @ 0° and @ ±180°. the relevant_flip_indexes are the ones, that
+        # 3) check, which sign changes refer to east-west flip @ 0° and @ ±180°. the relevant_flip_indexes are the ones, that
         # refer to crossing of ±180°, NOT the 0°-lon line.
         for i, flip_index in enumerate(sign_flip_indexes):
             if not -5 < lon[flip_index] < 5:
@@ -174,31 +174,33 @@ def _get_central_longitude(
                 # > if there are several crossings, and the loop has arrived at the last crossing, adapt the remaining values
                 # > else, fill the values until the next dateline crossing
                 else:
-                    if flip_index_position == (len(relevant_flip_indexes) - 1):
-                        lon[flip_index : len(lon)] -= 360
-                        break
+                    if flip_index_position % 2 == 0:
 
-                    else:
-                        # print(f"subtracting 360° from this range: {flip_index} : {(relevant_flip_indexes[flip_index_position+1])}\nto figure out, how far to the east the trajectory travels ")
-                        lon[
-                            flip_index : (
-                                relevant_flip_indexes[flip_index_position + 1]
-                            )
-                        ] -= 360
-
-                        # print(f"flip_index: {flip_index}; flip_index_position: {flip_index_position}, new min: {np.min(lon)}")
-                        min_lons.append(np.min(lon))
-
-                        if len(relevant_flip_indexes) == 2:
-                            # loop can be stopped at this point, because the maximum expansion towards the east has happened after the first crossing.
-                            # at some point the trajectory turns around and crosses the dateline back, towards its origin. Not relevant for the computation
-                            # of the central longitude or domain boundaries
+                        if flip_index_position == (len(relevant_flip_indexes) - 1):
+                            lon[flip_index : len(lon)] -= 360
                             break
+                        # print(f"subtracting 360° from this range: {flip_index} : {(relevant_flip_indexes[flip_index_position+1])}\nto figure out, how far to the east the trajectory travels ")
 
                         else:
-                            # the next iteration can be skipped, as only the expansion to the east is of importance.
-                            # perhaps after a consecutive crossing from west to east, the trajectoriy expands further than in the first
-                            flip_index_position += 1
+                            lon[
+                                flip_index : (
+                                    relevant_flip_indexes[flip_index_position + 1]
+                                )
+                            ] -= 360
+                            # print(f"flip_index: {flip_index}; flip_index_position: {flip_index_position}, new min: {np.min(lon)}")
+                            print(f"--- appending: {np.min(lon)}")
+                            min_lons.append(np.min(lon))
+
+                    # if len(relevant_flip_indexes) == 2:
+                    #     # loop can be stopped at this point, because the maximum expansion towards the east has happened after the first crossing.
+                    #     # at some point the trajectory turns around and crosses the dateline back, towards its origin. Not relevant for the computation
+                    #     # of the central longitude or domain boundaries
+                    #     break
+
+                    # else:
+                    #     # the next iteration can be skipped, as only the expansion to the east is of importance.
+                    #     # perhaps after a consecutive crossing from west to east, the trajectoriy expands further than in the first
+                    #     flip_index_position += 1
 
             if (
                 lon[flip_index] < 0
@@ -219,25 +221,27 @@ def _get_central_longitude(
 
                     else:
                         # print(f"subtracting 360° from this range: {flip_index} : {(relevant_flip_indexes[flip_index_position+1])}\nto figure out, how far to the east the trajectory travels ")
-                        lon[
-                            flip_index : (
-                                relevant_flip_indexes[flip_index_position + 1]
-                            )
-                        ] += 360
+                        if flip_index_position % 2 == 0:
+                            lon[
+                                flip_index : (
+                                    relevant_flip_indexes[flip_index_position + 1]
+                                )
+                            ] += 360
 
-                        # print(f"flip_index: {flip_index}; flip_index_position: {flip_index_position}, new min: {np.min(lon)}")
-                        min_lons.append(np.min(lon))
+                            # print(f"flip_index: {flip_index}; flip_index_position: {flip_index_position}, new min: {np.min(lon)}")
+                            # print(f"--- appending: {np.min(lon)}")
+                            # min_lons.append(np.min(lon))
 
-                        if len(relevant_flip_indexes) == 2:
-                            # loop can be stopped at this point, because the maximum expansion towards the east has happened after the first crossing.
-                            # at some point the trajectory turns around and crosses the dateline back, towards its origin. Not relevant for the computation
-                            # of the central longitude or domain boundaries
-                            break
+                        # if len(relevant_flip_indexes) == 2:
+                        #     # loop can be stopped at this point, because the maximum expansion towards the east has happened after the first crossing.
+                        #     # at some point the trajectory turns around and crosses the dateline back, towards its origin. Not relevant for the computation
+                        #     # of the central longitude or domain boundaries
+                        #     break
 
-                        else:
-                            # the next iteration can be skipped, as only the expansion to the east is of importance.
-                            # perhaps after a consecutive crossing from west to east, the trajectoriy expands further than in the first
-                            flip_index_position += 1
+                        # else:
+                        #     # the next iteration can be skipped, as only the expansion to the east is of importance.
+                        #     # perhaps after a consecutive crossing from west to east, the trajectoriy expands further than in the first
+                        #     flip_index_position += 1
 
         # for i, longitude in enumerate(lon):
         #     print(f"lons after all shifts ({i}):\t\t{longitude}")
@@ -364,7 +368,10 @@ def main():
         # "src/pytrajplot/scratch/dateline/punggyeri_df.csv", # [3] trajectories cross dateline several times
         # "src/pytrajplot/scratch/dateline/basel_df.csv", # [4] fix computation of dynamic domain
         # "src/pytrajplot/scratch/dateline/zurich_df.csv", # [4] fix computation of dynamic domain
-        "src/pytrajplot/scratch/dateline/bagdad_df.csv",  # [4] fix computation of dynamic domain
+        # "src/pytrajplot/scratch/dateline/bagdad_df.csv",  # [4] fix computation of dynamic domain
+        # "src/pytrajplot/scratch/dateline/punggyeri_000-144F_df.csv",
+        # "src/pytrajplot/scratch/dateline/punggyeri_012-144F_df.csv",
+        # "src/pytrajplot/scratch/dateline/punggyeri_018-144F_df.csv"
     ]
 
     for csv_file in csv_files:
