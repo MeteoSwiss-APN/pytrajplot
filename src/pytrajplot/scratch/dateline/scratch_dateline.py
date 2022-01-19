@@ -2,8 +2,11 @@
 
 
 # interesting link: https://stackoverflow.com/questions/13856123/setting-up-a-map-which-crosses-the-dateline-in-cartopy
-# Third-party
+# Standard library
 # IMPORTS
+import csv
+
+# Third-party
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
@@ -48,7 +51,7 @@ def _get_traj_dict(data, number_of_trajectories=None, traj_length=None) -> dict:
                 []
             )  # here, only flip indexes which correspond to dateline crossings, not 0°-line crossings
             for flip_index in sign_flip_indexes:
-                if not -5 < lon[flip_index] < 5:
+                if not -20 < lon[flip_index] < 20:
                     relevant_flip_indexes.append(flip_index)
 
             # if this list is not empty --> dateline got crossed
@@ -135,7 +138,7 @@ def _get_central_longitude(
     # iterate through dateline-crossing trajcetories
     for traj_index in dateline_crossing_trajectories:
         if verbose:
-            print(f"Trajectory {traj_index} crosses the dateline.")
+            print(f"Trajectory {traj_index} crosses the dateline or prime meridian.")
         # 1) extract longitude pandas series from date-line-crossing trajectory from trajectory dict
         lon = (traj_dict["traj_" + str(traj_index)]["lon"]).values
 
@@ -150,7 +153,7 @@ def _get_central_longitude(
         # 3) check, which sign changes refer to east-west flip @ 0° and @ ±180°. the relevant_flip_indexes are the ones, that
         # refer to crossing of ±180°, NOT the 0°-lon line.
         for i, flip_index in enumerate(sign_flip_indexes):
-            if not -5 < lon[flip_index] < 5:
+            if not -20 < lon[flip_index] < 20:
                 relevant_flip_indexes.append(flip_index)
 
         # ~~~~~~~~~~~~~~~~~~~~~~ NEW ~~~~~~~~~~~~~~~~~~~~~~ #
@@ -158,11 +161,13 @@ def _get_central_longitude(
 
             if verbose:
                 print(
-                    f"@ index {flip_index} the trajectory flips from: {lon[flip_index-1]} to {lon[flip_index]}"
+                    f"@ index {flip_index} the trajectory flips from: {lon[flip_index-1]} to {lon[flip_index]} (flip_index_position: {flip_index_position})"
                 )
 
+            value_after_flip = lon[flip_index]
+
             if (
-                lon[flip_index] > 0
+                value_after_flip > 0
             ):  # the trajectory crossed from the west to the east over the dateline
 
                 # if there is only one crossing of the dateline, all values after the crossing need to be adjusted
@@ -173,37 +178,20 @@ def _get_central_longitude(
                 # if there are several crossings of the dateline (i.e. back&forth), only the values between consecutive crossings need to be adjusted
                 # > if there are several crossings, and the loop has arrived at the last crossing, adapt the remaining values
                 # > else, fill the values until the next dateline crossing
-                else:
-                    if flip_index_position % 2 == 0:
+                elif flip_index_position % 2 == 0:
+                    if flip_index_position == (len(relevant_flip_indexes) - 1):
+                        lon[flip_index : len(lon)] -= 360
+                        break
 
-                        if flip_index_position == (len(relevant_flip_indexes) - 1):
-                            lon[flip_index : len(lon)] -= 360
-                            break
-                        # print(f"subtracting 360° from this range: {flip_index} : {(relevant_flip_indexes[flip_index_position+1])}\nto figure out, how far to the east the trajectory travels ")
-
-                        else:
-                            lon[
-                                flip_index : (
-                                    relevant_flip_indexes[flip_index_position + 1]
-                                )
-                            ] -= 360
-                            # print(f"flip_index: {flip_index}; flip_index_position: {flip_index_position}, new min: {np.min(lon)}")
-                            print(f"--- appending: {np.min(lon)}")
-                            min_lons.append(np.min(lon))
-
-                    # if len(relevant_flip_indexes) == 2:
-                    #     # loop can be stopped at this point, because the maximum expansion towards the east has happened after the first crossing.
-                    #     # at some point the trajectory turns around and crosses the dateline back, towards its origin. Not relevant for the computation
-                    #     # of the central longitude or domain boundaries
-                    #     break
-
-                    # else:
-                    #     # the next iteration can be skipped, as only the expansion to the east is of importance.
-                    #     # perhaps after a consecutive crossing from west to east, the trajectoriy expands further than in the first
-                    #     flip_index_position += 1
+                    else:
+                        lon[
+                            flip_index : (
+                                relevant_flip_indexes[flip_index_position + 1]
+                            )
+                        ] -= 360
 
             if (
-                lon[flip_index] < 0
+                value_after_flip < 0
             ):  # the trajectory crossed from the east to the west over the dateline
 
                 # if there is only one crossing of the dateline, all values after the crossing need to be adjusted
@@ -214,40 +202,18 @@ def _get_central_longitude(
                 # if there are several crossings of the dateline (i.e. back&forth), only the values between consecutive crossings need to be adjusted
                 # > if there are several crossings, and the loop has arrived at the last crossing, adapt the remaining values
                 # > else, fill the values until the next dateline crossing
-                else:
+                elif flip_index_position % 2 == 0:
                     if flip_index_position == (len(relevant_flip_indexes) - 1):
                         lon[flip_index : len(lon)] += 360
                         break
 
                     else:
-                        # print(f"subtracting 360° from this range: {flip_index} : {(relevant_flip_indexes[flip_index_position+1])}\nto figure out, how far to the east the trajectory travels ")
-                        if flip_index_position % 2 == 0:
-                            lon[
-                                flip_index : (
-                                    relevant_flip_indexes[flip_index_position + 1]
-                                )
-                            ] += 360
-
-                            # print(f"flip_index: {flip_index}; flip_index_position: {flip_index_position}, new min: {np.min(lon)}")
-                            # print(f"--- appending: {np.min(lon)}")
-                            # min_lons.append(np.min(lon))
-
-                        # if len(relevant_flip_indexes) == 2:
-                        #     # loop can be stopped at this point, because the maximum expansion towards the east has happened after the first crossing.
-                        #     # at some point the trajectory turns around and crosses the dateline back, towards its origin. Not relevant for the computation
-                        #     # of the central longitude or domain boundaries
-                        #     break
-
-                        # else:
-                        #     # the next iteration can be skipped, as only the expansion to the east is of importance.
-                        #     # perhaps after a consecutive crossing from west to east, the trajectoriy expands further than in the first
-                        #     flip_index_position += 1
-
-        # for i, longitude in enumerate(lon):
-        #     print(f"lons after all shifts ({i}):\t\t{longitude}")
-
+                        lon[
+                            flip_index : (
+                                relevant_flip_indexes[flip_index_position + 1]
+                            )
+                        ] += 360
         # 4) append the maximum/minimum longitude to their respective list
-        # print(f"min_lon = {np.min(lon)}\nmax_lon = {np.max(lon)}")
         min_lons.append(np.min(lon))
         max_lons.append(np.max(lon))
 
@@ -362,16 +328,16 @@ def _create_plot(traj_dict, central_longitude, dynamic_domain):
 def main():
     # 1) load csv --> dataframe
     csv_files = [
-        # "src/pytrajplot/scratch/dateline/144-000B_df.csv", # [0] trajectories cross from the west
-        # "src/pytrajplot/scratch/dateline/006-144F_df.csv", # [1] trajectories cross from the east
-        # "src/pytrajplot/scratch/dateline/000-048F_df.csv", # [2] trajectories don't cross dateline
-        # "src/pytrajplot/scratch/dateline/punggyeri_df.csv", # [3] trajectories cross dateline several times
-        # "src/pytrajplot/scratch/dateline/basel_df.csv", # [4] fix computation of dynamic domain
-        # "src/pytrajplot/scratch/dateline/zurich_df.csv", # [4] fix computation of dynamic domain
-        # "src/pytrajplot/scratch/dateline/bagdad_df.csv",  # [4] fix computation of dynamic domain
-        # "src/pytrajplot/scratch/dateline/punggyeri_000-144F_df.csv",
-        # "src/pytrajplot/scratch/dateline/punggyeri_012-144F_df.csv",
-        # "src/pytrajplot/scratch/dateline/punggyeri_018-144F_df.csv"
+        "src/pytrajplot/scratch/dateline/test_files/144-000B_df.csv",  # [0] trajectories cross from the west
+        "src/pytrajplot/scratch/dateline/test_files/006-144F_df.csv",  # [1] trajectories cross from the east
+        "src/pytrajplot/scratch/dateline/test_files/000-048F_df.csv",  # [2] trajectories don't cross dateline
+        "src/pytrajplot/scratch/dateline/test_files/punggyeri_df.csv",  # [3] trajectories cross dateline several times
+        "src/pytrajplot/scratch/dateline/test_files/basel_df.csv",  # [4] fix computation of dynamic domain
+        "src/pytrajplot/scratch/dateline/test_files/zurich_df.csv",  # [5] fix computation of dynamic domain
+        "src/pytrajplot/scratch/dateline/test_files/bagdad_df.csv",  # [6] fix computation of dynamic domain
+        "src/pytrajplot/scratch/dateline/test_files/punggyeri_000-144F_df.csv",  # [7] trajectories cross dateline several times
+        "src/pytrajplot/scratch/dateline/test_files/punggyeri_012-144F_df.csv",  # [8] trajectories cross dateline several times
+        "src/pytrajplot/scratch/dateline/test_files/punggyeri_018-144F_df.csv",  # [9] trajectories cross dateline several times
     ]
 
     for csv_file in csv_files:
