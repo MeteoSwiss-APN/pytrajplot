@@ -1,10 +1,6 @@
 """Generate PDF w/ altitude figure and map plot."""
 
 # Standard library
-import cProfile
-import io
-import pstats
-import time
 from pathlib import Path
 
 # Third-party
@@ -14,35 +10,14 @@ import numpy as np
 import pandas as pd
 
 # Local
-from .scratch.dateline.scratch_dateline import _analyse_trajectories
-from .scratch.dateline.scratch_dateline import _check_dateline_crossing
-from .scratch.dateline.scratch_dateline import _create_plot
-from .scratch.dateline.scratch_dateline import _get_traj_dict
-
-
-def profile(func):
-    def wrapper(*args, **kwargs):
-        pr = cProfile.Profile()
-        pr.enable()
-        retval = func(*args, **kwargs)
-        pr.disable()
-        s = io.StringIO()
-        sortby = "cumulative"
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
-        return retval
-
-    return wrapper
-
-
-plt.rc("axes", labelsize=8)  # change the font size of the axis labels
-
-
-# Local
+from .plotting.analyse_trajectories.analyse_trajectories import _analyse_trajectories
+from .plotting.analyse_trajectories.analyse_trajectories import _check_dateline_crossing
+from .plotting.analyse_trajectories.analyse_trajectories import _get_traj_dict
 from .plotting.plot_altitude import generate_altitude_plot
 from .plotting.plot_info_header import generate_info_header
 from .plotting.plot_map import generate_map_plot
+
+plt.rc("axes", labelsize=8)  # change the font size of the axis labels
 
 
 def create_plot_dict(altitude_levels):
@@ -450,7 +425,9 @@ def get_map_settings(lon, lat, case, number_of_times):
 
     if case == "HRES":
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-        # implement scratch_dateline.py (only relevant for HRES trajectories though)
+        # implement analyse_dateline.py (only relevant for HRES trajectories though)
+        # analogous to the main() in the analyse_dateline.py file
+        # Remark: the analyse_dateline.py can also be used as a stand-alone script. Handy for debugging purposes.
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # 0) concat the longitude/latitude dataframes into a new dataframe
         data = {
@@ -489,10 +466,6 @@ def get_map_settings(lon, lat, case, number_of_times):
         )
 
         projection = ccrs.PlateCarree(central_longitude=central_longitude)
-
-        # TODO: remove later
-        # 5) plot trajectories & save plot (just temporarily to check wheter all information is correct)
-        # _create_plot(traj_dict, central_longitude, dynamic_domain)
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
         return central_longitude, projection, dynamic_domain, cross_dateline
