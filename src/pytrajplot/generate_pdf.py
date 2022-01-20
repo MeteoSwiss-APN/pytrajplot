@@ -492,9 +492,9 @@ def generate_pdf(
         output_types:           tuple               Tuple containing the file types of the output files. (pdf and/or png)
 
     """
-    print("--- Assembling PDF")
-    for key in trajectory_dict:  # iterate through the trajectory dict
-        # print(key)
+    print("--- Assembling Ouput")
+    # iterate through the trajectory dictionary containing the trajectory data
+    for key in trajectory_dict:
         trajectory_df = trajectory_dict[key]  # extract df for given key
         # ~~~~~~~~~~~~~~~~~~~~ save dataframe ~~~~~~~~~~~~~~~~~~~~ #
         # trajectory_df.to_csv(f'{output_dir}{key}_df.csv', index = False)
@@ -549,6 +549,9 @@ def generate_pdf(
                     plot_dict["altitude_" + str(alt_index)][
                         "max_start_altitude"
                     ] = max_start_altitude
+                    plot_dict["altitude_" + str(alt_index)][
+                        "alt_level"
+                    ] = trajectory_df["z"][lower_row]
 
                 plot_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
                     "z_type"
@@ -557,9 +560,6 @@ def generate_pdf(
                     "trajectory_direction"
                 ] = trajectory_direction
                 plot_dict["altitude_" + str(alt_index)]["start_time"] = start_time
-                plot_dict["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
-                    "start_altitude"
-                ][lower_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "z"
                 ] = trajectory_df["z"][lower_row:upper_row]
