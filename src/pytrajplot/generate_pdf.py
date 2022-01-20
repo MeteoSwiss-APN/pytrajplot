@@ -549,9 +549,16 @@ def generate_pdf(
                     plot_dict["altitude_" + str(alt_index)][
                         "max_start_altitude"
                     ] = max_start_altitude
-                    plot_dict["altitude_" + str(alt_index)][
-                        "alt_level"
-                    ] = trajectory_df["z"][lower_row]
+
+                    if trajectory_df["z_type"][lower_row] == "agl":
+                        plot_dict["altitude_" + str(alt_index)]["alt_level"] = (
+                            trajectory_df["z"][lower_row]
+                            - trajectory_df["hsurf"][lower_row]
+                        )
+                    else:
+                        plot_dict["altitude_" + str(alt_index)][
+                            "alt_level"
+                        ] = trajectory_df["z"][lower_row]
 
                 plot_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
                     "z_type"
@@ -662,9 +669,18 @@ def generate_pdf(
                 plot_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
                     "z_type"
                 ][lower_row]
-                plot_dict["altitude_" + str(alt_index)]["alt_level"] = trajectory_df[
-                    "start_altitude"
-                ][lower_row]
+
+                # add starting height
+                if trajectory_df["z_type"][lower_row] == "agl":
+                    plot_dict["altitude_" + str(alt_index)]["alt_level"] = (
+                        trajectory_df["z"][lower_row]
+                        - trajectory_df["hsurf"][lower_row]
+                    )
+                else:
+                    plot_dict["altitude_" + str(alt_index)][
+                        "alt_level"
+                    ] = trajectory_df["z"][lower_row]
+
                 plot_dict["altitude_" + str(alt_index)][
                     "trajectory_direction"
                 ] = trajectory_direction
