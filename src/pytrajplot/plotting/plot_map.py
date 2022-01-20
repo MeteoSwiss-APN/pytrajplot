@@ -160,7 +160,7 @@ def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
         "centraleurope": {
             "domain": [1, 20, 42.5, 51.5]
         },  # added two degrees to the east
-        "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},  # optimised boundaries
+        "ch": {"domain": [5.3, 11.2, 45.4, 48.2]},  # optimised boundaries
         "alps": {"domain": [0.7, 16.5, 42.3, 50]},  # optimised boundaries
         "europe": {"domain": [-10, 47, 35, 65]},  # original boundaries
         "dynamic": {
