@@ -1,6 +1,7 @@
 """Generate Map Plot Figure."""
 
 # Standard library
+import time
 from pathlib import Path
 
 # Third-party
@@ -8,6 +9,7 @@ import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -155,15 +157,12 @@ def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
     padding = 1  # padding on each side, for the dynamically created plots
 
     domain_dict = {
-        "centraleurope": {"domain": [2, 18, 42.5, 51.5]},  # optimised boundaries
-        # "centraleurope": {"domain": [2, 18, 42, 52]},     # original boundaries
-        "ch": {"domain": [5.8, 10.6, 45.4, 48.2]},  # optimised boundaries
+        "centraleurope": {
+            "domain": [1, 20, 42.5, 51.5]
+        },  # added two degrees to the east
+        "ch": {"domain": [5.3, 11.2, 45.4, 48.2]},  # optimised boundaries
         "alps": {"domain": [0.7, 16.5, 42.3, 50]},  # optimised boundaries
-        # "europe": {"domain": [-12.5, 50.5, 35, 65]},      # optimised boundaries
         "europe": {"domain": [-10, 47, 35, 65]},  # original boundaries
-        # the domain ch_hd has been removed
-        # "ch_hd": {"domain": [2.8, 13.2, 44.1, 49.4]},  # optimised boundaries
-        # "ch_hd": {"domain": [3.5, 12.6, 44.1, 49.4]},     # original boundaries
         "dynamic": {
             "domain": [
                 round(custom_domain_boundaries[0]) - padding,
@@ -183,7 +182,7 @@ def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
     }
 
     domain_boundaries = domain_dict[domain]["domain"]
-    ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree())
+    ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree(central_longitude=0))
 
     return domain_boundaries
 
@@ -191,27 +190,31 @@ def crop_map(ax, domain, custom_domain_boundaries, origin_coordinates):
 def get_dynamic_zoom_boundary(custom_domain_boundaries, origin_coordinates):
     # case 1: trajectory expansion mainly towards the east from origin
     if abs(custom_domain_boundaries[0] - origin_coordinates["lon"]) <= 10:
-        left_boundary = origin_coordinates["lon"] - 5
-        right_boundary = origin_coordinates["lon"] + 15
+        left_boundary = origin_coordinates["lon"] - 2
+        right_boundary = origin_coordinates["lon"] + 18
     # case 2: trajectory expansion mainly towards the west from origin
     if abs(custom_domain_boundaries[1] - origin_coordinates["lon"]) <= 10:
-        left_boundary = origin_coordinates["lon"] - 15
-        right_boundary = origin_coordinates["lon"] + 5
+        left_boundary = origin_coordinates["lon"] - 18
+        right_boundary = origin_coordinates["lon"] + 2
     # case 3: trajectory expansion to both east&west from origin
-    else:
+    if (abs(custom_domain_boundaries[0] - origin_coordinates["lon"]) > 10) and (
+        abs(custom_domain_boundaries[1] - origin_coordinates["lon"]) > 10
+    ):
         left_boundary = origin_coordinates["lon"] - 10
         right_boundary = origin_coordinates["lon"] + 10
 
     # case 1: trajectory expansion mainly towards the north from origin
     if abs(custom_domain_boundaries[2] - origin_coordinates["lat"]) <= 10:
-        lower_boundary = origin_coordinates["lat"] - 5
-        upper_boundary = origin_coordinates["lat"] + 10
+        lower_boundary = origin_coordinates["lat"] - 3
+        upper_boundary = origin_coordinates["lat"] + 12
     # case 2: trajectory expansion mainly towards the south from origin
     if abs(custom_domain_boundaries[3] - origin_coordinates["lat"]) <= 10:
-        lower_boundary = origin_coordinates["lat"] - 10
-        upper_boundary = origin_coordinates["lat"] + 5
+        lower_boundary = origin_coordinates["lat"] - 12
+        upper_boundary = origin_coordinates["lat"] + 3
     # case 3: trajectory expansion to both south&north from origin
-    else:
+    if (abs(custom_domain_boundaries[2] - origin_coordinates["lat"]) > 10) and (
+        abs(custom_domain_boundaries[3] - origin_coordinates["lat"]) > 10
+    ):
         lower_boundary = origin_coordinates["lat"] - 7.5
         upper_boundary = origin_coordinates["lat"] + 7.5
     return left_boundary, right_boundary, lower_boundary, upper_boundary
@@ -428,11 +431,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 population=population,
                 lon=lon,
             ):
-
-                if cross_dateline:
-                    if lon < 0:
-                        lon = 360 - abs(lon)
-
                 ax.scatter(
                     x=lon,
                     y=lat,
@@ -449,7 +447,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                     y=lat + 0.05,
                     s=city,
                     fontsize=8,
-                    transform=ccrs.PlateCarree(),
+                    transform=ccrs.Geodetic(),
                     rasterized=True,
                 )
 
@@ -481,32 +479,6 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
                 "Glarus": {"lon": 9.0667, "lat": 47.0333},
                 "Appenzell": {"lon": 9.4086, "lat": 47.3306},
             }
-
-        # if domain == "ch_hd":
-        #     cities_list = {
-        #         "Munich": {"lon": 11.5755, "lat": 48.1372},
-        #         "Milan": {"lon": 9.19, "lat": 45.4669},
-        #         "Bern": {"lon": 7.4474, "lat": 46.948},
-        #         "Vaduz": {"lon": 9.5215, "lat": 47.1415},
-        #         "Turin": {"lon": 7.7, "lat": 45.0667},
-        #         "Grenoble": {"lon": 5.7224, "lat": 45.1715},
-        #         "Genoa": {"lon": 8.934, "lat": 44.4072},
-        #         "Lyon": {"lon": 4.84, "lat": 45.76},
-        #         "Strasbourg": {"lon": 7.7458, "lat": 48.5833},
-        #         "Nancy": {"lon": 6.1846, "lat": 48.6936},
-        #         "Zurich": {"lon": 8.54, "lat": 47.3786},
-        #         "Bologna": {"lon": 11.3428, "lat": 44.4939},
-        #         "Verona": {"lon": 10.9928, "lat": 45.4386},
-        #         "Geneva": {"lon": 6.15, "lat": 46.2},
-        #         "Basel": {"lon": 7.5906, "lat": 47.5606},
-        #         "Saarbrucken": {"lon": 7.0, "lat": 49.2333},
-        #         "Dijon": {"lon": 5.0167, "lat": 47.3167},
-        #         "Salzburg": {"lon": 13.0477, "lat": 47.7972},
-        #         "Lausanne": {"lon": 6.6333, "lat": 46.5333},
-        #         "Innsbruck": {"lon": 11.3933, "lat": 47.2683},
-        #         "Trento": {"lon": 11.1167, "lat": 46.0667},
-        #         "Lucerne": {"lon": 8.3059, "lat": 47.0523},
-        #     }
 
         if domain == "alps":
             cities_list = {
@@ -651,7 +623,7 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
 
 
 def add_time_interval_points(coord_dict, ax, i, linestyle):
-    """Summary - First line should end with a period.
+    """Add time interval points to map..
 
     Args:
         coord_dict:         dict       containing the lan/lot data & other plot properties
@@ -699,28 +671,22 @@ def retrieve_interval_points(coord_dict, altitude_index):
 
     """
     # create temporary dataframes
-    lat_df_tmp = pd.DataFrame(
-        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lat"].items()
+    lat_df_tmp = coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lat"].values
+    lon_df_tmp = coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lon"].values
+    time_df_tmp = coord_dict["altitude_" + str(altitude_index)]["traj_0"]["time"].values
+
+    comb_df = pd.DataFrame(
+        data={"time": time_df_tmp, "lon": lon_df_tmp, "lat": lat_df_tmp},
+        dtype=np.float64,
     )
-    lon_df_tmp = pd.DataFrame(
-        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["lon"].items()
-    )
-    time_df_tmp = pd.DataFrame(
-        coord_dict["altitude_" + str(altitude_index)]["traj_0"]["time"].items()
-    )
-    # delete index columns
-    del lon_df_tmp[0]
-    del lat_df_tmp[0]
-    del time_df_tmp[0]
-    # rename remaining column
-    lon_df = lon_df_tmp.rename(columns={1: "lon"})
-    lat_df = lat_df_tmp.rename(columns={1: "lat"})
-    time_df = time_df_tmp.rename(columns={1: "time"})
-    # combine columns to one df
-    comb_df = pd.concat([lat_df, lon_df, time_df], axis=1, join="inner")
-    comb_df["time"] = comb_df["time"].astype(
-        float
-    )  # ensure correct type for time column (difference w/ HRES & COSMO)
+
+    shift = comb_df["time"].values[0]
+    if shift > 0:
+        # The time column of COSMO trajectories starts @ the lead time. I.e. the first entry for 003-033F would be 3.00.
+        # The time column of HRES  trajectories starts w/ 0.00, ALWAYS. Thus when computing the modulo of the time column
+        # of HRES trajectories, the 'interval' points get computet correctly. This shift in the COSMO data must be accounted
+        # for by subtraction the time-shift from the time column, before applying %6
+        comb_df["time"] -= shift
 
     # extract position every 6 hours into important_points dataframe
     important_points_tmp = comb_df[comb_df["time"] % 6 == 0]
@@ -734,13 +700,11 @@ def retrieve_interval_points(coord_dict, altitude_index):
 
 
 def add_trajectories(
-    cross_dateline,
     coord_dict,
     side_traj,
     altitude_levels,
     ax,
     subplot_properties_dict,
-    central_longitude,
 ):
     """Add trajectories to map.
 
@@ -750,8 +714,6 @@ def add_trajectories(
         altitude_levels:               int        # altitude levels
         ax:                            Axes       current map to crop
         subplot_properties_dict:       dict       Dictionary containing the mapping between the altitude levels and colours. Uniform w/ altitude plots.
-        central_longitude:             float      Central Longitude for PlateCarree Projection
-        cross_dateline:                bool       True/False if dateline gets crossed
 
     """
     i = 1
@@ -769,14 +731,6 @@ def add_trajectories(
             for traj in traj_index:
                 latitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = coord_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
-                if cross_dateline:
-                    longitude_new = []
-                    for lon in longitude:
-                        if lon < 0:
-                            lon = central_longitude + (180 - abs(lon))
-
-                        longitude_new.append(lon)
-                    longitude = pd.Series(longitude_new)
 
                 ystart = latitude.iloc[0]
                 xstart = longitude.iloc[0]
@@ -794,7 +748,7 @@ def add_trajectories(
                         linestyle,  # define linestyle
                         alpha=alpha,  # define line opacity
                         label=textstr,
-                        transform=ccrs.PlateCarree(),
+                        transform=ccrs.Geodetic(),
                         rasterized=True,
                     )
 
@@ -805,11 +759,11 @@ def add_trajectories(
                     ax.plot(
                         xstart,
                         ystart,
-                        marker="^",
+                        marker="D",
                         markersize=10,
                         markeredgecolor="red",
                         markerfacecolor="white",
-                        transform=ccrs.PlateCarree(),
+                        transform=ccrs.Geodetic(),
                         rasterized=True,
                     )
 
@@ -820,21 +774,13 @@ def add_trajectories(
                         latitude,  # define y-axis
                         linestyle,  # define linestyle
                         alpha=alpha,  # define line opacity
-                        transform=ccrs.PlateCarree(),
+                        transform=ccrs.Geodetic(),
                         rasterized=True,
                     )
 
         else:  # no side traj
             latitude = coord_dict["altitude_" + str(i)]["traj_0"]["lat"]
             longitude = coord_dict["altitude_" + str(i)]["traj_0"]["lon"]
-
-            if cross_dateline:
-                longitude_new = []
-                for lon in longitude:
-                    if lon < 0:
-                        lon = central_longitude + (180 - abs(lon))
-                    longitude_new.append(lon)
-                longitude = longitude_new
 
             ystart = latitude.iloc[0]
             xstart = longitude.iloc[0]
@@ -849,7 +795,7 @@ def add_trajectories(
                 linestyle,  # define linestyle
                 alpha=alpha,  # define line opacity
                 label=textstr,
-                transform=ccrs.PlateCarree(),
+                transform=ccrs.Geodetic(),
                 rasterized=True,
             )
 
@@ -866,7 +812,7 @@ def add_trajectories(
                 markersize=10,
                 markeredgecolor="red",
                 markerfacecolor="white",
-                transform=ccrs.PlateCarree(),
+                transform=ccrs.Geodetic(),
                 rasterized=True,
             )
 
@@ -880,8 +826,7 @@ def generate_map_plot(
     side_traj,
     altitude_levels,
     domain,
-    trajectory_expansion,
-    central_longitude,
+    trajectory_expansion,  # this is the dynamic domain
     ax=None,
 ):
     """Generate Map Plot.
@@ -893,7 +838,6 @@ def generate_map_plot(
         altitude_levels:            int        # altitude levels
         domain:                     str        Domain for map
         trajectory_expansion:       array      array w/ dynamic domain boundaries
-        central_longitude:          float      Central longitude of PlateCarree projection
         ax:                         Axes       Axes to generate the map on. Defaults to None.
 
     """
@@ -907,12 +851,15 @@ def generate_map_plot(
         "lat": coord_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
     }
 
+    # start = time.perf_counter()
     domain_boundaries = crop_map(
         ax=ax,
         domain=domain,
         custom_domain_boundaries=trajectory_expansion,
         origin_coordinates=origin_coordinates,
     )  # sets extent of map
+    # end = time.perf_counter()
+    # print(f"Cropping map took:\t\t{end-start} seconds")
 
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(coord_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
@@ -934,7 +881,10 @@ def generate_map_plot(
             rasterized=True,
         )
 
+    # start = time.perf_counter()
     add_features(ax=ax)
+    # end = time.perf_counter()
+    # print(f"Adding features took:\t\t{end-start} seconds")
 
     # start = time.perf_counter()
     add_cities(
@@ -944,7 +894,7 @@ def generate_map_plot(
         cross_dateline=cross_dateline,
     )
     # end = time.perf_counter()
-    # print(f"Adding cities took: {end-start} seconds")
+    # print(f"Adding cities took:\t\t{end-start} seconds")
 
     subplot_properties_dict = {
         0: "k-",
@@ -958,15 +908,15 @@ def generate_map_plot(
         8: "crimson-",
         9: "lightgreen-",
     }
+    # start = time.perf_counter()
     add_trajectories(
-        cross_dateline=cross_dateline,
         coord_dict=coord_dict,
         side_traj=side_traj,
         altitude_levels=altitude_levels,
         ax=ax,
         subplot_properties_dict=subplot_properties_dict,
-        central_longitude=central_longitude,
     )
-
+    # end = time.perf_counter()
+    # print(f"Adding trajectories took:\t{end-start} seconds")
     ax.legend(fontsize=8)
     return ax
