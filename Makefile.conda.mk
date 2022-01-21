@@ -9,7 +9,7 @@ SHELL := /bin/bash
 CHAIN ?= 0#OPT Whether to chain targets, e.g., let test depend on install-test
 IGNORE_VENV ?= 0#OPT Don't create and/or use a virtual environment
 MSG ?= ""#OPT Message used as, e.g., tag annotation in version bump commands
-PYTHON ?= 3.8#OPT Python version used to create conda virtual environment
+PYTHON ?= 3.9.7#OPT Python version used to create conda virtual environment
 VENV_DIR ?= ""#OPT Path to existing or new conda virtual environment (overrides VENV_NAME)
 VENV_NAME ?= pytrajplot#OPT Name of conda virtual environment (overridden by VENV_DIR)
 
@@ -518,7 +518,7 @@ test-check: ${_INSTALL_DEV}
 # 	$(MAKE) -C docs clean
 # 	$(MAKE) -C docs html
 # 	${browser} docs/_build/html/index.html
-  
+
 # .PHONY: servedocs #CMD Compile the docs watching for changes.
 # servedocs: docs
 # 	@echo -e "\n[make servedocs] continuously regenerating HTML documentation"
