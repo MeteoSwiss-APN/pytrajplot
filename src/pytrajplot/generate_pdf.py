@@ -10,9 +10,10 @@ import numpy as np
 import pandas as pd
 
 # Local
-from .plotting.analyse_trajectories.analyse_trajectories import _analyse_trajectories
-from .plotting.analyse_trajectories.analyse_trajectories import _check_dateline_crossing
-from .plotting.analyse_trajectories.analyse_trajectories import _get_traj_dict
+from . import __version__
+from .plotting.analyse_trajectories import _analyse_trajectories
+from .plotting.analyse_trajectories import _check_dateline_crossing
+from .plotting.analyse_trajectories import _get_traj_dict
 from .plotting.plot_altitude import generate_altitude_plot
 from .plotting.plot_info_header import generate_info_header
 from .plotting.plot_map import generate_map_plot
@@ -175,7 +176,7 @@ def assemble_pdf(
     # generate the output directory if it doesn't exist
     origin = plot_dict["altitude_1"]["origin"]
     output_dir = Path(output_dir)
-    outpath = Path(output_dir / "plots" / key)
+    outpath = Path(output_dir)
     outpath.mkdir(parents=True, exist_ok=True)
 
     # compute the trajectory shift for side trajectories, if there are any
@@ -325,12 +326,14 @@ def assemble_pdf(
                 footer = (
                     f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
                     + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
-                    + f"MeteoSwiss ©"
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
                 )
             else:
                 footer = (
                     f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"MeteoSwiss ©"
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
                 )
 
         if language == "de":
@@ -338,12 +341,14 @@ def assemble_pdf(
                 footer = (
                     f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
                     + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
-                    + f"MeteoSwiss ©"
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
                 )
             else:
                 footer = (
                     f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"MeteoSwiss ©"
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
                 )
 
         subfigsnest[0].suptitle(
