@@ -479,4 +479,4 @@ def check_input_dir(input_dir, prefix_dict, separator):
             plot_info_dict=plot_info_dict,
         )
 
-    return trajectory_dict, plot_info_dict, keys
+    return trajectory_dict, plot_info_dict

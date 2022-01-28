@@ -108,15 +108,7 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
         case_sensitive=False,
     ),
     multiple=True,
-    # TODO: add dynamic_zoom domain to default domains, after having implemented this domain
-    default=(
-        "centraleurope",
-        "europe",
-        "dynamic",
-        # "ch_hd",
-        "ch",
-        "alps",
-    ),
+    default=("centraleurope", "europe", "dynamic", "ch", "alps", "dynamic_zoom"),
     help="Choose domains for map plots. Default: centraleurope, europe, dynamic",
 )
 @click.option(
@@ -163,25 +155,16 @@ def main(
     domain: str,
     datatype: str,
 ) -> None:
-    # start_complete = time.perf_counter()
-    # start = time.perf_counter()
+
     prefix_dict, language = interpret_options(
         start_prefix=start_prefix,
         traj_prefix=traj_prefix,
         info_name=info_name,
         language=language,
     )
-    # end = time.perf_counter()
-    # print(f"check 1:\t{end-start} s")
-
-    # start = time.perf_counter()
-    trajectory_dict, plot_info_dict, _ = check_input_dir(
+    trajectory_dict, plot_info_dict = check_input_dir(
         input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
     )
-    # end = time.perf_counter()
-    # print(f"check 2:\t{end-start} s")
-
-    # start = time.perf_counter()
     generate_pdf(
         trajectory_dict=trajectory_dict,
         plot_info_dict=plot_info_dict,
@@ -191,10 +174,6 @@ def main(
         domains=domain,
         output_types=datatype,
     )
-    # end = time.perf_counter()
-    # print(f"check 3:\t{end-start} s")
 
     print("--- Done.")
-    # end_complete = time.perf_counter()
-    # print(f"The whole pipeline took:\t\t{end_complete-start_complete} seconds!")
     return

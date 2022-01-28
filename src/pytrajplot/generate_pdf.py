@@ -195,10 +195,13 @@ def assemble_pdf(
 
     base_time = plot_info_dict["mbt"][0:13] + " " + plot_info_dict["mbt"][-3:]
 
+    # initalise ```figure``` instance
     fig = plt.figure(tight_layout=False, figsize=(16, 9))
 
+    # initialise ```subfigure``` instances for header & plots section (w/ map & altitude plots)
     subfigs = fig.subfigures(2, 1, height_ratios=[0.2, 1])
 
+    # split the plots-subfigure into map- & altitude-plot section
     subfigsnest = subfigs[1].subfigures(1, 2, width_ratios=[1, 0.4])
 
     plt.subplots_adjust(
@@ -210,7 +213,7 @@ def assemble_pdf(
         hspace=0.05,
     )
 
-    # add facecolor to subfigures
+    # dbg: add facecolor to subfigures
     if False:
         subfigs[0].set_facecolor("0.75")  # header
         subfigsnest[0].set_facecolor("0.70")  # map
@@ -219,6 +222,7 @@ def assemble_pdf(
     # ADD ALTITUDE PLOT; compute only once for given origin
     subplot_dict = {}
 
+    # treat 1-3 altitude plot case separately (for cosmetic reasons)
     if altitude_levels < 3:
         axsnest1 = subfigsnest[1].subplots(3, 1)
 
@@ -320,65 +324,31 @@ def assemble_pdf(
     # ADD MAP, HEADER & FOOTER; compute for each domain
     for domain in domains:
         # ADD FOOTER
-        # start = time.perf_counter()
-        if language == "en":
-            if side_traj:
-                footer = (
-                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
-            else:
-                footer = (
-                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
-
-        if language == "de":
-            if side_traj:
-                footer = (
-                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
-            else:
-                footer = (
-                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
+        footer = create_footer(
+            plot_info_dict, side_traj, language, traj_shift, base_time
+        )
 
         subfigsnest[0].suptitle(
             footer,
             x=0.08,
             y=0.035,
-            horizontalalignment="left",  # 'center', 'left', 'right'; default: center
-            verticalalignment="top",  # 'top', 'center', 'bottom', 'baseline'; default: top
+            horizontalalignment="left",
+            verticalalignment="top",
             fontdict={
                 "size": 6,
                 "color": "k",
-                # "color": "#5B5B5B",
             },
         )
-        # end = time.perf_counter()
-        # print(f"Adding footer took:\t\t{end-start} seconds")
 
         # ADD INFO HEADER & TITLE
-        # start = time.perf_counter()
         axTop = subfigs[0].subplots()
         generate_info_header(
             language=language,
             plot_data=plot_dict,
             ax=axTop,
         )
-        # end = time.perf_counter()
-        # print(f"Adding info header took:\t{end-start} seconds")
 
         # ADD MAP & FOOTER
-        # start = time.perf_counter()
         map_ax = subfigsnest[0].add_subplot(111, projection=projection)
         generate_map_plot(
             cross_dateline=cross_dateline,
@@ -389,24 +359,51 @@ def assemble_pdf(
             trajectory_expansion=trajectory_expansion,
             ax=map_ax,
         )
-        # end = time.perf_counter()
-        # print(f"Adding map took:\t\t{end-start} seconds")
 
         # SAVE FIGURE
         filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
 
         for file_type in output_types:
-            # print(f"key:{key}, domain:{domain}, origin:{origin}")
-            # start = time.perf_counter()
             plt.savefig(str(outpath) + f"/{filename}.{file_type}")
-            # end = time.perf_counter()
-            # print(f"Saving plot took:\t\t{end-start} seconds")
 
         # CLEAR HEADER/MAP AXES FOR NEXT ITERATION
         map_ax.remove()
         axTop.remove()
 
     plt.close(fig)
+
+
+def create_footer(plot_info_dict, side_traj, language, traj_shift, base_time):
+    if language == "en":
+        if side_traj:
+            footer = (
+                f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
+                + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+        else:
+            footer = (
+                f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+
+    if language == "de":
+        if side_traj:
+            footer = (
+                f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+        else:
+            footer = (
+                f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+    return footer
 
 
 def get_map_settings(lon, lat, case, number_of_times):
@@ -420,6 +417,7 @@ def get_map_settings(lon, lat, case, number_of_times):
 
     """
     if case == "COSMO":
+        # COSMO trajectories are computed within Europe only and have a special projection.
         central_longitude = 0
         cross_dateline = False
         trajectory_expansion = [0, 0, 0, 0]
@@ -505,10 +503,18 @@ def generate_pdf(
         # trajectory_df.to_csv(f'{output_dir}{key}_df.csv', index = False)
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         start_time = trajectory_df["datetime"].loc[0]
-        altitude_levels = int(trajectory_df["altitude_levels"].loc[0])
-        trajectory_direction = str(trajectory_df["trajectory_direction"].loc[0])
-        number_of_times = int(trajectory_df["block_length"].iloc[0])
-        number_of_trajectories = int(trajectory_df["#trajectories"].iloc[0])
+        altitude_levels = int(
+            trajectory_df["altitude_levels"].loc[0]
+        )  # number of starting altitudes (can vary for different origins within one df)
+        trajectory_direction = str(
+            trajectory_df["trajectory_direction"].loc[0]
+        )  # Backward / Forward
+        number_of_times = int(
+            trajectory_df["block_length"].iloc[0]
+        )  # number or rows, corresponding to one trajectory
+        number_of_trajectories = int(
+            trajectory_df["#trajectories"].iloc[0]
+        )  # number of trajectories, from given start point
 
         if "HRES" in plot_info_dict["model_name"]:
             model = "HRES"
@@ -518,20 +524,26 @@ def generate_pdf(
         # time axis for altitude plots (= x-axis)
         time_axis = trajectory_df["datetime"].iloc[0:number_of_times]
 
+        # extract information referring to individual origin from dataframe into plot_dict
         plot_dict = create_plot_dict(altitude_levels=altitude_levels)
 
+        # initialise two empty panda series, which ultimately contain the longitude/latitude values of all trajectories
+        # departing from current origin. --> to compute dynamic domain and check dateline crossing
         trajectory_longitude_expansion, trajectory_latitude_expansion = (
             pd.Series(),
             pd.Series(),
         )
 
-        row_index = 0
+        row_index = 0  # index of the current trajectory; helper variable to compute the rows, that make up individual trajectories
         alt_index = 1  # altitude 1,2,3,4,...
         traj_index = 0  # 0=main, 1=east, 2=north, 3=west, 4=south
 
         while row_index < number_of_trajectories:
+            # compute range of rows, for current trajectory
             lower_row = row_index * number_of_times
             upper_row = row_index * number_of_times + number_of_times
+
+            # general information
             origin = trajectory_df["origin"].loc[lower_row]
             lon_precise = trajectory_df["lon_precise"].loc[lower_row]
             lat_precise = trajectory_df["lat_precise"].loc[lower_row]
@@ -541,6 +553,8 @@ def generate_pdf(
             side_traj = trajectory_df["side_traj"].loc[lower_row]
 
             if side_traj:
+                # if origin does not contain the separator (i.e. ~ is not in Beznau),
+                # it is a main trajectory (not side trajectory) --> extract some further information
                 if separator not in origin:
                     plot_dict["altitude_" + str(alt_index)]["origin"] = origin
                     plot_dict["altitude_" + str(alt_index)]["lon_precise"] = lon_precise
@@ -555,6 +569,8 @@ def generate_pdf(
                         "max_start_altitude"
                     ] = max_start_altitude
 
+                    # sometimes, the first trajectory is of type: 'agl' (above ground level)
+                    # --> compute difference between surface and trajectory height
                     if trajectory_df["z_type"][lower_row] == "agl":
                         plot_dict["altitude_" + str(alt_index)]["alt_level"] = (
                             trajectory_df["z"][lower_row]
@@ -606,9 +622,8 @@ def generate_pdf(
                     alt_index += 1
 
                 if alt_index > altitude_levels:
-                    # start = time.perf_counter()
                     (
-                        central_longitude,
+                        _,
                         projection,
                         trajectory_expansion,
                         cross_dateline,
@@ -618,11 +633,8 @@ def generate_pdf(
                         case=model,
                         number_of_times=number_of_times,
                     )
-                    # end = time.perf_counter()
-                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
 
-                    # start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -640,7 +652,9 @@ def generate_pdf(
                         cross_dateline=cross_dateline,
                     )
 
-                    # ~~~~~~~~~~~~~~~~~ check if #altitude levels is variable within one traj-file ~~~~~~~~~~~ #
+                    # ~~~~~~~~~~~~~~~~~ check if #altitude_levels is variable within one traj-file ~~~~~~~~~~~ #
+                    # > if it is variable, a new plot_dict needs to be initialised with the corresponding numer of
+                    # altitude levels.
                     if row_index < (number_of_trajectories - 1):
                         next_number_of_altitudes = trajectory_df["altitude_levels"].loc[
                             (row_index + 1) * number_of_times
@@ -658,11 +672,7 @@ def generate_pdf(
                         pd.Series(),
                     )
 
-                    # end = time.perf_counter()
-                    # print(
-                    #     f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
-                    # )
-
+            # analogous to case w/ side trajectories. compare there for reference.
             else:
                 plot_dict["altitude_" + str(alt_index)]["origin"] = origin
                 plot_dict["altitude_" + str(alt_index)]["lon_precise"] = lon_precise
@@ -742,9 +752,8 @@ def generate_pdf(
                 row_index += 1
                 alt_index += 1
                 if alt_index > altitude_levels:
-                    # start = time.perf_counter()
                     (
-                        central_longitude,
+                        _,
                         projection,
                         trajectory_expansion,
                         cross_dateline,
@@ -754,11 +763,8 @@ def generate_pdf(
                         case=model,
                         number_of_times=number_of_times,
                     )
-                    # end = time.perf_counter()
-                    # print(f"Computing dynamic domain took\t{end-start} seconds.")
                     alt_index = 1
 
-                    # start = time.perf_counter()
                     assemble_pdf(
                         plot_info_dict=plot_info_dict,
                         x=time_axis,
@@ -780,9 +786,4 @@ def generate_pdf(
                         pd.Series(),
                         pd.Series(),
                     )
-
-                    # end = time.perf_counter()
-                    # print(
-                    #     f"Assemble pdf took\t\t{end-start} sec from the whole generate_pdf pipeline."
-                    # )
     return

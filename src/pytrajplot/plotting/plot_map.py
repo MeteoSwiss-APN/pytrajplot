@@ -1,7 +1,6 @@
 """Generate Map Plot Figure."""
 
 # Standard library
-import time
 from pathlib import Path
 
 # Third-party
@@ -11,74 +10,6 @@ import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-
-def create_coord_dict(altitude_levels):
-    """Create dict of dicts to be filled with information for all trajectories to be plottet.
-
-    Args:
-        altitude_levels     int        Number of trajectory dicts (for each alt. level one dict)
-
-    Returns:
-        coord_dict          dict       Dict of dicts. For each altitude level, one dict is present in this dict. Each of those 'altitude dicts' contains the relevant information to plot the corresponding trajectory.
-
-    """
-    assert (
-        altitude_levels <= 10
-    ), "It is not possible, to generate altitude plots for more than 10 different starting altitudes."
-
-    coord_dict = {}
-
-    key_name = "altitude_"
-
-    i = 1
-
-    while i < altitude_levels + 1:
-        altitude_dict = {
-            "origin": None,
-            "y_type": None,
-            "alt_level": None,
-            "subplot_index": None,
-            "traj_0": {
-                "lon": [],
-                "lat": [],
-                "time": [],
-                "z_type": None,
-                "alpha": 1,
-            },  # main trajectory
-            "traj_1": {
-                "lon": [],
-                "lat": [],
-                "time": [],
-                "z_type": None,
-                "alpha": 0.5,
-            },  # side trajectory 1
-            "traj_2": {
-                "lon": [],
-                "lat": [],
-                "time": [],
-                "z_type": None,
-                "alpha": 0.5,
-            },  # side trajectory 2
-            "traj_3": {
-                "lon": [],
-                "lat": [],
-                "time": [],
-                "z_type": None,
-                "alpha": 0.5,
-            },  # side trajectory 3
-            "traj_4": {
-                "lon": [],
-                "lat": [],
-                "time": [],
-                "z_type": None,
-                "alpha": 0.5,
-            },  # side trajectory 4
-        }
-        coord_dict[key_name + str(i)] = altitude_dict
-        i += 1
-
-    return coord_dict
 
 
 def add_features(ax):
@@ -105,7 +36,7 @@ def add_features(ax):
         color="k",
         alpha=0.3,
         linestyle="-.",
-        # rasterized=True,
+        rasterized=True,
     )  # define grid line properties
     gl.top_labels = False
     gl.right_labels = False
