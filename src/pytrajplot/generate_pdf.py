@@ -324,9 +324,35 @@ def assemble_pdf(
     # ADD MAP, HEADER & FOOTER; compute for each domain
     for domain in domains:
         # ADD FOOTER
-        footer = create_footer(
-            plot_info_dict, side_traj, language, traj_shift, base_time
-        )
+        if language == "en":
+            if side_traj:
+                footer = (
+                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
+                    + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
+                )
+            else:
+                footer = (
+                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
+                )
+
+        if language == "de":
+            if side_traj:
+                footer = (
+                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                    + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
+                )
+            else:
+                footer = (
+                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                    + f"© MeteoSwiss"
+                    + f" v{__version__}"
+                )
 
         subfigsnest[0].suptitle(
             footer,
@@ -371,39 +397,6 @@ def assemble_pdf(
         axTop.remove()
 
     plt.close(fig)
-
-
-def create_footer(plot_info_dict, side_traj, language, traj_shift, base_time):
-    if language == "en":
-        if side_traj:
-            footer = (
-                f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
-                + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
-                + f"© MeteoSwiss"
-                + f" v{__version__}"
-            )
-        else:
-            footer = (
-                f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
-                + f"© MeteoSwiss"
-                + f" v{__version__}"
-            )
-
-    if language == "de":
-        if side_traj:
-            footer = (
-                f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
-                + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
-                + f"© MeteoSwiss"
-                + f" v{__version__}"
-            )
-        else:
-            footer = (
-                f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
-                + f"© MeteoSwiss"
-                + f" v{__version__}"
-            )
-    return footer
 
 
 def get_map_settings(lon, lat, case, number_of_times):
