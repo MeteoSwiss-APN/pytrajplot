@@ -171,7 +171,7 @@ def generate_altitude_plot(
 
             ax.plot(
                 x,
-                yaxis_masked,  # yaxis,
+                yaxis_masked,
                 linestyle,
                 alpha=alpha,
                 label=textstr,
@@ -254,7 +254,6 @@ def generate_altitude_plot(
         ax.set_xlim(left=x.iloc[0], right=x.iloc[-1])
     if key[-1] == "B":
         ax.set_xlim(left=x.iloc[-1], right=x.iloc[0])
-    # ax.set_xmargin(0.5)
-    # https://stackoverflow.com/questions/30445708/datetime-axis-spacing
+
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
     return ax

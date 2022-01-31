@@ -1,6 +1,6 @@
 click
 numpy
-pandas
+pandas<1.4
 matplotlib==3.5.1
 cartopy
 shapely==1.7.1

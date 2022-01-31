@@ -8,6 +8,9 @@ from datetime import timedelta
 import numpy as np
 import pandas as pd
 
+# Local
+from .parsing.plot_info import PLOT_INFO
+
 
 def map_altitudes_and_subplots(unit, unique_start_altitudes, current_altitude):
     """Map (randomly sorted) start altitudes of the trajectories to the subplot indeces in descending order.
@@ -464,18 +467,8 @@ def check_input_dir(input_dir, prefix_dict, separator):
 
         if (
             filename[: len(prefix_dict["plot_info"])] == prefix_dict["plot_info"]
-        ):  # if filename ≡ provided plot_info file name
-            with open(file_path, "r") as f:
-                plot_info = [line.strip() for line in f.readlines()]
-
-            plot_info_dict = {
-                "mbt": plot_info[1][
-                    44:
-                ],  # model base time (corresponds to the 2nd row; first row is empty)
-                "model_name": plot_info[2][
-                    44:
-                ],  # model name (corresponds to the 3rd row)
-            }
+        ):  # if filename ≡ plot_info filename
+            plot_info_dict = PLOT_INFO(file=file_path).data
 
     # for each start file (identified by its unique key) a corresponding trajectory file exists
     for key in keys:
@@ -486,4 +479,4 @@ def check_input_dir(input_dir, prefix_dict, separator):
             plot_info_dict=plot_info_dict,
         )
 
-    return trajectory_dict, plot_info_dict, keys
+    return trajectory_dict, plot_info_dict

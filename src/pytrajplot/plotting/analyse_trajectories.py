@@ -324,6 +324,7 @@ def _create_plot(traj_dict, central_longitude, dynamic_domain):
     return
 
 
+# DBG: uncomment the following code, to use this as a stand alone script. useful for debugging.
 # def main():
 #     # 1) load csv --> dataframe
 #     csv_files = [
