@@ -41,11 +41,13 @@ class PLOT_INFO:
         while len(lines) > 0:
             line = lines.pop(0)
             elements = line.strip().split(":", maxsplit=1)
+            # Stop extraction of header information if line contains no ":"
+            if len(elements) == 1:
+                break
             key, data = elements[0], elements[1].lstrip()
             if key == "Model base time":
                 self.data["mbt"] = "".join(data)
             if key == "Model name":
                 self.data["model_name"] = "".join(data)
-
         # DEBUG: uncomment the following line, to check the dict
         # pprint.pprint(self.data)
