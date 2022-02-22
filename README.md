@@ -1,5 +1,5 @@
 # PyTrajPlot
-PyTrajPlot is a Python-based tool to visualize ICON & COSMO trajectory simulations results.
+PyTrajPlot is a Python-based tool to visualize IFS-HRES Europe/Global & COSMO-1E trajectory simulations results.
 
 ## Installation
 PyTrajPlot is hosted on [GitHub](https://github.com/MeteoSwiss-APN/pytrajplot) Github. For the available releases, see [Releases](https://github.com/MeteoSwiss-APN/pytrajplot/releases).
