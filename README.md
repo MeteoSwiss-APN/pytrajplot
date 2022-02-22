@@ -2,7 +2,7 @@
 PyTrajPlot is a Python-based tool to visualize ICON & COSMO trajectory simulations results.
 
 ## Installation
-PyFlexPlot is hosted on [GitHub](https://github.com/MeteoSwiss-APN/pytrajplot) Github. For the available releases, see [Releases](https://github.com/MeteoSwiss-APN/pytrajplot/releases).
+PyTrajPlot is hosted on [GitHub](https://github.com/MeteoSwiss-APN/pytrajplot) Github. For the available releases, see [Releases](https://github.com/MeteoSwiss-APN/pytrajplot/releases).
 ### With Conda
 Having Conda installed is a pre-requisit for the further installation process. If that is not the case, install the latest Miniconda version from [here](https://docs.conda.io/en/latest/miniconda.html). Afterwards, follow these instructions to clone the GitHub Repo; set up a conda environment and test all possible use-cases. Make sure to execute the following commands from the root of the `pytrajplot` directory.
 
@@ -50,7 +50,7 @@ Options:
   -V, --version                   Print version and exit.
   --help                          Show this message and exit.
 ```
-The only mandatory arguments are `INPUT_DIR` & `OUTPUT_DIR`. The input directory specifies the path to the source files. In the input directory, there should be at least one *plot_info* file, and for each trajectory file one corresponding start file.
+The only mandatory arguments are `INPUT_DIR` & `OUTPUT_DIR`. The input directory specifies the path to the source files. In the input directory, there should be at exactly **one plot_info** file, and for each trajectory file one corresponding start file.
 
 ### File Nomenclature
 Should the prefixes of the file names deviate from the default values (*tra_geom_*, *startf_*, *plot_info*),  it is possible to specify the prefix of the start and trajectory files, as well as the name of the plot_info file.
@@ -92,7 +92,53 @@ pytrajplot tests/test_hres/4_altitudes/ plots
 ##### 0. [cli.py](src/pytrajplot/cli.py)
 Before the input files get parsed, the user inputs need to be parsed using the function `interpret_options`.
 
-##### 1. [parse_data.py](src/pytrajplot/parse_data.py)
+##### 1. Parsing Input Files: [parse_data.py](src/pytrajplot/parse_data.py)
 In the next step the `check_input_dir` function from the data parser script is initialised.
 
-#####
+###### Procedure
+1. iterate through the directory and read the start & plot_info files. simultaneously collect all present keys
+ 1.1. *Remark:* The start file is parsed using the `read_startf` function & the plot_info file is parsed using the `PLOT_INFO` [class](src/pytrajplot/parsing/plot_info.py).
+3. for each found key, parse corresponding trajectory file using the `read_trajectory` function.
+
+There is a number of different helper-functions involved in the parsing of these files. The code is well commented and the docstrings should provide further information on the use of each function. See [here](src/pytrajplot/parse_data.py)
+
+Ultimately, the parsing-pipeline returns two *dictionaries*. The main dictionary, containing all information, is the `trajectory_dict`. Each key contains a `pandas dataframe`, with the combined information of the corresponding start/trajectory file. The second dictionary contains the relevant information of the plot_info file, which corresponds to all start/trajecotry files.
+
+##### 3. Assembling Ouput: [generate_pdf.py](src/pytrajplot/generate_pdf.py)
+Once all the data from one directory is in this usable dictionary format, the plotting pipeline is initialised. The first part of the [generate_pdf](src/pytrajplot/generate_pdf.py) script iterates through this dictionary, retrieves the dataframes and "parses" them. For each trajectory origin the plotting pipeline is called and one plot generated. Usually, there are several trajectories/origins per dataframe.
+
+*Fun Fact:* @MeteoSwiss approximately 2800 trajectory plots are generated each day for the IFS-HRES-Europe, IFS-HRES-Global and COSMO-1E models.
+
+###### Procedure
+1. iterate through `trajectory_dict`
+2. retrieve `df` for current key
+3. iterate through dataframe
+4. for each origin, present in current dataframe, fill a new dictionary (`plot_dict`) with plot-specific information.
+5. initialise pipeline with the plot_dict by calling `assemble_pdf`
+    5.1 create output directory (if it doesn't exist)
+    5.2 add altitude plot to figure
+    5.3 add footer to figure
+    5.4 add header to figure
+    5.5 add map figure
+6. save figure
+7. repeat steps 3.-6. until all plots for the current dataframes/domains/datatypes have been generated
+8. repeat steps 2.-7. until all figures for all start/trajectory files have been generated
+9. return `-- done`
+
+###### Remark
+Again, this procedure outlines the inner workings of the plotting scripts. For greater insight, it is recommended to read the scripts and pay special attention to the comments & docstrings. All plotting-scripts are located [here](src/pytrajplot/plotting).
+
+
+
+## ToDos
+Some further todos for the future:
+- [x] Complete ReadMe
+- [ ] Add debug statements and debug flag
+- [ ] Write Class for COSMO trajectory files
+- [ ] Write Class for HRES trajectory files
+- [ ] Write Class for start files
+- [ ] Make Code more efficient
+- [ ] Fix Aspect Ratio of Map, for trajectories with unusual longitudinal/latitudinal expansions
+
+## Credits
+This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and the [MeteoSwiss-APN/mch-python-blueprint](https://github.com/MeteoSwiss-APN/mch-python-blueprint) project template.
