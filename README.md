@@ -7,7 +7,7 @@ PyTrajPlot is hosted on [GitHub](https://github.com/MeteoSwiss-APN/pytrajplot) G
 Having Conda installed is a pre-requisit for the further installation process. If that is not the case, install the latest Miniconda version from [here](https://docs.conda.io/en/latest/miniconda.html). Afterwards, follow these instructions to clone the GitHub Repo; set up a conda environment and test all possible use-cases. Make sure to execute the following commands from the root of the `pytrajplot` directory.
 
 1. `git clone https://github.com/MeteoSwiss-APN/pytrajplot.git`
-2. `make venv install`
+2. `make install`
 3. `conda activate pytrajplot`
 4. `./tests/test_pytrajplot.sh`
 
@@ -63,10 +63,10 @@ The relevant part in the filename of the trajectory/start files, is the *key*. I
 traj_prefix+key <---> start_prefix+key
 ```
 2. keys must end with **F** / **B** to determine the trajectories direction (forward/backward)
-3. XXX refers to the initialisation time of the model (w.r.t the model base time, which is specified in the corresponding plot_info file)
-5. YYY refers to the end-time of the model's computation (w.r.t to the model base time.
-6. XXX and YYY are seperated by a dash
-7. The difference of XXX and YYY equals the model's runtime.
+3. XXX refers to the start of the computation of trajectories (w.r.t the model base time, which is specified in the corresponding plot_info file)
+4. YYY refers to the end-time of the trajectory computation (w.r.t to the model base time.
+5. XXX and YYY are seperated by a dash
+6. The difference of XXX and YYY equals the trajectory length (in hours).
 
 Information in the header & footer of the output plots, is partially generated from the information in the *key*.
 

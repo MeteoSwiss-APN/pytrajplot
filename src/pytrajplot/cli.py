@@ -41,7 +41,7 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
         "plot_info": info_name,
     }
 
-    if language[0] == "e":
+    if language[0] == "e" or language[0] == "E":
         language = "en"
     else:
         language = "de"
@@ -68,7 +68,7 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
     "--info-name",
     default="plot_info",
     type=str,
-    help="Prefix for the plot info files. Default: plot_info",
+    help="Name of plot_info file. Default: plot_info",
 )
 @click.option(
     "--separator",
@@ -97,7 +97,6 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
     "--domain",
     type=click.Choice(
         [
-            # "ch_hd", # this domain has become obsolete
             "ch",
             "europe",
             "centraleurope",
@@ -105,7 +104,7 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
             "dynamic",
             "dynamic_zoom",
         ],
-        case_sensitive=False,
+        case_sensitive=True,
     ),
     multiple=True,
     default=("centraleurope", "europe", "dynamic", "ch", "alps", "dynamic_zoom"),
