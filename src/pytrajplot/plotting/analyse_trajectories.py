@@ -3,15 +3,14 @@
 
 # interesting link: https://stackoverflow.com/questions/13856123/setting-up-a-map-which-crosses-the-dateline-in-cartopy
 # Standard library
-import csv
+import csv  # necessary, if script should be used on its own
 
 # Third-party
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from numpy.lib.function_base import flip
-from numpy.lib.function_base import median
+from numpy.lib.function_base import mean
 
 
 # FUNCTIONS
@@ -25,13 +24,13 @@ def _get_traj_dict(data, number_of_trajectories=None, traj_length=None) -> dict:
 
     traj_dict = {}
     max_lons, min_lons = [], []
-    dateline_crossing_trajectories = []
+    sign_flip_trajectories = []
 
     for traj_index in range(number_of_trajectories):
-        bottom_index = traj_index * traj_length
-        top_index = traj_index * traj_length + traj_length
+        first_row = traj_index * traj_length
+        next_first_row = traj_index * traj_length + traj_length
 
-        lon = data["lon"].iloc[bottom_index:top_index]
+        lon = data["lon"].iloc[first_row:next_first_row]
 
         max_lon = np.max(lon)
         min_lon = np.min(lon)
@@ -55,11 +54,11 @@ def _get_traj_dict(data, number_of_trajectories=None, traj_length=None) -> dict:
 
             # if this list is not empty --> dateline got crossed
             if relevant_flip_indexes is not None:
-                dateline_crossing_trajectories.append(traj_index)
+                sign_flip_trajectories.append(traj_index)
 
         traj_dict["traj_" + str(traj_index)] = {
-            "lon": data["lon"].iloc[bottom_index:top_index],
-            "lat": data["lat"].iloc[bottom_index:top_index],
+            "lon": data["lon"].iloc[first_row:next_first_row],
+            "lat": data["lat"].iloc[first_row:next_first_row],
         }
 
     # since there is no cyclical behaviour with the latitude, these expansion boundaries can be derived from the
@@ -75,7 +74,7 @@ def _get_traj_dict(data, number_of_trajectories=None, traj_length=None) -> dict:
 
     return (
         traj_dict,
-        dateline_crossing_trajectories,
+        sign_flip_trajectories,
         latitude_expansion,
         eastern_longitudes,
     )
@@ -97,16 +96,18 @@ def _check_dateline_crossing(
     cross_dateline = False
 
     lon = lon.values  # convert pandas series to array.
+
     # 1) check if the sign gets flipped
     sign_flip_indexes = np.where(np.sign(lon[:-1]) != np.sign(lon[1:]))[0] + 1
 
+    # if there are no sign flips, the trajectory is completely in the western hemisphere (because all stations are in the west.)
     if len(sign_flip_indexes) == 0:
         return cross_dateline, [min_lon, max_lon]
 
     else:
         # 2) check if the any of the sign_flips are relevant (i.e. not crossing the 0° longitude line)
         for flip_index in sign_flip_indexes:
-            # print(f"@flip index {flip_index} the longitude is: {lon[flip_index]}")
+            # print(f"lon before/after flip: (index: {flip_index})\t{lon[flip_index-1]} --> {lon[flip_index]}")
             if not np.isnan(lon[flip_index]) and not np.isnan(lon[flip_index - 1]):
                 if not (
                     -20 < lon[flip_index] < 20
@@ -117,17 +118,15 @@ def _check_dateline_crossing(
 
 
 def _get_central_longitude(
-    traj_dict, dateline_crossing_trajectories, eastern_longitudes, verbose=False
+    traj_dict, sign_flip_trajectories, eastern_longitudes, verbose=False
 ):
     """Compute central longitude for dateline-crossing trajectories.
 
     Args:
         traj_dict (dict): Dictionary, containig all trajectories
-        dateline_crossing_trajectories (list): List, containing the trajectory indexes, of dateline-crossing trajectories.
-
-    Returns:
-        # TODO
-        [type]: [description]
+        sign_flip_trajectories (list): List, containing the trajectory indexes, of dateline-crossing trajectories.
+        eastern_longitudes (list): List, containing all points on eastern hemisphere.
+        verbose (bool): add debug statements to command prompt
 
     """
     # IF there are several trajectories crossing the dateline in the traj_dict - collect their longitude expansions in
@@ -135,7 +134,7 @@ def _get_central_longitude(
     min_lons, max_lons = [], []
 
     # iterate through dateline-crossing trajcetories
-    for traj_index in dateline_crossing_trajectories:
+    for traj_index in sign_flip_trajectories:
         if verbose:
             print(f"Trajectory {traj_index} crosses the dateline or prime meridian.")
         # 1) extract longitude pandas series from date-line-crossing trajectory from trajectory dict
@@ -155,7 +154,6 @@ def _get_central_longitude(
             if not -20 < lon[flip_index] < 20:
                 relevant_flip_indexes.append(flip_index)
 
-        # ~~~~~~~~~~~~~~~~~~~~~~ NEW ~~~~~~~~~~~~~~~~~~~~~~ #
         for flip_index_position, flip_index in enumerate(relevant_flip_indexes):
 
             if verbose:
@@ -212,12 +210,13 @@ def _get_central_longitude(
                                 relevant_flip_indexes[flip_index_position + 1]
                             )
                         ] += 360
+
         # 4) append the maximum/minimum longitude to their respective list
         min_lons.append(np.min(lon))
         max_lons.append(np.max(lon))
 
     # 5) compute central longitude
-    central_longitude = round(median([np.max(max_lons), np.min(min_lons)]))
+    central_longitude = round(mean([np.max(max_lons), np.min(min_lons)]))
 
     # 6) compute longitude expansion:
 
@@ -227,14 +226,14 @@ def _get_central_longitude(
     # cross the dateline into consideration
     if central_longitude < 0:
         for traj_index, _ in enumerate(traj_dict):
-            if traj_index not in dateline_crossing_trajectories:
+            if traj_index not in sign_flip_trajectories:
                 max_lons.append(np.max(traj_dict["traj_" + str(traj_index)]["lon"]))
 
         left_boundary = np.min(min_lons)
         right_boundary = np.max(max_lons)
 
     # case: trajectory crosses the dateline from the east and ends in the west
-    if central_longitude > 0:  # TODO
+    if central_longitude > 0:
         left_boundary = np.min(eastern_longitudes)
         right_boundary = np.max(max_lons)
 
@@ -251,7 +250,7 @@ def _get_central_longitude(
 def _analyse_trajectories(
     traj_dict,
     cross_dateline,
-    dateline_crossing_trajectories,
+    sign_flip_trajectories,
     latitude_expansion,
     longitude_expansion,
     eastern_longitudes,
@@ -260,7 +259,7 @@ def _analyse_trajectories(
     if cross_dateline:
         central_lontigude, longitude_expansion = _get_central_longitude(
             traj_dict,
-            dateline_crossing_trajectories,
+            sign_flip_trajectories,
             eastern_longitudes=eastern_longitudes,
         )
 
@@ -317,59 +316,60 @@ def _create_plot(traj_dict, central_longitude, dynamic_domain):
 
     plt.title(f"plate carree w/ centr. lon: {central_longitude}")
     plt.savefig(
-        f"src/pytrajplot/scratch/dateline/test_plots/central_longtitude_{central_longitude}.png"
+        f"src/pytrajplot/plotting/analyse_trajectories/test_plots/central_longtitude_{central_longitude}.png"
     )
     plt.close()
 
     return
 
+    # DBG: uncomment the following code, to use this as a stand alone script. useful for debugging.
+    # the csv files below are generated by uncommenting line: trajectory_df.to_csv(f'{output_dir}{key}_df.csv', index = False)
+    # in the generate_pdf script/function and then pointing to this csv file.
 
-# DBG: uncomment the following code, to use this as a stand alone script. useful for debugging.
-# def main():
-#     # 1) load csv --> dataframe
-#     csv_files = [
-#         "src/pytrajplot/scratch/dateline/test_files/144-000B_df.csv",  # [0] trajectories cross from the west
-#         "src/pytrajplot/scratch/dateline/test_files/006-144F_df.csv",  # [1] trajectories cross from the east
-#         "src/pytrajplot/scratch/dateline/test_files/000-048F_df.csv",  # [2] trajectories don't cross dateline
-#         "src/pytrajplot/scratch/dateline/test_files/punggyeri_df.csv",  # [3] trajectories cross dateline several times
-#         "src/pytrajplot/scratch/dateline/test_files/basel_df.csv",  # [4] fix computation of dynamic domain
-#         "src/pytrajplot/scratch/dateline/test_files/zurich_df.csv",  # [5] fix computation of dynamic domain
-#         "src/pytrajplot/scratch/dateline/test_files/bagdad_df.csv",  # [6] fix computation of dynamic domain
-#         "src/pytrajplot/scratch/dateline/test_files/punggyeri_000-144F_df.csv",  # [7] trajectories cross dateline several times
-#         "src/pytrajplot/scratch/dateline/test_files/punggyeri_012-144F_df.csv",  # [8] trajectories cross dateline several times
-#         "src/pytrajplot/scratch/dateline/test_files/punggyeri_018-144F_df.csv",  # [9] trajectories cross dateline several times
-#     ]
+    # def main():
+    #     # 1) load csv --> dataframe
+    #     csv_files = [
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/144-000B_df.csv",  # [0] trajectories cross from the west
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/006-144F_df.csv",  # [1] trajectories cross from the east
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/000-048F_df.csv",  # [2] trajectories don't cross dateline
+    #         "src/pytrajplot/plotting/analyse_trajectories/test_files/punggyeri_df.csv",  # [3] trajectories cross dateline several times
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/basel_df.csv",  # [4] fix computation of dynamic domain
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/zurich_df.csv",  # [5] fix computation of dynamic domain
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/bagdad_df.csv",  # [6] fix computation of dynamic domain
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/punggyeri_000-144F_df.csv",  # [7] trajectories cross dateline several times
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/punggyeri_012-144F_df.csv",  # [8] trajectories cross dateline several times
+    #         # "src/pytrajplot/plotting/analyse_trajectories/test_files/punggyeri_018-144F_df.csv",  # [9] trajectories cross dateline several times
+    #     ]
 
-#     for csv_file in csv_files:
-#         data = pd.read_csv(csv_file)
+    #     for csv_file in csv_files:
+    #         data = pd.read_csv(csv_file)
 
-#         # 2) check if dateline gets crossed;
-#         # if the dateline does not get crossed, the min_lon value is the left boundary and the max_lon the right boundary
-#         cross_dateline, longitude_expansion = _check_dateline_crossing(lon=data["lon"])
+    #         # 2) check if dateline gets crossed;
+    #         # if the dateline does not get crossed, the min_lon value is the left boundary and the max_lon the right boundary
+    #         cross_dateline, longitude_expansion = _check_dateline_crossing(lon=data["lon"])
 
-#         # 3) split lon/lat lists into corresponding trajectories. for each trajectory one key should be assigned.
-#         (
-#             traj_dict,
-#             dateline_crossing_trajectories,
-#             latitude_expansion,
-#             eastern_longitudes,
-#         ) = _get_traj_dict(data=data)
+    #         # 3) split lon/lat lists into corresponding trajectories. for each trajectory one key should be assigned.
+    #         (
+    #             traj_dict,
+    #             sign_flip_trajectories,
+    #             latitude_expansion,
+    #             eastern_longitudes,
+    #         ) = _get_traj_dict(data=data)
 
-#         # 4) compute central longitude dynamic domain if dateline does not get crossed
-#         central_longitude, dynamic_domain = _analyse_trajectories(
-#             traj_dict=traj_dict,
-#             cross_dateline=cross_dateline,
-#             dateline_crossing_trajectories=dateline_crossing_trajectories,
-#             latitude_expansion=latitude_expansion,
-#             longitude_expansion=longitude_expansion,
-#             eastern_longitudes=eastern_longitudes,
-#         )
+    #         # 4) compute central longitude dynamic domain if dateline does not get crossed
+    #         central_longitude, dynamic_domain = _analyse_trajectories(
+    #             traj_dict=traj_dict,
+    #             cross_dateline=cross_dateline,
+    #             sign_flip_trajectories=sign_flip_trajectories,
+    #             latitude_expansion=latitude_expansion,
+    #             longitude_expansion=longitude_expansion,
+    #             eastern_longitudes=eastern_longitudes,
+    #         )
 
-#         # 5) plot trajectories & save plot
-#         _create_plot(traj_dict, central_longitude, dynamic_domain)
+    #         # 5) plot trajectories & save plot
+    #         _create_plot(traj_dict, central_longitude, dynamic_domain)
 
-#         print(f"--- done.")
+    #         print(f"--- done.")
 
-
-# if __name__ == "__main__":
-#     main()
+    # if __name__ == "__main__":
+    main()
