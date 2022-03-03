@@ -9,12 +9,15 @@ import matplotlib.pyplot as plt
 import matplotlib.units as munits
 import numpy as np
 
+# Local
+from .plot_utils import subplot_properties_dict
 
-def altitude_limits(y, max_start_altitude, altitude_levels):
+
+def altitude_limits(plot_dict, max_start_altitude, altitude_levels):
     """Define the y-axis limits dynamically.
 
     Args:
-        y
+        plot_dict
                             dict       Dictionary containing the y-axis information (esp. the altitude)
         max_start_altitude
                             float      Highest start altitude - derive upper limit from these altitude-values.
@@ -31,11 +34,13 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
     i = 1
     max_altitude_array = []
 
-    if y["altitude_1"]["traj_0"]["z_type"] == "hpa":
+    if plot_dict["altitude_1"]["traj_0"]["z_type"] == "hpa":
         unit = "hPa"  # unit for the HRES case
 
         while i <= altitude_levels:
-            max_altitude_array.append(np.min(y["altitude_" + str(i)]["traj_0"]["z"]))
+            max_altitude_array.append(
+                np.min(plot_dict["altitude_" + str(i)]["traj_0"]["z"])
+            )
             i += 1
 
         if np.min(max_altitude_array) >= max_start_altitude:
@@ -46,7 +51,9 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
     else:
         unit = "m"
         while i <= altitude_levels:
-            max_altitude_array.append(np.max(y["altitude_" + str(i)]["traj_0"]["z"]))
+            max_altitude_array.append(
+                np.max(plot_dict["altitude_" + str(i)]["traj_0"]["z"])
+            )
             i += 1
 
         if np.max(max_altitude_array) <= max_start_altitude:
@@ -59,7 +66,7 @@ def altitude_limits(y, max_start_altitude, altitude_levels):
 
 def generate_altitude_plot(
     x,
-    y,
+    plot_dict,
     key,
     side_traj,
     altitude_levels,
@@ -73,7 +80,7 @@ def generate_altitude_plot(
 
     Args:
         x                   df         Pandas Dataframe containing the datetime column of the trajectory dataframe (x-axis information)
-        y                   dict       Dictionary, containig the y-axis information for all subplots
+        plot_dict           dict       Dictionary, containig the y-axis information for all subplots
         key                 str        Key string necessary for creating an output folder for each start/trajectory file pair
         side_traj           int        0/1 --> Necessary, for choosing the correct loop in the plotting pipeline
         altitude_levels     int        #altitude levels = #subplots
@@ -99,19 +106,8 @@ def generate_altitude_plot(
     if sub_index != (altitude_levels - 1):
         ax.set_xticklabels([])
 
-    subplot_properties_dict = {
-        0: "k-",
-        1: "g-",
-        2: "b-",
-        3: "r-",
-        4: "c-",
-        5: "m-",
-        6: "y-",
-        7: "deepskyblue-",
-        8: "crimson-",
-        9: "lightgreen-",
-    }
     plt.tick_params(axis="both", labelsize=8)
+
     converter = mdates.ConciseDateConverter()
     munits.registry[np.datetime64] = converter
     munits.registry[datetime.date] = converter
@@ -120,7 +116,9 @@ def generate_altitude_plot(
     # print(f"--- {key} > plot altitude \t{origin}")
 
     unit, custom_ylim = altitude_limits(
-        y=y, max_start_altitude=max_start_altitude, altitude_levels=altitude_levels
+        plot_dict=plot_dict,
+        max_start_altitude=max_start_altitude,
+        altitude_levels=altitude_levels,
     )
 
     # Setting the values for all y-axes.
@@ -135,7 +133,7 @@ def generate_altitude_plot(
     if side_traj:
         traj_index = [0, 1, 2, 3, 4]
 
-        y_surf = y["altitude_" + str(alt_index)]["y_surf"]
+        y_surf = plot_dict["altitude_" + str(alt_index)]["y_surf"]
 
         lower_boundary = [custom_ylim[0]] * len(x)
         upper_boundary = y_surf
@@ -152,22 +150,24 @@ def generate_altitude_plot(
         for traj in traj_index:
 
             textstr = (
-                str(y["altitude_" + str(alt_index)]["alt_level"])
+                str(plot_dict["altitude_" + str(alt_index)]["alt_level"])
                 + " "
                 + unit
                 + " ("
-                + y["altitude_" + str(alt_index)]["traj_" + str(traj)]["z_type"]
+                + plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)]["z_type"]
                 + ")"
             )
 
-            yaxis = y["altitude_" + str(alt_index)]["traj_" + str(traj)]["z"]
+            yaxis = plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)]["z"]
             yaxis_masked = np.ma.masked_where(np.isnan(yaxis.values), yaxis.values)
 
             ystart = yaxis.iloc[0]
             xstart = x[0]
 
             linestyle = subplot_properties_dict[sub_index]
-            alpha = y["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"]
+            alpha = plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)][
+                "alpha"
+            ]
 
             ax.plot(
                 x,
@@ -178,8 +178,11 @@ def generate_altitude_plot(
                 rasterized=True,
             )
 
+            # this if statement differentiates between main & side trajectories
+            # alternatively: if traj==0 should also work.
             if (
-                y["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"] == 1
+                plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"]
+                == 1
             ):  # only add legend & startpoint for the main trajectories
 
                 ax.plot(
@@ -196,9 +199,9 @@ def generate_altitude_plot(
     else:  # no side traj
 
         if key[-1] == "B":
-            y_surf = np.flip(y["altitude_" + str(alt_index)]["y_surf"])
+            y_surf = np.flip(plot_dict["altitude_" + str(alt_index)]["y_surf"])
         else:
-            y_surf = y["altitude_" + str(alt_index)]["y_surf"]
+            y_surf = plot_dict["altitude_" + str(alt_index)]["y_surf"]
 
         lower_boundary = [custom_ylim[0]] * len(x)
         upper_boundary = y_surf
@@ -213,20 +216,20 @@ def generate_altitude_plot(
         )
 
         textstr = (
-            str(y["altitude_" + str(alt_index)]["alt_level"])
+            str(plot_dict["altitude_" + str(alt_index)]["alt_level"])
             + " "
             + unit
             + " ("
-            + y["altitude_" + str(alt_index)]["traj_0"]["z_type"]
+            + plot_dict["altitude_" + str(alt_index)]["traj_0"]["z_type"]
             + ")"
         )
 
-        yaxis = y["altitude_" + str(alt_index)]["traj_0"]["z"]
+        yaxis = plot_dict["altitude_" + str(alt_index)]["traj_0"]["z"]
         ystart = yaxis.iloc[0]
         xstart = x[0]
 
         linestyle = subplot_properties_dict[sub_index]
-        alpha = y["altitude_" + str(alt_index)]["traj_0"]["alpha"]
+        alpha = plot_dict["altitude_" + str(alt_index)]["traj_0"]["alpha"]
 
         # plot altitude profile
         ax.plot(
