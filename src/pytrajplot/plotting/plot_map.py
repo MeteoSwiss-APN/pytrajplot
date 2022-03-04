@@ -12,11 +12,14 @@ import numpy as np
 import pandas as pd
 
 # Local
+from ..__init__ import cities_data_path
 from .plot_utils import alps_cities_list
 from .plot_utils import centraleurope_cities_list
 from .plot_utils import ch_cities_list
 from .plot_utils import europe_cities_list
 from .plot_utils import subplot_properties_dict
+
+# from ..__init__ import earth_data_path
 
 
 def add_features(ax):
@@ -27,13 +30,13 @@ def add_features(ax):
 
     """
     # point cartopy to the folder containing the shapefiles for the features on the map
-    earth_data_path = Path("src/pytrajplot/resources/")
-    assert (
-        earth_data_path.exists()
-    ), f"The natural earth data could not be found at {earth_data_path}"
-    # earth_data_path = str(earth_data_path)
-    cartopy.config["pre_existing_data_dir"] = earth_data_path
-    cartopy.config["data_dir"] = earth_data_path
+    # earth_data_path = Path("src/pytrajplot/resources/")
+    # assert (
+    #     earth_data_path.exists()
+    # ), f"The natural earth data could not be found at {earth_data_path}"
+    # # earth_data_path = str(earth_data_path)
+    # cartopy.config["pre_existing_data_dir"] = earth_data_path
+    # cartopy.config["data_dir"] = earth_data_path
 
     # add grid & labels to map
     gl = ax.gridlines(
@@ -343,10 +346,10 @@ def add_cities(ax, domain_boundaries, domain, cross_dateline):
             )
 
     if "dynamic" in domain:
-        cities_data_path = Path("src/pytrajplot/resources/cities/")
-        assert (
-            cities_data_path.exists()
-        ), f"The cities data could not be found at {cities_data_path}"
+        # cities_data_path = Path("src/pytrajplot/resources/cities/")
+        # assert (
+        #     cities_data_path.exists()
+        # ), f"The cities data could not be found at {cities_data_path}"
         cities_df = pd.read_csv(Path(cities_data_path, "worldcities.csv"))
 
         # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
