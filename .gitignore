@@ -111,7 +111,7 @@ venv_*/
 # Test output directory
 out
 
-# output pngs
-*.png
-scratch_*.py
+# Remove scratch, png, csv files
 *.csv
+*.png
+*scratch
