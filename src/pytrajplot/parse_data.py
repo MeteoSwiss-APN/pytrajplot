@@ -1,6 +1,7 @@
 """Parse data from start, trajectory & plot info files."""
 # Standard library
 import datetime
+import math
 import os
 from datetime import timedelta
 
@@ -49,7 +50,6 @@ def map_altitudes_and_subplots(unit, unique_start_altitudes, current_altitude):
             unique_start_altitudes_sorted.index(unique_start_altitudes[tmp_02]) + 1
         )
         subplot_index = alt_dict[altitude_index]
-        # print(f"altitude: {unique_start_altitudes[tmp_02]} {unit} --> altitude_{altitude_index} --> subplot_{subplot_index}")
         altitude_mapping_dict[unique_start_altitudes[tmp_02]] = subplot_index
         tmp_02 += 1
 
@@ -108,7 +108,6 @@ def read_startf(startf_path, separator):
         # len(start_df) = #rows in start file (= #trajectories)
         while i < len(start_df):
             if i < len(start_df) - 1:
-
                 # have side trajectories, if Ǝ separator in origin of next trajectory
                 if separator in start_df["origin"].loc[i + 1]:
                     # The 5 rows, that correspond to this origin, are assigned: 1 (=True) to the side_traj column
@@ -132,7 +131,7 @@ def read_startf(startf_path, separator):
                         )
 
                     # The correct subplot index is assigned to the main + side trajectories. This can be achieved w/ the
-                    # map_altidude_and_subplots function. The order of altitude levels in the start file is of no imporance.
+                    # map_altidude_and_subplots function. The order of altitude levels in the start file is of no significance.
                     start_df.loc[
                         i : i + 4, "subplot_index"
                     ] = map_altitudes_and_subplots(
@@ -263,22 +262,31 @@ def convert_time(plot_info_dict, traj_df, key, case):
     format = "%Y-%m-%d %H:%M"
     dt_object = datetime.datetime.strptime(init_time, format)
 
-    # add leadtime to model base time
-    if case == "HRES":
-        dt_object = dt_object + timedelta(hours=int(key[0:3]))
-
     # add new empty key to the traj_df
     traj_df["datetime"] = None
 
-    # fill the newly created empty key with the datetime object, corresponding to the elapsed time of the model
-    for counter, row in enumerate(traj_df["time"]):
-        delta_t = float(row)
-        if ".3" in str(
-            delta_t
-        ):  # HRES trajectories have a weird time discretisation where half an hour is discretised as 0.3
-            delta_t = delta_t + 0.2
-        date = dt_object + timedelta(hours=delta_t)
-        traj_df.loc[counter, "datetime"] = date
+    # add leadtime to model base time
+    if case == "HRES":
+        dt_object = dt_object + timedelta(hours=int(key[0:3]))
+        # the time discretisation of HRES trajectories is: hours.minutes
+        # --> convert to fraction of hour (1.30 hours.minutes = 1.5 hours)
+        for counter, time in enumerate(traj_df["time"]):
+            minutes = 100 * round(
+                math.modf(time)[0], 2
+            )  # part after decimal point, converted to minutes
+            hour_fraction = (
+                minutes / 60
+            )  # number of minutes converted to fraction of hour
+            hours = math.modf(time)[1]
+            delta_t = hours + hour_fraction
+            date = dt_object + timedelta(hours=delta_t)
+            traj_df.loc[counter, "datetime"] = date
+
+    else:  # Case: COSMO
+        for counter, time in enumerate(traj_df["time"]):
+            delta_t = float(time)
+            date = dt_object + timedelta(hours=delta_t)
+            traj_df.loc[counter, "datetime"] = date
 
     return traj_df
 
@@ -372,8 +380,8 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     # basically, at this point the information from the start_df, gets merged into the trajectory dataframe
     tmp = 0
     while tmp < number_of_trajectories:
-        lower_row = tmp * number_of_times
-        upper_row = tmp * number_of_times + number_of_times
+        first_row = tmp * number_of_times
+        next_first_row = tmp * number_of_times + number_of_times
         # get info from start_df
         z_type = start_df["z_type"][tmp]
         origin = start_df["origin"][tmp]
@@ -386,7 +394,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         max_start_altitude = start_df["max_start_altitude"][tmp]
         # add info to traj_df
         traj_df.loc[
-            lower_row:upper_row,
+            first_row:next_first_row,
             [
                 "z_type",
                 "origin",

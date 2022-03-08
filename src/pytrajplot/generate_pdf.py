@@ -159,22 +159,22 @@ def assemble_pdf(
     Args:
         plot_info_dict:         dict                Dictionary containing the information of the plot-info file
         x:                      pandas series       Pandas Series (array-like) w/ the dates. x-axis information for the altitude plot
-        plot_dict:              dict                Dictionary containing the combined information of the start & trajectory file
+        plot_dict:              dict                Dictionary containing the combined information of all trajectories for one plot.
         key:                    str                 ID of the start and trajectory file
         side_traj:              bool                Bool, to specify whether there are side trajectories or not
         output_dir:             str                 Path to output directory
         altitude_levels:        int                 Number of starting altitudes
         language:               str                 Language of plot annotations
         max_start_altitude:     float               Highest starting altitude
-        domains:                str                 Domain of the map.
+        domains:                tuple               Domain of the map.
         output_types:           tuple               Tuple containing the file types of the output files. (pdf and/or png)
         projection:             cartopy projection  Projection of map
         trajectory_expansion:   list                Expansion of trajectory (formerly called dynamic_boundaries)
         cross_dateline:         bool                True/False if dateline gets crossed
 
     """
-    # generate the output directory if it doesn't exist
     origin = plot_dict["altitude_1"]["origin"]
+    # generate the output directory if it doesn't exist
     output_dir = Path(output_dir)
     outpath = Path(output_dir)
     outpath.mkdir(parents=True, exist_ok=True)
@@ -234,7 +234,7 @@ def assemble_pdf(
                 else:
                     generate_altitude_plot(
                         x=x,
-                        y=plot_dict,
+                        plot_dict=plot_dict,
                         key=key,
                         side_traj=side_traj,
                         altitude_levels=1,
@@ -262,7 +262,7 @@ def assemble_pdf(
                     tmp_ax = subplot_dict[subplot_index]
                     generate_altitude_plot(
                         x=x,
-                        y=plot_dict,
+                        plot_dict=plot_dict,
                         key=key,
                         side_traj=side_traj,
                         altitude_levels=2,
@@ -278,7 +278,7 @@ def assemble_pdf(
                     tmp_ax = subplot_dict[subplot_index]
                     generate_altitude_plot(
                         x=x,
-                        y=plot_dict,
+                        plot_dict=plot_dict,
                         key=key,
                         side_traj=side_traj,
                         altitude_levels=2,
@@ -309,7 +309,7 @@ def assemble_pdf(
             tmp_ax = subplot_dict[subplot_index]
             generate_altitude_plot(
                 x=x,
-                y=plot_dict,
+                plot_dict=plot_dict,
                 key=key,
                 side_traj=side_traj,
                 altitude_levels=altitude_levels,
@@ -322,63 +322,61 @@ def assemble_pdf(
             alt_index += 1
 
     # ADD MAP, HEADER & FOOTER; compute for each domain
+    # create footer
+    if language == "en":
+        if side_traj:
+            footer = (
+                f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
+                + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+        else:
+            footer = (
+                f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+    if language == "de":
+        if side_traj:
+            footer = (
+                f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+        else:
+            footer = (
+                f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
+                + f"© MeteoSwiss"
+                + f" v{__version__}"
+            )
+    subfigsnest[0].suptitle(
+        footer,
+        x=0.08,
+        y=0.035,
+        horizontalalignment="left",
+        verticalalignment="top",
+        fontdict={
+            "size": 6,
+            "color": "k",
+        },
+    )
+
+    # ADD INFO HEADER & TITLE
+    axTop = subfigs[0].subplots()
+    generate_info_header(
+        language=language,
+        plot_dict=plot_dict,
+        ax=axTop,
+    )
+
     for domain in domains:
-        # ADD FOOTER
-        if language == "en":
-            if side_traj:
-                footer = (
-                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"Add. traj. @ {traj_shift} km N/E/S/W  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
-            else:
-                footer = (
-                    f"LAGRANTO based on {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
-
-        if language == "de":
-            if side_traj:
-                footer = (
-                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"Zus. traj. @ {traj_shift} km N/O/S/W  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
-            else:
-                footer = (
-                    f"LAGRANTO basierend auf {plot_info_dict['model_name']} {base_time}  |  "
-                    + f"© MeteoSwiss"
-                    + f" v{__version__}"
-                )
-
-        subfigsnest[0].suptitle(
-            footer,
-            x=0.08,
-            y=0.035,
-            horizontalalignment="left",
-            verticalalignment="top",
-            fontdict={
-                "size": 6,
-                "color": "k",
-            },
-        )
-
-        # ADD INFO HEADER & TITLE
-        axTop = subfigs[0].subplots()
-        generate_info_header(
-            language=language,
-            plot_data=plot_dict,
-            ax=axTop,
-        )
-
-        # ADD MAP & FOOTER
+        # ADD MAP
         map_ax = subfigsnest[0].add_subplot(111, projection=projection)
         generate_map_plot(
             cross_dateline=cross_dateline,
-            coord_dict=plot_dict,
+            plot_dict=plot_dict,
             side_traj=side_traj,
             altitude_levels=altitude_levels,
             domain=domain,
@@ -394,7 +392,7 @@ def assemble_pdf(
 
         # CLEAR HEADER/MAP AXES FOR NEXT ITERATION
         map_ax.remove()
-        axTop.remove()
+        # axTop.remove()
 
     plt.close(fig)
 
@@ -423,26 +421,26 @@ def get_map_settings(lon, lat, case, number_of_times):
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # implement analyse_dateline.py (only relevant for HRES trajectories though)
         # analogous to the main() in the analyse_dateline.py file
-        # Remark: the analyse_dateline.py can also be used as a stand-alone script. Handy for debugging purposes.
+        # Remark: the analyse_trajectories.py can also be used as a stand-alone script. Handy for debugging purposes.
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-        # 0) concat the longitude/latitude dataframes into a new dataframe
-        data = {
-            "lon": lon,
-            "lat": lat,
-        }
 
-        number_of_trajectories = int(len(lat) / number_of_times)
-
-        lon_lat_df = pd.concat(data, axis=1)
-
-        # 1) check if dateline gets crossed;
+        # 0) check if dateline gets crossed;
         # if the dateline does not get crossed -->  longitude expansion = left & right boundary of trajectories
         cross_dateline, longitude_expansion = _check_dateline_crossing(lon=lon)
 
-        # 2) split lon/lat lists into corresponding trajectories. for each trajectory one key should be assigned.
+        # 1) split lon/lat lists into separate trajectories.
+        lon_lat_df = pd.concat(
+            {
+                "lon": lon,
+                "lat": lat,
+            },
+            axis=1,
+        )
+        number_of_trajectories = int(len(lat) / number_of_times)
+
         (
             traj_dict,
-            dateline_crossing_trajectories,
+            sign_flip_trajectories,
             latitude_expansion,
             eastern_longitudes,
         ) = _get_traj_dict(
@@ -451,11 +449,11 @@ def get_map_settings(lon, lat, case, number_of_times):
             traj_length=number_of_times,
         )
 
-        # 3) compute central longitude dynamic domain if dateline does not get crossed
+        # 2) compute central longitude dynamic domain if dateline does not get crossed
         central_longitude, dynamic_domain = _analyse_trajectories(
             traj_dict=traj_dict,
             cross_dateline=cross_dateline,
-            dateline_crossing_trajectories=dateline_crossing_trajectories,
+            sign_flip_trajectories=sign_flip_trajectories,
             latitude_expansion=latitude_expansion,
             longitude_expansion=longitude_expansion,
             eastern_longitudes=eastern_longitudes,
@@ -533,17 +531,17 @@ def generate_pdf(
 
         while row_index < number_of_trajectories:
             # compute range of rows, for current trajectory
-            lower_row = row_index * number_of_times
-            upper_row = row_index * number_of_times + number_of_times
+            first_row = row_index * number_of_times
+            next_first_row = row_index * number_of_times + number_of_times
 
             # general information
-            origin = trajectory_df["origin"].loc[lower_row]
-            lon_precise = trajectory_df["lon_precise"].loc[lower_row]
-            lat_precise = trajectory_df["lat_precise"].loc[lower_row]
-            altitude_levels = trajectory_df["altitude_levels"].loc[lower_row]
-            subplot_index = trajectory_df["subplot_index"].loc[lower_row]
-            max_start_altitude = trajectory_df["max_start_altitude"].loc[lower_row]
-            side_traj = trajectory_df["side_traj"].loc[lower_row]
+            origin = trajectory_df["origin"].loc[first_row]
+            lon_precise = trajectory_df["lon_precise"].loc[first_row]
+            lat_precise = trajectory_df["lat_precise"].loc[first_row]
+            altitude_levels = trajectory_df["altitude_levels"].loc[first_row]
+            subplot_index = trajectory_df["subplot_index"].loc[first_row]
+            max_start_altitude = trajectory_df["max_start_altitude"].loc[first_row]
+            side_traj = trajectory_df["side_traj"].loc[first_row]
 
             if side_traj:
                 # if origin does not contain the separator (i.e. ~ is not in Beznau),
@@ -554,7 +552,7 @@ def generate_pdf(
                     plot_dict["altitude_" + str(alt_index)]["lat_precise"] = lat_precise
                     plot_dict["altitude_" + str(alt_index)]["y_surf"] = trajectory_df[
                         "hsurf"
-                    ][lower_row:upper_row]
+                    ][first_row:next_first_row]
                     plot_dict["altitude_" + str(alt_index)][
                         "subplot_index"
                     ] = subplot_index
@@ -564,48 +562,51 @@ def generate_pdf(
 
                     # sometimes, the first trajectory is of type: 'agl' (above ground level)
                     # --> compute difference between surface and trajectory height
-                    if trajectory_df["z_type"][lower_row] == "agl":
+                    if trajectory_df["z_type"][first_row] == "agl":
                         plot_dict["altitude_" + str(alt_index)]["alt_level"] = (
-                            trajectory_df["z"][lower_row]
-                            - trajectory_df["hsurf"][lower_row]
+                            trajectory_df["z"][first_row]
+                            - trajectory_df["hsurf"][first_row]
                         )
                     else:
                         plot_dict["altitude_" + str(alt_index)][
                             "alt_level"
-                        ] = trajectory_df["z"][lower_row]
+                        ] = trajectory_df["z"][first_row]
 
-                plot_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
-                    "z_type"
-                ][lower_row]
+                # remark 1: the z_type (i.e. m, hpa) is now called y_type, becaue the height is plotted on the
+                # y-axis in the altitude plots.
+                plot_dict[f"altitude_{alt_index}"]["y_type"] = trajectory_df["z_type"][
+                    first_row
+                ]
                 plot_dict["altitude_" + str(alt_index)][
                     "trajectory_direction"
                 ] = trajectory_direction
                 plot_dict["altitude_" + str(alt_index)]["start_time"] = start_time
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "z"
-                ] = trajectory_df["z"][lower_row:upper_row]
+                ] = trajectory_df["z"][first_row:next_first_row]
 
                 # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "lon"
-                ] = trajectory_df["lon"][lower_row:upper_row]
+                ] = trajectory_df["lon"][first_row:next_first_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "lat"
-                ] = trajectory_df["lat"][lower_row:upper_row]
+                ] = trajectory_df["lat"][first_row:next_first_row]
+
                 trajectory_latitude_expansion = trajectory_latitude_expansion.append(
-                    trajectory_df["lat"][lower_row:upper_row], ignore_index=True
+                    trajectory_df["lat"][first_row:next_first_row], ignore_index=True
                 )
                 trajectory_longitude_expansion = trajectory_longitude_expansion.append(
-                    trajectory_df["lon"][lower_row:upper_row], ignore_index=True
+                    trajectory_df["lon"][first_row:next_first_row], ignore_index=True
                 )
                 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "time"
-                ] = trajectory_df["time"][lower_row:upper_row]
+                ] = trajectory_df["time"][first_row:next_first_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
                     "z_type"
-                ] = trajectory_df["z_type"][lower_row]
+                ] = trajectory_df["z_type"][first_row]
 
                 row_index += 1
                 traj_index += 1
@@ -676,18 +677,18 @@ def generate_pdf(
                 ] = max_start_altitude
                 plot_dict["altitude_" + str(alt_index)]["y_type"] = trajectory_df[
                     "z_type"
-                ][lower_row]
+                ][first_row]
 
                 # add starting height
-                if trajectory_df["z_type"][lower_row] == "agl":
+                if trajectory_df["z_type"][first_row] == "agl":
                     plot_dict["altitude_" + str(alt_index)]["alt_level"] = (
-                        trajectory_df["z"][lower_row]
-                        - trajectory_df["hsurf"][lower_row]
+                        trajectory_df["z"][first_row]
+                        - trajectory_df["hsurf"][first_row]
                     )
                 else:
                     plot_dict["altitude_" + str(alt_index)][
                         "alt_level"
-                    ] = trajectory_df["z"][lower_row]
+                    ] = trajectory_df["z"][first_row]
 
                 plot_dict["altitude_" + str(alt_index)][
                     "trajectory_direction"
@@ -697,25 +698,25 @@ def generate_pdf(
                 # traj_0 -> relevant information
                 plot_dict["altitude_" + str(alt_index)]["y_surf"] = trajectory_df[
                     "hsurf"
-                ][lower_row:upper_row]
+                ][first_row:next_first_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_0"]["z"] = trajectory_df[
                     "z"
-                ][lower_row:upper_row]
+                ][first_row:next_first_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "time"
-                ] = trajectory_df["time"][lower_row:upper_row]
+                ] = trajectory_df["time"][first_row:next_first_row]
                 # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "lon"
-                ] = trajectory_df["lon"][lower_row:upper_row]
+                ] = trajectory_df["lon"][first_row:next_first_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "lat"
-                ] = trajectory_df["lat"][lower_row:upper_row]
+                ] = trajectory_df["lat"][first_row:next_first_row]
                 trajectory_latitude_expansion = trajectory_latitude_expansion.append(
-                    trajectory_df["lat"][lower_row:upper_row], ignore_index=True
+                    trajectory_df["lat"][first_row:next_first_row], ignore_index=True
                 )
                 trajectory_longitude_expansion = trajectory_longitude_expansion.append(
-                    trajectory_df["lon"][lower_row:upper_row], ignore_index=True
+                    trajectory_df["lon"][first_row:next_first_row], ignore_index=True
                 )
                 # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
 
@@ -736,7 +737,7 @@ def generate_pdf(
                 # further empty keys
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "z_type"
-                ] = trajectory_df["z_type"][lower_row]
+                ] = trajectory_df["z_type"][first_row]
                 plot_dict["altitude_" + str(alt_index)]["traj_1"]["z_type"] = None
                 plot_dict["altitude_" + str(alt_index)]["traj_2"]["z_type"] = None
                 plot_dict["altitude_" + str(alt_index)]["traj_3"]["z_type"] = None

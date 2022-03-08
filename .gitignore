@@ -110,3 +110,8 @@ venv_*/
 
 # Test output directory
 out
+
+# Remove scratch, png, csv files
+*.csv
+*.png
+*scratch
