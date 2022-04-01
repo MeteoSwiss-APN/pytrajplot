@@ -212,8 +212,8 @@ def _get_central_longitude(
                         ] += 360
 
         # 4) append the maximum/minimum longitude to their respective list
-        min_lons.append(np.min(lon))
-        max_lons.append(np.max(lon))
+        min_lons.append(np.nanmin(lon))
+        max_lons.append(np.nanmax(lon))
 
     # 5) compute central longitude
     central_longitude = round(mean([np.max(max_lons), np.min(min_lons)]))
