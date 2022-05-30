@@ -45,6 +45,8 @@ class PLOT_INFO:
             if len(elements) == 1:
                 break
             key, data = elements[0], elements[1].lstrip()
+            if key == "Reference time":
+                self.data["reftime"] = "".join(data)
             if key == "Model base time":
                 self.data["mbt"] = "".join(data)
             if key == "Model name":

@@ -249,7 +249,7 @@ def convert_time(plot_info_dict, traj_df, key, case):
     """Convert time steps into datetime objects.
 
     Args:
-        plot_info_dict (dict): Dict containing the information of plot_info file. Esp. the trajectory initialisation time
+        plot_info_dict (dict): Dict containing the information of plot_info file. Esp. the trajectory reference time
         traj_df (df): Trajectory dataframe containing the time step column (parsed form the trajectory file)
         key (str): Key, containing information about the runtime
         case (str): HRES / COSMO
@@ -258,9 +258,14 @@ def convert_time(plot_info_dict, traj_df, key, case):
         traj_df (df): Trajectory dataframe w/ added datetime column.
 
     """
-    init_time = plot_info_dict["mbt"][:16]
+    # reference time for relative times
+    if "reftime" in plot_info_dict:
+        refecerce_time = plot_info_dict["reftime"][:16]
+    else:
+        # Backward compatibility for plot_info files without reference time
+        refecerce_time = plot_info_dict["mbt"][:16]
     format = "%Y-%m-%d %H:%M"
-    dt_object = datetime.datetime.strptime(init_time, format)
+    dt_object = datetime.datetime.strptime(refecerce_time, format)
 
     # add new empty key to the traj_df
     traj_df["datetime"] = None
