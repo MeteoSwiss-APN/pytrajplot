@@ -178,19 +178,19 @@ Project Structure
        Type ``make help`` to see all available commands.
    * -  setup.py
      - Script used to build the package.
-       It reads the unpinned top-level requirements from ``requirements/requirements.in`` into the variable ``requirements``.
+       It reads the unpinned top-level requirements from ``requirements/requirements.txt`` into the variable ``requirements``.
    * -  MANIFEST.in
      -  Specifies the files and directories which will be added to the Pip package.
 
    * -  requirements/
      -  Directory containing requirements files with various types of dependencies.
-   * - requirements/dev-requirements.in
+   * - requirements/dev-requirements.txt
      - A text file containing top-level unpinned development dependencies (critical version restrictions only).
        It is managed manually.
    * - requirements/dev-requirements.txt
      - A text file containing recursive pinned development and runtime dependencies (all versions specified), a superset of those in ``requirements/requirements.txt``.
        It is created automatically with ``pip freeze`` or the pip-tools command ``pip-compile``.
-   * - requirements/requirements.in
+   * - requirements/requirements.txt
      - A text file containing top-level unpinned runtime dependencies (critical version restrictions only).
        It is managed manually and read in ``setup.py``.
    * - requirements/requirements.txt

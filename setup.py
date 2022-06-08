@@ -32,7 +32,7 @@ description_files = [
 
 metadata = {
     "name": "pytrajplot",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Michel Zeller's pytrajplot",
     "long_description": read_present_files(description_files),
     "author": "Michel Zeller",
@@ -51,7 +51,7 @@ metadata = {
 python = ">= 3.7"
 
 # Runtime dependencies (unpinned: only critical version restrictions)
-with open("requirements/requirements.in") as f:
+with open("requirements/requirements.txt") as f:
     requirements = list(map(str, parse_requirements(f.readlines())))
 
 scripts = [

@@ -3,7 +3,7 @@
 
 # Path to input and output directories
 input_dir_tests=tests
-output_dir_tests=out
+output_dir_tests=local
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~HRES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # test variable number of altitude pltos

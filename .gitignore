@@ -108,8 +108,8 @@ venv_*/
 # VS Code
 .vscode
 
-# Test output directory
-out
+# Local files, e.g. for test output
+local/
 
 # Remove scratch, png, csv files
 *.csv
