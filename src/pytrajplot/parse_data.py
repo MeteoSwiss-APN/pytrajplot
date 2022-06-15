@@ -245,27 +245,23 @@ def traj_helper_fct(case, file_path, firstline, start_df):
     return number_of_trajectories, number_of_times
 
 
-def convert_time(plot_info_dict, traj_df, key, case):
+def convert_time(plot_info_dict, traj_df, key, case, reference_time):
     """Convert time steps into datetime objects.
 
     Args:
-        plot_info_dict (dict): Dict containing the information of plot_info file. Esp. the trajectory reference time
+        plot_info_dict (dict): Dict containing the information of plot_info file.
         traj_df (df): Trajectory dataframe containing the time step column (parsed form the trajectory file)
         key (str): Key, containing information about the runtime
         case (str): HRES / COSMO
+        reference_time (str): reference time (yyyy-mm-dd HH:MM)
 
     Returns:
         traj_df (df): Trajectory dataframe w/ added datetime column.
 
     """
     # reference time for relative times
-    if "reftime" in plot_info_dict:
-        refecerce_time = plot_info_dict["reftime"][:16]
-    else:
-        # Backward compatibility for plot_info files without reference time
-        refecerce_time = plot_info_dict["mbt"][:16]
     format = "%Y-%m-%d %H:%M"
-    dt_object = datetime.datetime.strptime(refecerce_time, format)
+    dt_object = datetime.datetime.strptime(reference_time, format)
 
     # add new empty key to the traj_df
     traj_df["datetime"] = None
@@ -311,6 +307,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     # read first line of trajectory file to check which case it is.
     with open(trajectory_file_path) as f:
         firstline = f.readline().rstrip()
+        secondline = f.readline().rstrip()
 
     # based on the structure of the **current** trajectory files, the two cases: HRES & COSMO can (and must) be distinguished.
     if firstline[:8] == "LAGRANTO":  # case: COSMO trajectory file
@@ -322,6 +319,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
             firstline=firstline,
             start_df=start_df,
         )
+        reference_time = secondline[16:32]
 
     if firstline[:9] == "Reference":  # case: HRES trajectory file
         case = "HRES"
@@ -331,6 +329,13 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
             file_path=trajectory_file_path,
             firstline=firstline,
             start_df=start_df,
+        )
+        reference_time = "{y}-{m}-{d} {H}:{M}".format(
+            y=firstline[15:19],
+            m=firstline[19:21],
+            d=firstline[21:23],
+            H=firstline[24:26],
+            M=firstline[26:28],
         )
 
     traj_df = pd.read_csv(
@@ -432,6 +437,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         traj_df=traj_df,
         key=trajectory_file_path[-8:],
         case=case,
+        reference_time=reference_time,
     )
 
     # change the lon/lat values where the trajectory leaves the domain from their computational domain-boundary values to np.NaN.
