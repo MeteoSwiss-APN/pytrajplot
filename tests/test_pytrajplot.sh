@@ -6,6 +6,9 @@ input_dir_tests=tests
 output_dir_tests=local
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~HRES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# version
+pytrajplot --version
+
 # test variable number of altitude pltos
 pytrajplot $input_dir_tests/test_hres/4_altitudes $output_dir_tests/test_hres/4_altitudes --datatype png --domain europe
 pytrajplot $input_dir_tests/test_hres/3_altitudes $output_dir_tests/test_hres/3_altitudes --datatype png --domain europe

@@ -268,7 +268,6 @@ def convert_time(plot_info_dict, traj_df, key, case, reference_time):
 
     # add leadtime to model base time
     if case == "HRES":
-        dt_object = dt_object + timedelta(hours=int(key[0:3]))
         # the time discretisation of HRES trajectories is: hours.minutes
         # --> convert to fraction of hour (1.30 hours.minutes = 1.5 hours)
         for counter, time in enumerate(traj_df["time"]):

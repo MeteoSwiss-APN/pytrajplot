@@ -79,8 +79,6 @@ help:
 install: env
 	@echo -e "\n[make install] installing the package with runtime dependencies."
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
-	@which python
-	@python --version
 	python -m pip install .
 	pytrajplot -V
 	@echo "To activate this environment, use: conda activate $(NAME_OR_PREFIX)"
@@ -90,7 +88,6 @@ install-dev: env-dev
 	@echo -e "\n[make install-dev] installing the package as editable with development dependencies"
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX_DEV)
 	python -m pip install --editable .
-	pre-commit install
 	pytrajplot -V
 	@echo "To activate this environment, use: conda activate $(NAME_OR_PREFIX)"
 
@@ -102,15 +99,12 @@ env: $(FILE)
 	@echo -e "\n[make env] creating conda environment:"  $(NAME_OR_PREFIX)
 	@echo -e "[make env] from file:" $(FILE)
 	conda env create --force $(TARGET_ENV) --file $(FILE)
-#	conda create --yes $(TARGET_ENV) --file $(FILE) # conda create cannot parse yml file
 
 .PHONY: env-dev #CMD Add the development environment for the package.
 env-dev: $(FILE) $(FILE_DEV)
 	@echo -e "\n[make env-dev] creating conda environment:"  $(NAME_OR_PREFIX_DEV)
 	@echo -e "[make env-dev] from files:" $(FILE) $(FILE_DEV)
-	conda create --yes $(TARGET_ENV_DEV) --file $(FILE) --file $(FILE_DEV)
-#	conda env create --force $(TARGET_ENV_DEV) --file $(FILE) --file $(FILE_DEV)
-#	conda install $(TARGET_ENV_DEV) --file $(FILE_DEV)
+	conda env create --force $(TARGET_ENV_DEV) --file $(FILE) --file $(FILE_DEV)
 
 .PHONY: pinned  #CMD Save the current environment for pinned installation.
 pinned:
@@ -123,7 +117,7 @@ pinned:
 pinned-dev:
 	@echo -e "\n[make pinned-dev] creating file defining pinned conda environment"
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
-	conda env export --no-builds | head -n -1 > $(FILE_DEV_PINNED)
+	conda env export --no-builds | tail -n +2 | head -n -2 > $(FILE_DEV_PINNED)
 	@echo "[make pinned-dev] Pinned environment saved in" $(FILE_DEV_PINNED)
 
 #==============================================================================
