@@ -320,7 +320,7 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         )
         reference_time = secondline[16:32]
 
-    if firstline[:9] == "Reference":  # case: HRES trajectory file
+    elif firstline[:9] == "Reference":  # case: HRES trajectory file
         case = "HRES"
         skiprows = 5
         number_of_trajectories, number_of_times = traj_helper_fct(
@@ -336,6 +336,9 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
             H=firstline[24:26],
             M=firstline[26:28],
         )
+
+    else:  # case: unknown trajectory file format
+        raise Exception('Unknown trajectory file format (cannot parse header info)')
 
     traj_df = pd.read_csv(
         trajectory_file_path,
