@@ -88,12 +88,15 @@ install-dev: env-dev
 	@echo -e "\n[make install-dev] installing the package as editable with development dependencies"
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX_DEV)
 	python -m pip install --editable .
+	pre-commit install
 	pytrajplot -V
 	@echo "To activate this environment, use: conda activate $(NAME_OR_PREFIX_DEV)"
 
 #==============================================================================
 # Create Conda Environment
 #==============================================================================
+# Note: conda create only takes simple plain-text lists, but can take multiple files
+#       conda env create takes a yaml environment file, but only (the last) one of them.
 
 env: $(FILE)
 	@echo -e "\n[make env] creating conda environment:"  $(NAME_OR_PREFIX)
@@ -104,11 +107,8 @@ env: $(FILE)
 .PHONY: env-dev #CMD Add the development environment for the package.
 env-dev: $(FILE) $(FILE_DEV)
 	@echo -e "\n[make env-dev] creating conda environment:"  $(NAME_OR_PREFIX_DEV)
-	@echo -e "[make env-dev] from file:" $(FILE)
-	conda env create --force $(TARGET_ENV_DEV) --file $(FILE)
-	@echo -e "[make env-dev] installing dev requirements:"  $(NAME_OR_PREFIX_DEV)
-	@echo -e "[make env-dev] from file:" $(FILE) $(FILE_DEV)
-	conda env create         $(TARGET_ENV_DEV) --file $(FILE_DEV)
+	@echo -e "[make env-dev] from file:" $(FILE_DEV)
+	conda env create --force $(TARGET_ENV_DEV) --file $(FILE_DEV)
 	@echo -e "\n[make env-dev] conda environment created:"  $(NAME_OR_PREFIX_DEV)
 
 .PHONY: pinned  #CMD Save the current environment for pinned installation.
