@@ -3,13 +3,16 @@
 
 # Settings
 # --------
-# Conda environment
+# Conda default environment
 conda_env=pytrajplot
-# Lagranto output storage location
+# Lagranto-output storage location
 store_osm=/store/mch/msopr/osm
+# pytrajplot output location
+pytrajplot_out=.
 # Graphics format
 datatype_opt="--datatype png --datatype pdf"
-# Domain options
+# Domain options for
+# COSMO-1E-CTR (c1), IFS-HRES-Europe (ie), IFS-HRES global (ig)
 domain_opt_c1="--domain ch --domain alps"
 domain_opt_ie="--domain alps --domain centraleurope --domain europe"
 domain_opt_ig="--domain dynamic --domain dynamic_zoom"
@@ -28,8 +31,11 @@ bt_00=$(date --utc --date="today 00" +%Y%m%d%H)
 # Today 03 UTC
 bt_03=$(date --utc --date="today 03" +%Y%m%d%H)
 
-# Load conda env if CONDA_PREFIX not defined
+# Load conda env for pytrajplot if CONDA_PREFIX not defined
 [[ -z $CONDA_PREFIX ]] && conda activate $conda_env
+echo CONDA_PREFIX=$CONDA_PREFIX
+# Report version
+$CONDA_PREFIX/bin/pytrajplot --version
 
 for basetime in $bt_06 $bt_12 $bt_18 $bt_21 $bt_00 $bt_03 ; do
     yy=${basetime:2:2}
@@ -45,24 +51,24 @@ for basetime in $bt_06 $bt_12 $bt_18 $bt_21 $bt_00 $bt_03 ; do
     input_dir_ig=$store_osm/IFS-HRES/IFS-HRES-LAGRANTO${yy}/${yymmddhh}_LIH/lagranto_c
 
     # Output directories
-    output_dir_c1=plot_c1_${basetime}
-    output_dir_ie=plot_ie_${basetime}
-    output_dir_ig=plot_ig_${basetime}
+    output_dir_c1=$pytrajplot_out/plot_c1_${basetime}
+    output_dir_ie=$pytrajplot_out/plot_ie_${basetime}
+    output_dir_ig=$pytrajplot_out/plot_ig_${basetime}
 
     # Submit jobs
     for model in c1 ie ig ; do
-	eval input_dir=\$input_dir_$model
-	eval output_dir=\$output_dir_$model
-	eval domain_opt=\$domain_opt_$model
+        eval input_dir=\$input_dir_$model
+        eval output_dir=\$output_dir_$model
+        eval domain_opt=\$domain_opt_$model
 
-	if [[ -r $input_dir ]] ; then
-	    echo Input for $model: $(ls -d $input_dir)
-	    [[ ! -d $output_dir ]] && mkdir $output_dir
-	    echo Output for $model: $(ls -d $output_dir)
-	    batchPP -n ${model}_$hh -- \
-		$CONDA_PREFIX/bin/pytrajplot $input_dir $output_dir $datatype_opt $domain_opt
-	else
-	    echo "No data for $model, skipping: $input_dir"
-	fi
+        if [[ -r $input_dir ]] ; then
+            echo Input for $model: $(ls -d $input_dir)
+            [[ ! -d $output_dir ]] && mkdir -p $output_dir
+            echo Output for $model: $(ls -d $output_dir)
+            batchPP -n ${model}_$hh -- \
+                $CONDA_PREFIX/bin/pytrajplot $input_dir $output_dir $datatype_opt $domain_opt
+        else
+            echo "No data for $model, skipping: $input_dir"
+        fi
     done
 done

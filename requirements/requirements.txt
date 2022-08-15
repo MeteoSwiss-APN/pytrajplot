@@ -1,5 +1,7 @@
-click==7.1.2
-numpy==1.21.4
-pandas==1.3.4
-matplotlib==3.4.3
-cartopy==0.18.0
+click
+numpy
+pandas<1.4
+matplotlib==3.5.1
+cartopy
+shapely==1.7.1
+pytest

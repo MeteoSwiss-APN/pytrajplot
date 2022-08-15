@@ -2,7 +2,7 @@
 
 __author__ = "Michel Zeller"
 __email__ = "michel.zeller@meteoswiss.ch"
-__version__ = "1.0.1"
+__version__ = "1.1.1"
 
 # Standard library
 # Standard Library
