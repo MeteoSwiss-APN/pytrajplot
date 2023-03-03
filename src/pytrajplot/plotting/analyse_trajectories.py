@@ -82,6 +82,7 @@ def _get_traj_dict(data, number_of_trajectories=None, traj_length=None) -> dict:
 
 def _check_dateline_crossing(
     lon: pd.Series,
+    number_of_times: int,
 ):
     """Check, wheter dateline gets crossed by *any* trajectory departing from this location.
 
@@ -108,7 +109,11 @@ def _check_dateline_crossing(
         # 2) check if the any of the sign_flips are relevant (i.e. not crossing the 0° longitude line)
         for flip_index in sign_flip_indexes:
             # print(f"lon before/after flip: (index: {flip_index})\t{lon[flip_index-1]} --> {lon[flip_index]}")
-            if not np.isnan(lon[flip_index]) and not np.isnan(lon[flip_index - 1]):
+            if (
+                not np.isnan(lon[flip_index])
+                and not np.isnan(lon[flip_index - 1])
+                and flip_index % number_of_times != 0
+            ):
                 if not (
                     -20 < lon[flip_index] < 20
                 ):  # the dateline must have been crossed because the longitude value after the sign flip is not in the -20° - 20° longitude range.

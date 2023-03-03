@@ -6,11 +6,11 @@ import time
 # Third-party
 import click
 
-# Local
-from . import __version__
-from .generate_pdf import generate_pdf
-from .parse_data import check_input_dir
-from .utils import count_to_log_level
+# First-party
+from pytrajplot import __version__
+from pytrajplot.generate_pdf import generate_pdf
+from pytrajplot.parse_data import check_input_dir
+from pytrajplot.utils import count_to_log_level
 
 
 # pylint: disable=W0613  # unused-argument (param)

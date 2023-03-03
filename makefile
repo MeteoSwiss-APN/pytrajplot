@@ -69,7 +69,7 @@ help:
 	@echo -e "Add NAME=name_of_env to use a different environment name"
 	@echo -e "or  PREFIX=/path/to/env to install to a different location."
 	@echo -e "\nTargets:"
-	@grep "$(MARKER)" Makefile | sed 's/.PHONY: //' | sed "s/$(MARKER)/\t/"
+	@grep "$(MARKER)" makefile | sed 's/.PHONY: //' | sed "s/$(MARKER)/\t/"
 
 #==============================================================================
 # Installation
@@ -98,11 +98,12 @@ install-dev: env-dev
 # Note: conda create only takes simple plain-text lists, but can take multiple files
 #       conda env create takes a yaml environment file, but only (the last) one of them.
 
+.PHONY: env     #CMD Add the environment for the package.
 env: $(FILE)
 	@echo -e "\n[make env] creating conda environment:"  $(NAME_OR_PREFIX)
 	@echo -e "[make env] from file:" $(FILE)
 	conda env create --force $(TARGET_ENV) --file $(FILE)
-	@echo -e "\n[make env-dev] conda environment created:"  $(NAME_OR_PREFIX_DEV)
+	@echo -e "\n[make env] conda environment created:"  $(NAME_OR_PREFIX)
 
 .PHONY: env-dev #CMD Add the development environment for the package.
 env-dev: $(FILE) $(FILE_DEV)
@@ -121,7 +122,7 @@ pinned:
 .PHONY: pinned-dev #CMD Save the current environment for pinned development installation.
 pinned-dev:
 	@echo -e "\n[make pinned-dev] creating file defining pinned conda environment"
-	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
+	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX_DEV)
 	conda env export --no-builds | tail -n +2 | head -n -2 > $(FILE_DEV_PINNED)
 	@echo "[make pinned-dev] Pinned environment saved in" $(FILE_DEV_PINNED)
 

@@ -1,15 +1,28 @@
 # PyTrajPlot
-PyTrajPlot is a Python-based tool to visualize IFS-HRES Europe/Global & COSMO-1E trajectory simulations results.
+
+PyTrajPlot is a Python-based tool to visualize IFS-HRES Europe/Global & COSMO-1E
+trajectory simulations results.
 
 ## Installation
-PyTrajPlot is hosted on [GitHub](https://github.com/MeteoSwiss-APN/pytrajplot) Github. For the available releases, see [Releases](https://github.com/MeteoSwiss-APN/pytrajplot/releases).
-### With Conda
-Having Conda installed is a pre-requisit for the further installation process. If that is not the case, install the latest Miniconda version from [here](https://docs.conda.io/en/latest/miniconda.html). Afterwards, follow these instructions to clone the GitHub Repo; set up a conda environment and test all possible use-cases. Make sure to execute the following commands from the root of the `pytrajplot` directory.
 
-1. `git clone https://github.com/MeteoSwiss-APN/pytrajplot.git`
-2. `make install`
-3. `conda activate pytrajplot`
-4. `./tests/test_pytrajplot.sh`
+PyTrajPlot is hosted on
+[GitHub](https://github.com/MeteoSwiss-APN/pytrajplot). For the available
+releases, see [Releases](https://github.com/MeteoSwiss-APN/pytrajplot/releases).
+
+### With Conda
+
+Having Conda installed is a pre-requisit for the further installation
+process. If that is not the case, install the latest Miniconda version from
+[here](https://docs.conda.io/en/latest/miniconda.html). Afterwards, follow these
+instructions to clone the GitHub Repo; set up a conda environment and test all
+possible use-cases. Make sure to execute the following commands from the root of
+the `pytrajplot` directory.
+
+    git clone https://github.com/MeteoSwiss-APN/pytrajplot.git
+    cd pytrajplot
+    make install
+    conda activate pytrajplot
+    ./tests/test_pytrajplot.sh
 
 ---
 If no errors occur, plost such as these should be saved in their respective folders, in the `test/` directory.
@@ -18,11 +31,13 @@ If no errors occur, plost such as these should be saved in their respective fold
 
 
 ## Usage
+
 Activate the conda environment:
 ```conda activate pytrajplot```
 To get a list of all available commands, just type:
 ```pytrajplot --help```
 The possible options are as follows:
+
 ```
 Usage: pytrajplot [OPTIONS] INPUT_DIR OUTPUT_DIR
 
@@ -50,38 +65,54 @@ Options:
   -V, --version                   Print version and exit.
   --help                          Show this message and exit.
 ```
-The only mandatory arguments are `INPUT_DIR` & `OUTPUT_DIR`. The input directory specifies the path to the source files. In the input directory, there should be at exactly **one plot_info** file, and for each trajectory file one corresponding start file.
+
+The only mandatory arguments are `INPUT_DIR` and `OUTPUT_DIR`. The input directory
+specifies the path to the source files. In the input directory, there should be
+at exactly **one plot_info** file, and for each trajectory file one
+corresponding start file.
 
 ### File Nomenclature
-Should the prefixes of the file names deviate from the default values (*tra_geom_*, *startf_*, *plot_info*),  it is possible to specify the prefix of the start and trajectory files, as well as the name of the plot_info file.
 
+Should the prefixes of the file names deviate from the default values
+(*tra_geom_*, *startf_*, *plot_info*), it is possible to specify the prefix of
+the start and trajectory files, as well as the name of the plot_info file.
 
-The relevant part in the filename of the trajectory/start files, is the *key*. In general, the *key* looks like: `XXX-YYYF/B`. It has to satisfy the following *conditions*:
+The relevant part in the filename of the trajectory/start files, is the
+*key*. In general, the *key* looks like: `XXX-YYYF/B`. It has to satisfy the
+following *conditions*:
 
 1. keys must match between start/trajectory file
 ```
 traj_prefix+key <---> start_prefix+key
 ```
 2. keys must end with **F** / **B** to determine the trajectories direction (forward/backward)
-3. XXX refers to the start of the computation of trajectories (w.r.t the model base time, which is specified in the corresponding plot_info file)
+3. XXX refers to the start of the computation of trajectories (w.r.t the model base time,
+   which is specified in the corresponding plot_info file)
 4. YYY refers to the end-time of the trajectory computation (w.r.t to the model base time.
 5. XXX and YYY are seperated by a dash
 6. The difference of XXX and YYY equals the trajectory length (in hours).
 
-Information in the header & footer of the output plots, is partially generated from the information in the *key*.
+Information in the header and footer of the output plots, is partially generated
+from the information in the *key*.
 
 #### Examples
+
 Backward Trajectories; 33h in the past from model base time until model base time.
+
 > startf_033-000B/tra_geom_033-000B
 
 Forwart trajectories; 48h to the future from model base time.
+
 > startf_000-048F/tra_geom_000-048F
 
 ### Code Overview
 
-This part is a small step-by-step guide, how an exemplary `pytrajplot` command runs through the code with references to the corresponding (Python) scripts and functions.
+This part is a small step-by-step guide, how an exemplary `pytrajplot` command
+runs through the code with references to the corresponding (Python) scripts and
+functions.
 
-#### Exempli Gratia
+#### Example
+
 ```
 pytrajplot tests/test_hres/4_altitudes/ plots
 --- Parsing Input Files
@@ -90,26 +121,47 @@ pytrajplot tests/test_hres/4_altitudes/ plots
 ```
 
 ##### 0. [cli.py](src/pytrajplot/cli.py)
-Before the input files get parsed, the user inputs need to be parsed using the function `interpret_options`.
+
+Before the input files get parsed, the user inputs need to be parsed using the
+function `interpret_options`.
 
 ##### 1. Parsing Input Files: [parse_data.py](src/pytrajplot/parse_data.py)
-In the next step the `check_input_dir` function from the data parser script is initialised.
+
+In the next step the `check_input_dir` function from the data parser script is
+initialised.
 
 ###### Procedure
+
 1. iterate through the directory and read the start & plot_info files. simultaneously collect all present keys
- 1.1. *Remark:* The start file is parsed using the `read_startf` function & the plot_info file is parsed using the `PLOT_INFO` [class](src/pytrajplot/parsing/plot_info.py).
-3. for each found key, parse corresponding trajectory file using the `read_trajectory` function.
+   *Remark:* The start file is parsed using the `read_startf` function and
+   the plot_info file is parsed using the `PLOT_INFO` [class](src/pytrajplot/parsing/plot_info.py).
+2. for each found key, parse corresponding trajectory file using the `read_trajectory` function.
 
-There is a number of different helper-functions involved in the parsing of these files. The code is well commented and the docstrings should provide further information on the use of each function. See [here](src/pytrajplot/parse_data.py)
+There is a number of different helper-functions involved in the parsing of these
+files. The code is well commented and the docstrings should provide further
+information on the use of each function, see
+[here](src/pytrajplot/parse_data.py).
 
-Ultimately, the parsing-pipeline returns two *dictionaries*. The main dictionary, containing all information, is the `trajectory_dict`. Each key contains a `pandas dataframe`, with the combined information of the corresponding start/trajectory file. The second dictionary contains the relevant information of the plot_info file, which corresponds to all start/trajecotry files.
+Ultimately, the parsing-pipeline returns two *dictionaries*. The main
+dictionary, containing all information, is the `trajectory_dict`. Each key
+contains a `pandas dataframe`, with the combined information of the
+corresponding start/trajectory file. The second dictionary contains the relevant
+information of the plot_info file, which corresponds to all start/trajecotry
+files.
 
 ##### 3. Assembling Ouput: [generate_pdf.py](src/pytrajplot/generate_pdf.py)
-Once all the data from one directory is in this usable dictionary format, the plotting pipeline is initialised. The first part of the [generate_pdf](src/pytrajplot/generate_pdf.py) script iterates through this dictionary, retrieves the dataframes and "parses" them. For each trajectory origin the plotting pipeline is called and one plot generated. Usually, there are several trajectories/origins per dataframe.
+
+Once all the data from one directory is in this usable dictionary format, the
+plotting pipeline is initialised. The first part of the
+[generate_pdf](src/pytrajplot/generate_pdf.py) script iterates through this
+dictionary, retrieves the dataframes and "parses" them. For each trajectory
+origin, the plotting pipeline is called and one plot generated. Usually, there
+are several trajectories/origins per dataframe.
 
 *Fun Fact:* @MeteoSwiss approximately 2800 trajectory plots are generated each day for the IFS-HRES-Europe, IFS-HRES-Global and COSMO-1E models.
 
 ###### Procedure
+
 1. iterate through `trajectory_dict`
 2. retrieve `df` for current key
 3. iterate through dataframe
@@ -126,11 +178,16 @@ Once all the data from one directory is in this usable dictionary format, the pl
 9. return `-- done`
 
 ###### Remark
-Again, this procedure outlines the inner workings of the plotting scripts. For greater insight, it is recommended to read the scripts and pay special attention to the comments & docstrings. All plotting-scripts are located [here](src/pytrajplot/plotting).
+
+Again, this procedure outlines the inner workings of the plotting scripts. For
+greater insight, it is recommended to read the scripts and pay special attention
+to the comments and docstrings. All plotting-scripts are located
+[here](src/pytrajplot/plotting).
 
 
 
-## ToDos
+## Future Developments
+
 Some further todos for the future:
 - [x] Complete ReadMe
 - [ ] Add debug statements and debug flag
@@ -141,4 +198,8 @@ Some further todos for the future:
 - [ ] Fix Aspect Ratio of Map, for trajectories with unusual longitudinal/latitudinal expansions
 
 ## Credits
-This package was created with [Cookiecutter](https://github.com/audreyr/cookiecutter) and the [MeteoSwiss-APN/mch-python-blueprint](https://github.com/MeteoSwiss-APN/mch-python-blueprint) project template.
+
+This package was created with
+[Cookiecutter](https://github.com/audreyr/cookiecutter) and the
+[MeteoSwiss-APN/mch-python-blueprint](https://github.com/MeteoSwiss-APN/mch-python-blueprint)
+project template.
