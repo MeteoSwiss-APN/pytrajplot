@@ -31,6 +31,10 @@ pytrajplot $input_dir_tests/test_hres/dateline $output_dir_tests/test_hres/datel
 # (failed in v1.0.0 due to NaNs in the argument of the numpy max function - v1.0.1 uses nanmax instead)
 pytrajplot $input_dir_tests/test_hres/zero_lon_from_east $output_dir_tests/test_hres/zero_lon_from_east
 
+# test HRES trajectory ending at zero longitude and next ancillary trajectory starting with abs(lon) > 20 deg
+# (failed in v1.1.1 due to erroneously detecting a date line crossing but corresponding dictionary reamining undefined)
+pytrajplot $input_dir_tests/test_hres/zero_last_lon $output_dir_tests/test_hres/zero_last_lon
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~COSMO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # test COSMO forward/backward trajectories w/ all COSMO domains (ch, ch_hd, alps)
 pytrajplot $input_dir_tests/test_cosmo/forward  $output_dir_tests/test_cosmo/forward --datatype png --domain ch --domain alps
