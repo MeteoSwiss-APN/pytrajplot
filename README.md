@@ -1,7 +1,10 @@
 # PyTrajPlot
 
-PyTrajPlot is a Python-based tool to visualize IFS-HRES Europe/Global & COSMO-1E
-trajectory simulations results.
+PyTrajPlot is a Python-based tool to visualize trajectory calculations based on
+ECMWF's [IFS-HRES](https://www.ecmwf.int/en/forecasts/documentation-and-support)
+(on an European or global domain) and [COSMO](https://www.cosmo-model.org)
+(on a limited domain centered over Switzerland) with
+[LAGRANTO](https://www.research-collection.ethz.ch/handle/20.500.11850/103598).
 
 ## Installation
 
@@ -25,7 +28,7 @@ the `pytrajplot` directory.
     ./tests/test_pytrajplot.sh
 
 ---
-If no errors occur, plost such as these should be saved in their respective folders, in the `test/` directory.
+If no errors occur, plots such as these should be saved in their respective folders in the `test/` directory.
 ![](https://i.imgur.com/Zp4F9Z7.jpg)
 ![](https://i.imgur.com/4WvLK1x.jpg)
 
@@ -158,7 +161,7 @@ dictionary, retrieves the dataframes and "parses" them. For each trajectory
 origin, the plotting pipeline is called and one plot generated. Usually, there
 are several trajectories/origins per dataframe.
 
-*Fun Fact:* @MeteoSwiss approximately 2800 trajectory plots are generated each day for the IFS-HRES-Europe, IFS-HRES-Global and COSMO-1E models.
+*Fun Fact:* @MeteoSwiss approximately 2800 trajectory plots are generated each day for the IFS-HRES (over Europe and globally) and COSMO-1E models.
 
 ###### Procedure
 
@@ -188,8 +191,7 @@ to the comments and docstrings. All plotting-scripts are located
 
 ## Future Developments
 
-Some further todos for the future:
-- [x] Complete ReadMe
+Possible developments in the future:
 - [ ] Add debug statements and debug flag
 - [ ] Write Class for COSMO trajectory files
 - [ ] Write Class for HRES trajectory files
@@ -200,6 +202,5 @@ Some further todos for the future:
 ## Credits
 
 This package was created with
-[Cookiecutter](https://github.com/audreyr/cookiecutter) and the
-[MeteoSwiss-APN/mch-python-blueprint](https://github.com/MeteoSwiss-APN/mch-python-blueprint)
-project template.
+[Cookiecutter](https://github.com/audreyr/cookiecutter) and the MeteoSwiss
+blueprint for the CSCS systems.
