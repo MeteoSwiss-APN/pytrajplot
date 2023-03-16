@@ -29,6 +29,7 @@ jobs:
     - name: Create env from unpinned reqs
       run: |
         conda create --name dev_env python=3.9 mamba
+        conda activate dev_env
         mamba install --file requirements/requirements-gha.txt
     - name: Install project into env
       run: |
