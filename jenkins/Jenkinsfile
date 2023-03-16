@@ -51,7 +51,7 @@ pipeline {
                 conda activate dev_env
                 cd ${WORKSPACE}
                 pytest tests
-                test/test_pytrajplot.sh
+                tests/test_pytrajplot.sh
                 '''
             }
         }
