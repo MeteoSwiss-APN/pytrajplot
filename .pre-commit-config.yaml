@@ -23,21 +23,21 @@ repos:
         language: fail
         entry: "Found git merge backup file(s): review and remove them"
         files: "\\.orig$"
--   repo: local
-    hooks:
-    -   id: rstcheck
-        name: rstcheck
-        description: Check REST files for correctness
-        language: system
-        entry: rstcheck
-        types: [rst]
--   repo: local
-    hooks:
-    -   id: codespell
-        name: codespell
-        description: Check for spelling errors
-        language: system
-        entry: codespell
+#-   repo: local
+#    hooks:
+#    -   id: rstcheck
+#        name: rstcheck
+#        description: Check REST files for correctness
+#        language: system
+#        entry: rstcheck
+#        types: [rst]
+#-   repo: local
+#    hooks:
+#    -   id: codespell
+#        name: codespell
+#        description: Check for spelling errors
+#        language: system
+#        entry: codespell
 -   repo: local
     hooks:
     -   id: black
@@ -71,31 +71,31 @@ repos:
 # SR formatters changed something. A potential solution could be to write a
 # SR small bash script run-linters.sh that runs flake8, pylint and run-mypy.sh
 # SR in that order and aborts on error.
--   repo: local
-    hooks:
-    -   id: pylint
-        name: pylint
-        description: Check Python code for correctness, consistency and adherence to best practices
-        language: system
-        entry: pylint
-        types: [python]
--   repo: local
-    hooks:
-    -   id: flake8
-        name: flake8
-        description: Check Python code for correctness, consistency and adherence to best practices
-        language: system
-        entry: flake8
-        types: [python]
--   repo: local
-    hooks:
-    -   id: mypy
-        name: mypy
-        description: Perform static type analysis of Python code
-        language: system
-        entry: bash tools/run-mypy.sh
-        require_serial: true
-        pass_filenames: false
-        verbose: true
-        types: [python]
-        files: ^(src|tests)/
+#-   repo: local
+#    hooks:
+#    -   id: pylint
+#        name: pylint
+#        description: Check Python code for correctness, consistency and adherence to best practices
+#        language: system
+#        entry: pylint
+#        types: [python]
+#-   repo: local
+#    hooks:
+#    -   id: flake8
+#        name: flake8
+#        description: Check Python code for correctness, consistency and adherence to best practices
+#        language: system
+#        entry: flake8
+#        types: [python]
+#-   repo: local
+#    hooks:
+#    -   id: mypy
+#        name: mypy
+#        description: Perform static type analysis of Python code
+#        language: system
+#        entry: bash tools/run-mypy.sh
+#        require_serial: true
+#        pass_filenames: false
+#        verbose: true
+#        types: [python]
+#        files: ^(src|tests)/

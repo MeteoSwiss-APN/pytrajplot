@@ -1,0 +1,17 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: a1078ae
+_src_path: git@github.com:MeteoSwiss-APN/mch-python-blueprint.git
+email: pirmin.kaufmann@meteoswiss.ch
+full_name: Pirmin Kaufmann
+github_username: MeteoSwiss-APN
+module_name: pytrajplot
+project_doc_url: https://github.io/MeteoSwiss-APN/pytrajplot
+project_github: https://github.com/MeteoSwiss-APN/pytrajplot
+project_keywords: pytrajplot
+project_name: pytrajplot
+project_short_description: Pirmin Kaufmann's pytrajplot
+project_slug: pytrajplot
+project_ssh_url: git+ssh://git@github.com/MeteoSwiss-APN/pytrajplot.git
+python_version: '3.10'
+version: 0.1.0
+year: '2022'

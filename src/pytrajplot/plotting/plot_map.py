@@ -546,7 +546,6 @@ def add_trajectories(
                 if (
                     plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
                 ):  # only add legend & startpoint for the main trajectories
-
                     # plot main trajectory
                     ax.plot(
                         longitude,  # define x-axis

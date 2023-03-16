@@ -6,3 +6,10 @@ cartopy
 shapely
 pytest
 pre-commit
+rstcheck
+codespell
+black
+pydocstyle
+pylint
+flake8
+mypy

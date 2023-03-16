@@ -148,7 +148,6 @@ def generate_altitude_plot(
         )
 
         for traj in traj_index:
-
             textstr = (
                 str(plot_dict["altitude_" + str(alt_index)]["alt_level"])
                 + " "
@@ -184,7 +183,6 @@ def generate_altitude_plot(
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"]
                 == 1
             ):  # only add legend & startpoint for the main trajectories
-
                 ax.plot(
                     xstart,
                     ystart,
@@ -197,7 +195,6 @@ def generate_altitude_plot(
                 ax.legend(fontsize=8)
 
     else:  # no side traj
-
         if key[-1] == "B":
             y_surf = np.flip(plot_dict["altitude_" + str(alt_index)]["y_surf"])
         else:

@@ -154,7 +154,6 @@ def main(
     domain: str,
     datatype: str,
 ) -> None:
-
     prefix_dict, language = interpret_options(
         start_prefix=start_prefix,
         traj_prefix=traj_prefix,
