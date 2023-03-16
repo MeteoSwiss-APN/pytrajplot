@@ -493,8 +493,7 @@ def check_input_dir(input_dir, prefix_dict, separator):
 
     # check if plot_info has been found
     if not "plot_info_dict" in dir():
-        print("ERROR: plot_info file not found:", prefix_dict["plot_info"])
-        raise
+        raise RuntimeError("ERROR: plot_info file not found:", prefix_dict["plot_info"])
 
     # for each start file (identified by its unique key) a corresponding trajectory file exists
     for key in keys:

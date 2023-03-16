@@ -88,6 +88,7 @@ def _check_dateline_crossing(
 
     Args:
         lon (pandas series): one list, containing the longitude values for all trajectories
+        number_of_times (int): number of time steps in a trajectory
 
     Returns:
         cross_dateline (bool): true, if dateline gets crossed by any trajectory
