@@ -1,0 +1,8 @@
+python=3.9
+click
+numpy
+pandas
+matplotlib
+cartopy
+shapely
+pytest
