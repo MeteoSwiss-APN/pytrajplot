@@ -6,3 +6,4 @@ matplotlib
 cartopy
 shapely
 pytest
+pre_commit
