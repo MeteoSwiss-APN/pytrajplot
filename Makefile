@@ -135,5 +135,8 @@ test:
 	@echo -e "\n[make test] running all tests"
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
 	pytest tests
+	@echo "*** Creating plots from test input data in subdirectories of local/ ***"
+	tests/test_pytrajplot.sh
+	@echo "All test plots done."
 
 #==============================================================================

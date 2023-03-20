@@ -91,7 +91,8 @@ def _check_dateline_crossing(
         number_of_times (int): number of time steps in a trajectory
 
     Returns:
-        cross_dateline (bool): true, if dateline gets crossed by any trajectory
+        cross_dateline (bool, (real, real)): true and min/max lon, if dateline gets crossed by any trajectory
+                                             false and [None, None] otherwise
 
     """
     max_lon, min_lon = np.max(lon), np.min(lon)
