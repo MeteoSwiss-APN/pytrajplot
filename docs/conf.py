@@ -46,9 +46,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"pytrajplot"
-copyright = u"2021, Michel Zeller"
-author = u"Michel Zeller"
+project = "pytrajplot"
+copyright = "2021, Michel Zeller"
+author = "Michel Zeller"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -126,8 +126,8 @@ latex_documents = [
     (
         master_doc,
         "pytrajplot.tex",
-        u"pytrajplot Documentation",
-        u"Michel Zeller",
+        "pytrajplot Documentation",
+        "Michel Zeller",
         "manual",
     ),
 ]
@@ -141,7 +141,7 @@ man_pages = [
     (
         master_doc,
         "pytrajplot",
-        u"pytrajplot Documentation",
+        "pytrajplot Documentation",
         [author],
         1,
     )
@@ -157,7 +157,7 @@ texinfo_documents = [
     (
         master_doc,
         "pytrajplot",
-        u"pytrajplot Documentation",
+        "pytrajplot Documentation",
         author,
         "pytrajplot",
         "One line description of project.",

@@ -162,7 +162,6 @@ def _get_central_longitude(
                 relevant_flip_indexes.append(flip_index)
 
         for flip_index_position, flip_index in enumerate(relevant_flip_indexes):
-
             if verbose:
                 print(
                     f"@ index {flip_index} the trajectory flips from: {lon[flip_index-1]} to {lon[flip_index]} (flip_index_position: {flip_index_position})"
@@ -173,7 +172,6 @@ def _get_central_longitude(
             if (
                 value_after_flip > 0
             ):  # the trajectory crossed from the west to the east over the dateline
-
                 # if there is only one crossing of the dateline, all values after the crossing need to be adjusted
                 if len(relevant_flip_indexes) == 1:
                     lon[flip_index : len(lon)] -= 360
@@ -197,7 +195,6 @@ def _get_central_longitude(
             if (
                 value_after_flip < 0
             ):  # the trajectory crossed from the east to the west over the dateline
-
                 # if there is only one crossing of the dateline, all values after the crossing need to be adjusted
                 if len(relevant_flip_indexes) == 1:
                     lon[flip_index : len(lon)] += 360
@@ -285,7 +282,6 @@ def _analyse_trajectories(
 
 
 def _create_plot(traj_dict, central_longitude, dynamic_domain):
-
     # REMOVE HARDCODED CENTRAL LONGITUDE LATER!
     # central_longitude = 0
 
