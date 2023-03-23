@@ -1,4 +1,4 @@
-name: Run pre-commit in blueprint
+name: Run pre-commit in pytrajplot
 
 on:
   push:
@@ -15,12 +15,12 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3.4.0
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4.5.0
       with:
         python-version: 3.11.0
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v2.2.0
       with:
         miniconda-version: "latest"
         channels: conda-forge
