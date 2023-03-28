@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "sphinx_mdinclude"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -46,8 +46,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "pytrajplot"
-copyright = "2021, Michel Zeller"
+project = "PyTrajPlot"
+copyright = "2021-2023 MeteoSwiss"  # pylint: disable=W0622  # redefined-builtin
 author = "Michel Zeller"
 
 # The version info for the project you're documenting, acts as replacement
@@ -64,7 +64,7 @@ release = pytrajplot.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -94,7 +94,7 @@ html_theme = "alabaster"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 
 # -- Options for HTMLHelp output ---------------------------------------
@@ -105,7 +105,7 @@ htmlhelp_basename = "pytrajplotdoc"
 
 # -- Options for LaTeX output ------------------------------------------
 
-latex_elements: Dict[str, str] = {
+latex_elements: dict[str, str] = {
     # The paper size ("letterpaper" or "a4paper").
     # "papersize": "letterpaper",
     #
@@ -120,8 +120,8 @@ latex_elements: Dict[str, str] = {
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass
-# [howto, manual, or own class]).
+# (source start file, target name, title,
+#  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (
         master_doc,
@@ -132,6 +132,26 @@ latex_documents = [
     ),
 ]
 
+# The name of an image file (relative to this directory) to place at the top of
+# the title page.
+# latex_logo = None
+
+# For "manual" documents, if this is true, then toplevel headings are parts,
+# not chapters.
+# latex_use_parts = False
+
+# If true, show page references after internal links.
+# latex_show_pagerefs = False
+
+# If true, show URL addresses after external links.
+# latex_show_urls = False
+
+# Documents to append as an appendix to all manuals.
+# latex_appendices = []
+
+# If false, no module index is generated.
+# latex_domain_indices = True
+
 
 # -- Options for manual page output ------------------------------------
 
@@ -141,7 +161,7 @@ man_pages = [
     (
         master_doc,
         "pytrajplot",
-        "pytrajplot Documentation",
+        "PyTrajPlot Documentation",
         [author],
         1,
     )
@@ -157,10 +177,22 @@ texinfo_documents = [
     (
         master_doc,
         "pytrajplot",
-        "pytrajplot Documentation",
+        "PyTrajPlot Documentation",
         author,
         "pytrajplot",
         "One line description of project.",
         "Miscellaneous",
     ),
 ]
+
+# Documents to append as an appendix to all manuals.
+# texinfo_appendices = []
+
+# If false, no module index is generated.
+# texinfo_domain_indices = True
+
+# How to display URL addresses: 'footnote', 'no', or 'inline'.
+# texinfo_show_urls = 'footnote'
+
+# If true, do not generate a @detailmenu in the "Top" node's menu.
+# texinfo_no_detailmenu = False

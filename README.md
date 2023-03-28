@@ -1,10 +1,10 @@
 # PyTrajPlot
 
-PyTrajPlot is a Python-based tool to visualize trajectory calculations based on
-ECMWF's [IFS-HRES](https://www.ecmwf.int/en/forecasts/documentation-and-support)
-(on an European or global domain) and [COSMO](https://www.cosmo-model.org)
-(on a limited domain centered over Switzerland) with
-[LAGRANTO](https://www.research-collection.ethz.ch/handle/20.500.11850/103598).
+PyTrajPlot is a Python-based tool to visualize trajectories calculated with
+[LAGRANTO](https://www.research-collection.ethz.ch/handle/20.500.11850/103598)
+based on ECMWF's [IFS-HRES](https://www.ecmwf.int/en/forecasts/documentation-and-support)
+(on an European or global domain) or the [COSMO](https://www.cosmo-model.org) model
+(on a limited domain centered over Switzerland).
 
 ## Installation
 
@@ -12,23 +12,85 @@ PyTrajPlot is hosted on
 [GitHub](https://github.com/MeteoSwiss-APN/pytrajplot). For the available
 releases, see [Releases](https://github.com/MeteoSwiss-APN/pytrajplot/releases).
 
-### With Conda
-
-Having Conda installed is a pre-requisit for the further installation
-process. If that is not the case, install the latest Miniconda version from
-[here](https://docs.conda.io/en/latest/miniconda.html). Afterwards, follow these
-instructions to clone the GitHub Repo; set up a conda environment and test all
-possible use-cases. Make sure to execute the following commands from the root of
+Create a local copy of the repository and continue installation from the root of
 the `pytrajplot` directory.
 
     git clone https://github.com/MeteoSwiss-APN/pytrajplot.git
     cd pytrajplot
+
+### With Conda
+
+Having Conda installed is a prerequisite for the further installation
+process. If that is not the case, install the latest Miniconda version with
+
+    tools/setup_miniconda.sh
+
+or install it manually from the
+[miniconda webpage](https://docs.conda.io/en/latest/miniconda.html). Afterwards, follow the
+instructions here below to clone the GitHub repository, set up a conda environment and test all
+possible use-cases.
+
+Create an environment and install the package dependencies with the provided script `setup_env.sh`.
+Check available options with
+```bash
+tools/setup_env.sh -h
+```
+We distinguish pinned installations based on exported (reproducible) environments,
+and free installations, where the installation
+is based on top-level dependencies listed in `requirements/requirements.txt`.
+A pinned installation is done with
+
+    tools/setup_env.sh -n <package_env_name>
+
+If you start developing, you might want to do an unpinned installation and export the environment:
+
+    tools/setup_env.sh -u -e -n <package_env_name>
+
+*Hint*: Use the flag `-m` to speed up the installation using mamba. You will of course have to
+install mamba first. We recommend to install mamba into your base
+environment `conda install -c conda-forge mamba`. If you install mamba in another (maybe dedicated)
+environment, environments installed with mamba will be located
+in `<miniconda_root_dir>/envs/mamba/envs`, which is not very practical.
+
+The package itself is installed with `pip`.
+
+    conda activate <package_env_name>
+    pip install .
+
+For development, install the package in editable mode:
+
+    conda activate <package_env_name>
+    pip install --editable .
+
+*Warning:* Make sure you use the right pip, i.e. the one from the installed conda environment (`which pip` should point to something like `path/to/miniconda/envs/<package_env_name>/bin/pip`).
+
+Once your package is installed, run the tests by typing:
+
+```
+conda activate <package_env_name>
+pytest
+```
+
+If the tests pass, you are good to go.
+If developing, make sure to update the requirements file
+and export your environment after installation
+every time you add new imports while developing.
+
+### Shortcut using Makefile
+
+Instead of intalling the environment and the package with the above commands,
+you may alternatively use the available Makfile.
+Note however that providing a Makefile is no longer supported by the MeteoSwiss blueprint and the Makefile may therefore be removed in a future release.
+Use `make help` to see other available make targets. Use the `--dry-run`
+option to see the commands `make` would run without executing them.
+
     make install
-    conda activate pytrajplot
-    ./tests/test_pytrajplot.sh
+    make tests
 
 ---
-If no errors occur, plots such as these should be saved in their respective folders in the `test/` directory.
+### Test results
+
+If no errors occur, plots such as these should be saved in their respective folders in the `./local` directory.
 ![](https://i.imgur.com/Zp4F9Z7.jpg)
 ![](https://i.imgur.com/4WvLK1x.jpg)
 
