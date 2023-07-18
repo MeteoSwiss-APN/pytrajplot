@@ -50,38 +50,38 @@ def generate_info_header(language, plot_dict, ax=None):
     if language == "en":
         if trajectory_direction == "F":
             title = f"Forward Trajectory from {origin} departing on: {start_time}"
-            site = "$\it{Release\;Site:}$ "
+            site = r"$\it{Release\;Site:}$ "
         if trajectory_direction == "B":
             title = f"Backward Trajectory from {origin} arriving on: {start_time}"
-            site = "$\it{Receptor\;Site:}$ "
+            site = r"$\it{Receptor\;Site:}$ "
         info = (
             site
             + f"{origin}"
             + "  |  "
-            + "$\it{Coordinates:}$ "
+            + r"$\it{Coordinates:}$ "
             + f" {lat_0}"
             + "°N, "
             + f"{lon_0}°E  |  "
-            + "$\it{Elevation:}$ "
+            + r"$\it{Elevation:}$ "
             + f" {elevation} {unit}"
         )
 
     else:
         if trajectory_direction == "F":
             title = f"Vorwärts-Trajektorie von {origin} gestartet am: {start_time}"
-            site = "$\it{Ursprungsort:}$ "
+            site = r"$\it{Ursprungsort:}$ "
         if trajectory_direction == "B":
             title = f"Rückwärts-Trajektorie von {origin} gestartet am: {start_time}"
-            site = "$\it{Ankunftsort:}$ "
+            site = r"$\it{Ankunftsort:}$ "
         info = (
             site
             + f"{origin}"
             + "  |  "
-            + "$\it{Koordinaten:}$"
+            + r"$\it{Koordinaten:}$"
             + f" {lat_0}"
             + "°N, "
             + f"{lon_0}°E  |  "
-            + "$\it{Elevation:}$"
+            + r"$\it{Elevation:}$"
             + f" {elevation} {unit}"
         )
 
