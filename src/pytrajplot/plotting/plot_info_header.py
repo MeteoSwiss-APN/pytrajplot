@@ -49,10 +49,10 @@ def generate_info_header(language, plot_dict, ax=None):
 
     if language == "en":
         if trajectory_direction == "F":
-            title = f"Forward Trajectory from {origin} departing on: {start_time}"
+            title = f"Forward Trajectory from {origin} departing on: {start_time} UTC"
             site = r"$\it{Release\;Site:}$ "
         if trajectory_direction == "B":
-            title = f"Backward Trajectory from {origin} arriving on: {start_time}"
+            title = f"Backward Trajectory from {origin} arriving on: {start_time} UTC"
             site = r"$\it{Receptor\;Site:}$ "
         info = (
             site
@@ -68,10 +68,10 @@ def generate_info_header(language, plot_dict, ax=None):
 
     else:
         if trajectory_direction == "F":
-            title = f"Vorwärts-Trajektorie von {origin} gestartet am: {start_time}"
+            title = f"Vorwärts-Trajektorie von {origin} gestartet am: {start_time} UTC"
             site = r"$\it{Ursprungsort:}$ "
         if trajectory_direction == "B":
-            title = f"Rückwärts-Trajektorie von {origin} gestartet am: {start_time}"
+            title = f"Rückwärts-Trajektorie von {origin} gestartet am: {start_time} UTC"
             site = r"$\it{Ankunftsort:}$ "
         info = (
             site
