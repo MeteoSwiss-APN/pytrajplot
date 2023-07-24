@@ -86,6 +86,7 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
             "ger",
             "german",
             "Deutsch",
+            "deutsch"
         ],
         case_sensitive=False,
     ),
@@ -172,6 +173,5 @@ def main(
         domains=domain,
         output_types=datatype,
     )
-
     print("--- Done.")
     return
