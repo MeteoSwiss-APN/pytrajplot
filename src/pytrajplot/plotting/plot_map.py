@@ -122,10 +122,12 @@ def crop_map(ax: geoaxes.GeoAxesSubplot,
         },
     }
     domain_boundaries = domain_dict[domain]["domain"]
-    print("XLIM ",ax.get_xlim())
     ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree(central_longitude=0))
-    print("XLIM2 ",ax.get_xlim())
-    return domain_boundaries
+    lon_limits = ax.get_xlim()
+    if np.isclose(np.abs(lon_limits[0]-lon_limits[1]), 360, atol=1):
+        return []
+    else:
+        return domain_boundaries
 
 
 def get_dynamic_zoom_boundary(
@@ -796,6 +798,18 @@ def generate_map_plot(
         custom_domain_boundaries=trajectory_expansion,
         origin_coordinates=origin_coordinates,
     )  # sets extent of map
+    if not domain_boundaries:
+        return ax.text(
+            0.5,
+            0.5,
+            "Trajectories are far away from displayed domain.",
+            transform=ax.transAxes,
+            fontsize=14,
+            verticalalignment="center",
+            horizontalalignment="center",
+            rasterized=True,
+        )
+
     # print(f"Cropping map took:\t\t{end-start} seconds")
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(plot_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
