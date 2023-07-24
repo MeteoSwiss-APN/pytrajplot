@@ -122,7 +122,9 @@ def crop_map(ax: geoaxes.GeoAxesSubplot,
         },
     }
     domain_boundaries = domain_dict[domain]["domain"]
+    print("XLIM ",ax.get_xlim())
     ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree(central_longitude=0))
+    print("XLIM2 ",ax.get_xlim())
     return domain_boundaries
 
 
