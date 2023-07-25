@@ -70,10 +70,13 @@ def add_features(ax: geoaxes.GeoAxesSubplot) -> None:
         color="#97b6e1",
     )
 
-def crop_map(ax: geoaxes.GeoAxesSubplot, 
-            domain: str, 
-            custom_domain_boundaries: List[float],
-            origin_coordinates: Dict[str, Union[float, str]]) -> List[float]:
+
+def crop_map(
+    ax: geoaxes.GeoAxesSubplot,
+    domain: str,
+    custom_domain_boundaries: List[float],
+    origin_coordinates: Dict[str, Union[float, str]],
+) -> List[float]:
     """Crop map to given domain (i.e. centraleurope).
 
     Args:
@@ -96,7 +99,7 @@ def crop_map(ax: geoaxes.GeoAxesSubplot,
             upper_boundary,
         ) = get_dynamic_zoom_boundary(custom_domain_boundaries, origin_coordinates)
 
-    padding = 1 # padding on each side, for the dynamically created plots
+    padding = 1  # padding on each side, for the dynamically created plots
     domain_dict = {
         "centraleurope": {
             "domain": [1, 20, 42.5, 51.5]
@@ -124,15 +127,14 @@ def crop_map(ax: geoaxes.GeoAxesSubplot,
     domain_boundaries = domain_dict[domain]["domain"]
     ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree(central_longitude=0))
     lon_limits = ax.get_xlim()
-    if np.isclose(np.abs(lon_limits[0]-lon_limits[1]), 360, atol=1):
+    if np.isclose(np.abs(lon_limits[0] - lon_limits[1]), 360, atol=1):
         return []
     else:
         return domain_boundaries
 
 
 def get_dynamic_zoom_boundary(
-    custom_domain_boundaries: List[float], 
-    origin_coordinates: Dict[str, float]
+    custom_domain_boundaries: List[float], origin_coordinates: Dict[str, float]
 ) -> Tuple[float, float, float, float]:
     # case 1: trajectory expansion mainly towards the east from origin
     if abs(custom_domain_boundaries[0] - origin_coordinates["lon"]) <= 10:
@@ -189,12 +191,8 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
     )
     return is_in_domain
 
-def is_of_interest(
-    name: str, 
-    capital_type: str, 
-    population: int, 
-    lon: float
-) -> bool:
+
+def is_of_interest(name: str, capital_type: str, population: int, lon: float) -> bool:
     """Check if a city fulfils certain importance criteria.
 
     Args:
@@ -315,10 +313,10 @@ def is_of_interest(
 
 
 def add_cities(
-    ax: geoaxes.GeoAxesSubplot, 
-    domain_boundaries: List[float], 
-    domain: str, 
-    cross_dateline: bool
+    ax: geoaxes.GeoAxesSubplot,
+    domain_boundaries: List[float],
+    domain: str,
+    cross_dateline: bool,
 ) -> None:
     """Add cities to map.
 
@@ -333,7 +331,7 @@ def add_cities(
     # IMPORTING POPULATED ARES FROM https://simplemaps.com/data/world-cities INSTEAD OF NATURAL EARTH
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # Easter Egg - always add Weesen to plots, to make sure its safe.
-    add_w_town = False 
+    add_w_town = False
     if add_w_town:
         if domain in ["ch", "alps", "europe", "centraleurope"]:
             # add Weesen to maps
@@ -443,10 +441,10 @@ def add_cities(
 
 
 def add_time_interval_points(
-    plot_dict: Dict[str, Union[List[float], str]], 
-    ax: geoaxes.GeoAxesSubplot, 
-    i: int, 
-    linestyle: str
+    plot_dict: Dict[str, Union[List[float], str]],
+    ax: geoaxes.GeoAxesSubplot,
+    i: int,
+    linestyle: str,
 ) -> None:
     """Add time interval points to map..
 
@@ -479,11 +477,13 @@ def add_time_interval_points(
             transform=ccrs.PlateCarree(),
             rasterized=True,
         )
+
+
 def filter_by_domain(
-    longitude: pd.Series, 
-    latitude: pd.Series, 
-    domain_boundaries: List[float], 
-    cross_dateline: bool
+    longitude: pd.Series,
+    latitude: pd.Series,
+    domain_boundaries: List[float],
+    cross_dateline: bool,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Filters points out which are not within fiven domain boundaries.
 
@@ -493,17 +493,21 @@ def filter_by_domain(
         domain_boundaries:   lon/lat range of domain
         cross_dateline       if other coordinates cross the dateline
     """
-    filter_mask = [is_visible(lat,lon, domain_boundaries, cross_dateline) for lon, lat in zip(longitude.to_numpy(), latitude.to_numpy())]
-    return longitude.to_numpy()[filter_mask],latitude.to_numpy()[filter_mask]
-    
+    filter_mask = [
+        is_visible(lat, lon, domain_boundaries, cross_dateline)
+        for lon, lat in zip(longitude.to_numpy(), latitude.to_numpy())
+    ]
+    return longitude.to_numpy()[filter_mask], latitude.to_numpy()[filter_mask]
+
+
 def add_time_interval_points_within_domain(
-        plot_dict: dict, 
-        ax: Any, 
-        i: int, 
-        linestyle: str, 
-        domain_boundaries : List[float], 
-        cross_dateline: bool
-        ) -> None:
+    plot_dict: dict,
+    ax: Any,
+    i: int,
+    linestyle: str,
+    domain_boundaries: List[float],
+    cross_dateline: bool,
+) -> None:
     """Add time interval points to map..
 
     Args:
@@ -515,7 +519,9 @@ def add_time_interval_points_within_domain(
     """
 
     lon_important, lat_important = retrieve_interval_points(plot_dict, altitude_index=i)
-    lon_important, lat_important = filter_by_domain(lon_important, lat_important, domain_boundaries, cross_dateline)
+    lon_important, lat_important = filter_by_domain(
+        lon_important, lat_important, domain_boundaries, cross_dateline
+    )
     # add 6 hour interval points
     if i == 1:
         ax.scatter(
@@ -537,10 +543,10 @@ def add_time_interval_points_within_domain(
             rasterized=True,
         )
 
+
 def retrieve_interval_points(
-        plot_dict: dict, 
-        altitude_index: int
-        ) -> Tuple[pd.Series, pd.Series]:
+    plot_dict: dict, altitude_index: int
+) -> Tuple[pd.Series, pd.Series]:
     """Extract the interval points from plot_dict add them to ax.
 
     Args:
@@ -572,17 +578,18 @@ def retrieve_interval_points(
 
     # extract position every 6 hours into important_points dataframe
     important_points_tmp = comb_df[comb_df["time"] % 6 == 0]
-    important_points = important_points_tmp.iloc[1:]  # remove start point --> want triangle there
+    important_points = important_points_tmp.iloc[
+        1:
+    ]  # remove start point --> want triangle there
     lon_important = important_points["lon"]
     lat_important = important_points["lat"]
 
     return lon_important, lat_important
 
+
 def get_projected_point_on_domain_boundaries(
-        lat: float, 
-        lon: float, 
-        domain_boundaries: Tuple[float, float, float, float]
-        ) -> np.ndarray:
+    lat: float, lon: float, domain_boundaries: Tuple[float, float, float, float]
+) -> np.ndarray:
     """Calculates the projection of a given point onto a given boundary with the shortest distance.
     Args:
         lat:                  Latitude of the given point
@@ -593,12 +600,16 @@ def get_projected_point_on_domain_boundaries(
     closest_points = None
     position = np.array([lon, lat])
     lon_min, lon_max, lat_min, lat_max = domain_boundaries
-    boundary_points = np.array([[lon_min, lat_min], [lon_min, lat_max], [lon_max, lat_max], [lon_max, lat_min]])
+    boundary_points = np.array(
+        [[lon_min, lat_min], [lon_min, lat_max], [lon_max, lat_max], [lon_max, lat_min]]
+    )
     for i in range(len(boundary_points)):
-        p = np.array(boundary_points[i]) 
+        p = np.array(boundary_points[i])
         q = np.array(boundary_points[(i + 1) % len(boundary_points)])
         if np.dot(q - p, position - p) > 0 and np.dot(p - q, position - q) > 0:
-            projected_point = p + (q - p) * np.dot(q - p, position - p) / np.linalg.norm(q - p)
+            projected_point = p + (q - p) * np.dot(
+                q - p, position - p
+            ) / np.linalg.norm(q - p)
             dist = np.linalg.norm(position - projected_point)
             if dist < min_dist:
                 min_dist = dist
@@ -615,12 +626,14 @@ def get_projected_point_on_domain_boundaries(
                 closest_points = q
     return closest_points
 
+
 def get_intersection_point_on_domain_boundaries(
-        lat_in: float, 
-        lon_in: float, 
-        lat_out: float, 
-        lon_out: float, 
-        domain_boundaries: List[float]) -> np.ndarray:
+    lat_in: float,
+    lon_in: float,
+    lat_out: float,
+    lon_out: float,
+    domain_boundaries: List[float],
+) -> np.ndarray:
     """Calculates the intersection point between two points and a given boundary.
     Args:
         lat_in:                   Latitude of the point within the domain
@@ -635,27 +648,36 @@ def get_intersection_point_on_domain_boundaries(
     point_out = np.array([lon_out, lat_out])
     point_in = np.array([lon_in, lat_in])
     lon_min, lon_max, lat_min, lat_max = domain_boundaries
-    boundary_points = np.array([[lon_min, lat_min], [lon_min, lat_max], [lon_max, lat_max], [lon_max, lat_min]])
+    boundary_points = np.array(
+        [[lon_min, lat_min], [lon_min, lat_max], [lon_max, lat_max], [lon_max, lat_min]]
+    )
     for i in range(len(boundary_points)):
-        p = np.array(boundary_points[i]) 
+        p = np.array(boundary_points[i])
         q = np.array(boundary_points[(i + 1) % len(boundary_points)])
         if np.dot(q - p, point_out - p) > 0 and np.dot(p - q, point_out - q) > 0:
-            line_vector = q-p
+            line_vector = q - p
             point_vector = point_out - p
-            scalar = np.dot(point_vector, line_vector) / np.dot(line_vector, line_vector)
+            scalar = np.dot(point_vector, line_vector) / np.dot(
+                line_vector, line_vector
+            )
             projected_point_out = p + scalar * line_vector
             dist = np.linalg.norm(point_out - projected_point_out)
             if dist < min_dist:
                 min_dist = dist
                 closest_point_out = projected_point_out
-                closest_point_in = projected_point_out = p + (q - p) * np.dot(q - p, point_in - p) / np.linalg.norm(q - p)
+                closest_point_in = projected_point_out = p + (q - p) * np.dot(
+                    q - p, point_in - p
+                ) / np.linalg.norm(q - p)
 
     distance_to_projected_out = np.linalg.norm(closest_point_out - point_out)
     distance_to_projected_in = np.linalg.norm(closest_point_in - point_in)
-    stretch_factor = 1/(distance_to_projected_in/distance_to_projected_out + 1)
-    intersection_point = closest_point_out + stretch_factor*(closest_point_out-closest_point_in)
-    intersection_point = intersection_point + 0.001*(point_in-intersection_point)
+    stretch_factor = 1 / (distance_to_projected_in / distance_to_projected_out + 1)
+    intersection_point = closest_point_out + stretch_factor * (
+        closest_point_out - closest_point_in
+    )
+    intersection_point = intersection_point + 0.001 * (point_in - intersection_point)
     return intersection_point
+
 
 def add_trajectories_within_domain(
     plot_dict: dict,
@@ -663,7 +685,7 @@ def add_trajectories_within_domain(
     altitude_levels: List[int],
     ax: geoaxes.GeoAxesSubplot,
     domain_boundaries: List[float],
-    cross_dateline: bool
+    cross_dateline: bool,
 ) -> None:
     """Add trajectories to map.
 
@@ -673,7 +695,7 @@ def add_trajectories_within_domain(
         altitude_levels:               int        # altitude levels
         ax:                            Axes       current map to crop
         domain_boundaries:             list      lon/lat range of domain
-        cross_dateline:                bool      if the trajectories cross the dateline     
+        cross_dateline:                bool      if the trajectories cross the dateline
 
     """
     i = 1
@@ -689,48 +711,75 @@ def add_trajectories_within_domain(
                 latitude = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
                 if cross_dateline:
-                    longitude = longitude.apply(lambda lon: 360-np.abs(lon) if lon < 0 else lon)
+                    longitude = longitude.apply(
+                        lambda lon: 360 - np.abs(lon) if lon < 0 else lon
+                    )
                 ystart = latitude.iloc[0]
                 xstart = longitude.iloc[0]
                 linestyle = subplot_properties_dict[sub_index]
                 alpha = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
-                in_domain = [is_visible(lat, lon, domain_boundaries, False) for lat,lon in zip(latitude,longitude)]
+                in_domain = [
+                    is_visible(lat, lon, domain_boundaries, False)
+                    for lat, lon in zip(latitude, longitude)
+                ]
                 true_indices = np.where(in_domain)[0]
                 diff = np.diff(true_indices)
-                if len(diff)!=0:
-                    start_indices = np.r_[true_indices[0], true_indices[np.where(diff != 1)[0] + 1]]
-                    end_indices = np.r_[true_indices[np.where(diff != 1)[0]], true_indices[-1]]
-                    intervals = [(start,end) for start,end in zip(start_indices,end_indices)]
+                if len(diff) != 0:
+                    start_indices = np.r_[
+                        true_indices[0], true_indices[np.where(diff != 1)[0] + 1]
+                    ]
+                    end_indices = np.r_[
+                        true_indices[np.where(diff != 1)[0]], true_indices[-1]
+                    ]
+                    intervals = [
+                        (start, end) for start, end in zip(start_indices, end_indices)
+                    ]
                     data_length = len(latitude)
-                    is_main_trajectory = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"] == 1
+                    is_main_trajectory = (
+                        plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["alpha"]
+                        == 1
+                    )
 
                     for intv in intervals:
-                        plot_longitude = longitude[intv[0]:intv[1]]
-                        plot_latitude = latitude[intv[0]:intv[1]]
+                        plot_longitude = longitude[intv[0] : intv[1]]
+                        plot_latitude = latitude[intv[0] : intv[1]]
                         if intv[0] > 0:
-                            plot_longitude = longitude[intv[0]-1:intv[1]]
-                            plot_latitude = latitude[intv[0]-1:intv[1]]
-                            
-                        if intv[1] < data_length-1:
-                            plot_longitude = plot_longitude.append(pd.Series(longitude.iloc[intv[1]+1]))
-                            plot_latitude = plot_latitude.append(pd.Series(latitude.iloc[intv[1]+1]))
-                    
-                        ax.plot(
-                                plot_longitude,  # define x-axis
-                                plot_latitude,  # define y-axis
-                                linestyle,  # define linestyle
-                                alpha=alpha,  # define line opacity
-                                label=textstr if is_main_trajectory else None, # only provide labels for main trajectories
-                                transform=ccrs.Geodetic(),
-                                rasterized=True,
+                            plot_longitude = longitude[intv[0] - 1 : intv[1]]
+                            plot_latitude = latitude[intv[0] - 1 : intv[1]]
+
+                        if intv[1] < data_length - 1:
+                            plot_longitude = plot_longitude.append(
+                                pd.Series(longitude.iloc[intv[1] + 1])
                             )
-                    if (is_main_trajectory):
+                            plot_latitude = plot_latitude.append(
+                                pd.Series(latitude.iloc[intv[1] + 1])
+                            )
+
+                        ax.plot(
+                            plot_longitude,  # define x-axis
+                            plot_latitude,  # define y-axis
+                            linestyle,  # define linestyle
+                            alpha=alpha,  # define line opacity
+                            label=textstr
+                            if is_main_trajectory
+                            else None,  # only provide labels for main trajectories
+                            transform=ccrs.Geodetic(),
+                            rasterized=True,
+                        )
+                    if is_main_trajectory:
                         # add time interval points to main trajectory
-                        add_time_interval_points_within_domain(plot_dict, ax, i, linestyle, domain_boundaries, cross_dateline)
+                        add_time_interval_points_within_domain(
+                            plot_dict,
+                            ax,
+                            i,
+                            linestyle,
+                            domain_boundaries,
+                            cross_dateline,
+                        )
         else:  # no side traj
             latitude = plot_dict["altitude_" + str(i)]["traj_0"]["lat"]
             longitude = plot_dict["altitude_" + str(i)]["traj_0"]["lon"]
-            
+
             ystart = latitude.iloc[0]
             xstart = longitude.iloc[0]
 
@@ -749,8 +798,10 @@ def add_trajectories_within_domain(
             )
 
             # add time interval points to main trajectory
-            add_time_interval_points(plot_dict=plot_dict, ax=ax, i=i, linestyle=linestyle)
-            
+            add_time_interval_points(
+                plot_dict=plot_dict, ax=ax, i=i, linestyle=linestyle
+            )
+
             # add start point triangle
             ax.plot(
                 xstart,
@@ -764,6 +815,7 @@ def add_trajectories_within_domain(
             )
         i += 1
     return
+
 
 def generate_map_plot(
     cross_dateline: bool,
@@ -787,7 +839,9 @@ def generate_map_plot(
 
     """
     ax = ax or plt.gca()
-    ax.set_aspect("auto")  # scales the map, so that the aspeact ratio of fig & axes match
+    ax.set_aspect(
+        "auto"
+    )  # scales the map, so that the aspeact ratio of fig & axes match
     origin_coordinates = {
         "lon": plot_dict["altitude_1"]["traj_0"]["lon"].iloc[0],
         "lat": plot_dict["altitude_1"]["traj_0"]["lat"].iloc[0],
@@ -814,7 +868,7 @@ def generate_map_plot(
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(plot_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
     lon = pd.DataFrame(plot_dict["altitude_1"]["traj_0"]["lon"], columns=["lon"])
-    
+
     add_features(ax=ax)
     add_cities(
         ax=ax,
@@ -827,15 +881,15 @@ def generate_map_plot(
         side_traj=side_traj,
         altitude_levels=altitude_levels,
         ax=ax,
-        domain_boundaries = domain_boundaries,
-        cross_dateline=cross_dateline
+        domain_boundaries=domain_boundaries,
+        cross_dateline=cross_dateline,
     )
     if is_visible(
         lat=lat.iloc[0],
         lon=lon.iloc[0],
         domain_boundaries=domain_boundaries,
         cross_dateline=False,
-    ):  
+    ):
         ax.plot(
             lon.iloc[0],
             lat.iloc[0],
@@ -845,6 +899,6 @@ def generate_map_plot(
             markerfacecolor="white",
             transform=ccrs.Geodetic(),
             rasterized=True,
-            )
+        )
         ax.legend(fontsize=8)
     return ax
