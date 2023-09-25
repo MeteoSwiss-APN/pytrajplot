@@ -202,8 +202,8 @@ dependencies:
   - xorg-xproto=7.0.31
   - xz=5.2.6
   - yaml=0.2.5
-  - zipp=3.17.0
   - zlib=1.2.13
   - zstd=1.5.2
   - pip:
+    - zipp=3.17.0
     - pytrajplot==1.1.2
