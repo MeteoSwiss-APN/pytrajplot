@@ -205,6 +205,3 @@ dependencies:
   - zipp=3.15.0
   - zlib=1.2.13
   - zstd=1.5.2
-  - pip:
-    - pytrajplot==1.1.2
-prefix: /users/mketzel/miniconda3/envs/pytrajplot
