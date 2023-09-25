@@ -1,9 +1,9 @@
 click
 numpy
 pandas<1.4
-matplotlib==3.5.1
+matplotlib
 cartopy
-shapely==1.7.1
+shapely
 pip
 pre-commit
 black
