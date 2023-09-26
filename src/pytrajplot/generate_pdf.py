@@ -595,12 +595,15 @@ def generate_pdf(
                     "lat"
                 ] = trajectory_df["lat"][first_row:next_first_row]
 
-                trajectory_latitude_expansion = trajectory_latitude_expansion.append(
-                    trajectory_df["lat"][first_row:next_first_row], ignore_index=True
-                )
-                trajectory_longitude_expansion = trajectory_longitude_expansion.append(
-                    trajectory_df["lon"][first_row:next_first_row], ignore_index=True
-                )
+                if not trajectory_df["lon"][first_row:next_first_row].empty:
+                    trajectory_longitude_expansion = pd.concat([trajectory_longitude_expansion,
+                                                                trajectory_df["lon"][first_row:next_first_row]
+                                                                ]).reset_index(drop=True)
+                    
+                if not trajectory_df["lat"][first_row:next_first_row].empty:
+                    trajectory_latitude_expansion = pd.concat([trajectory_latitude_expansion,
+                                                               trajectory_df["lat"][first_row:next_first_row]
+                                                               ]).reset_index(drop=True)
                 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
                 plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj_index)][
@@ -714,12 +717,17 @@ def generate_pdf(
                 plot_dict["altitude_" + str(alt_index)]["traj_0"][
                     "lat"
                 ] = trajectory_df["lat"][first_row:next_first_row]
-                trajectory_latitude_expansion = trajectory_latitude_expansion.append(
-                    trajectory_df["lat"][first_row:next_first_row], ignore_index=True
-                )
-                trajectory_longitude_expansion = trajectory_longitude_expansion.append(
-                    trajectory_df["lon"][first_row:next_first_row], ignore_index=True
-                )
+
+                
+
+                if not trajectory_df["lon"][first_row:next_first_row].empty:
+                    trajectory_longitude_expansion = pd.concat([trajectory_longitude_expansion,
+                                                                trajectory_df["lon"][first_row:next_first_row]
+                                                                ]).reset_index(drop=True)
+                if not trajectory_df["lat"][first_row:next_first_row].empty:
+                    trajectory_latitude_expansion = pd.concat([trajectory_latitude_expansion,
+                                                               trajectory_df["lat"][first_row:next_first_row]
+                                                               ]).reset_index(drop=True)
                 # ~~~~~~~~~~~~~~~~~~~~ add lon/lat to plot_dict & trajectory_expansion_df ~~~~~~~~~~~~~~~~~~~~ #
 
                 # keys for trajectories 1-4 remain empty

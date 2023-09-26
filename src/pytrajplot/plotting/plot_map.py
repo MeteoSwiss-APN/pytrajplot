@@ -185,9 +185,11 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
         if lon < 0:
             lon = 360 - abs(lon)
 
+    lon = float(lon.iloc[0]) if isinstance(lon,pd.Series) else float(lon)
+    lat =float(lat.iloc[0]) if isinstance(lat,pd.Series) else float(lat)
     is_in_domain = (
-        domain_boundaries[0] <= float(lon) <= domain_boundaries[1]
-        and domain_boundaries[2] <= float(lat) <= domain_boundaries[3]
+        domain_boundaries[0] <= lon <= domain_boundaries[1]
+        and domain_boundaries[2] <= lat <= domain_boundaries[3]
     )
     return is_in_domain
 
@@ -748,12 +750,8 @@ def add_trajectories_within_domain(
                             plot_latitude = latitude[intv[0] - 1 : intv[1]]
 
                         if intv[1] < data_length - 1:
-                            plot_longitude = plot_longitude.append(
-                                pd.Series(longitude.iloc[intv[1] + 1])
-                            )
-                            plot_latitude = plot_latitude.append(
-                                pd.Series(latitude.iloc[intv[1] + 1])
-                            )
+                            plot_longitude  = pd.concat([plot_longitude,pd.Series(longitude.iloc[intv[1] + 1])])
+                            plot_latitude = pd.concat([plot_latitude, pd.Series(latitude.iloc[intv[1] + 1])])
 
                         ax.plot(
                             plot_longitude,  # define x-axis

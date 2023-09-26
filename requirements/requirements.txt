@@ -1,6 +1,6 @@
 click
 numpy
-pandas
+pandas==2.1.1
 matplotlib
 cartopy
 shapely
