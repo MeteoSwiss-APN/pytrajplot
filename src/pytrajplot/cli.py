@@ -79,14 +79,7 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
 @click.option(
     "--language",
     type=click.Choice(
-        [
-            "en",
-            "english",
-            "de",
-            "ger",
-            "german",
-            "Deutsch",
-        ],
+        ["en", "english", "de", "ger", "german", "Deutsch", "deutsch"],
         case_sensitive=False,
     ),
     multiple=False,
@@ -172,6 +165,5 @@ def main(
         domains=domain,
         output_types=datatype,
     )
-
     print("--- Done.")
     return
