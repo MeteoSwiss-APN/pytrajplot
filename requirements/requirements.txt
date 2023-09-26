@@ -3,7 +3,7 @@ numpy
 pandas==2.1.1
 matplotlib
 cartopy
-shapely
+shapely==1.7.1
 pip
 pre-commit
 black
