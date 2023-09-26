@@ -21,7 +21,7 @@ HELP=false
 ENV_PINNED=requirements/environment.yml
 # Requirement file (unpinned dependencies, used with 'conda create', plain text format)
 # Note: Unlike the blueprint, a plain text file is used here for unpinned requirements
-ENV_UNPINNED=requirements/requirements.yml
+ENV_UNPINNED=requirements/requirements.txt
 
 help_msg="Usage: $(basename "${0}") [-n NAME] [-p VER] [-u] [-e] [-m] [-h]
 
