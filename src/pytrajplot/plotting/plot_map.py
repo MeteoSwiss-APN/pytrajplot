@@ -1,9 +1,13 @@
 """Generate Map Plot Figure."""
 
 # Standard library
-from pathlib import Path
 from itertools import groupby
-from typing import List, Dict, Union, Tuple, Any
+from pathlib import Path
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Tuple
+from typing import Union
 
 # Third-party
 import cartopy
@@ -487,13 +491,14 @@ def filter_by_domain(
     domain_boundaries: List[float],
     cross_dateline: bool,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Filters points out which are not within fiven domain boundaries.
+    """Filter points out which are not within fiven domain boundaries.
 
     Args:
         latitude:            list of the points' latitude
         longitude:           list of the points' longitude
         domain_boundaries:   lon/lat range of domain
-        cross_dateline       if other coordinates cross the dateline
+        cross_dateline:      if other coordinates cross the dateline
+
     """
     filter_mask = [
         is_visible(lat, lon, domain_boundaries, cross_dateline)
@@ -513,13 +518,14 @@ def add_time_interval_points_within_domain(
     """Add time interval points to map..
 
     Args:
-        plot_dict:         dict       containing the lan/lot data & other plot properties
-        ax:                 Axes       current map to crop
-        i:                  int        Altitude index. Only want to add legend for altitude one.
-        linestyle:          str        Defines colour of interval poins (same as corresponding trajectory)
+        plot_dict:          containing the lan/lot data & other plot properties
+        ax:                 current map to crop
+        i:                  Altitude index. Only want to add legend for altitude one.
+        linestyle:          Defines colour of interval poins (same as corresponding trajectory)
+        domain_boundaries:  lon/lat range of domain
+        cross_dateline:     if other coordinates cross the dateline
 
     """
-
     lon_important, lat_important = retrieve_interval_points(plot_dict, altitude_index=i)
     lon_important, lat_important = filter_by_domain(
         lon_important, lat_important, domain_boundaries, cross_dateline
@@ -592,11 +598,13 @@ def retrieve_interval_points(
 def get_projected_point_on_domain_boundaries(
     lat: float, lon: float, domain_boundaries: Tuple[float, float, float, float]
 ) -> np.ndarray:
-    """Calculates the projection of a given point onto a given boundary with the shortest distance.
+    """Calculate the projection of a given point onto a given boundary with the shortest distance.
+
     Args:
         lat:                  Latitude of the given point
         lon:                  Longitude of the given point
         domain_boundaries:    Domain consisting of latitudes and longitudes
+
     """
     min_dist = np.inf
     closest_points = None
@@ -636,13 +644,15 @@ def get_intersection_point_on_domain_boundaries(
     lon_out: float,
     domain_boundaries: List[float],
 ) -> np.ndarray:
-    """Calculates the intersection point between two points and a given boundary.
+    """Calculate the intersection point between two points and a given boundary (NOT used currently).
+
     Args:
         lat_in:                   Latitude of the point within the domain
         lon_in:                   Longitude of the point within the domain
         lat_out:                  Latitude of the point out of the domain
         lon_out:                  Longitude of the point out of the domain
         domain_boundaries:        Domain consisting of latitudes and longitudes
+
     """
     min_dist = np.inf
     closest_point_out = None

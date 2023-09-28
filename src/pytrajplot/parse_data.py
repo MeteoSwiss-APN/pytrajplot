@@ -503,5 +503,4 @@ def check_input_dir(input_dir, prefix_dict, separator):
             start_df=start_dict[key],
             plot_info_dict=plot_info_dict,
         )
-
     return trajectory_dict, plot_info_dict
