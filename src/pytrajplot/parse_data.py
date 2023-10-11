@@ -470,8 +470,10 @@ def check_input_dir(input_dir, prefix_dict, separator):
         file_path = os.path.join(input_dir, filename)
         if filename.startswith(prefix_dict["start"]):
             # if filename starts w/ start file prefix
-            key = filename[len(prefix_dict["start"]):]
-            if (key not in keys):  # filename[len(prefix_dict["start"]) :] ≡ key (i.e. 000-048F)
+            key = filename[len(prefix_dict["start"]) :]
+            if (
+                key not in keys
+            ):  # filename[len(prefix_dict["start"]) :] ≡ key (i.e. 000-048F)
                 keys.append(key)
                 # check, that there is a matching trajectory file for each start file
                 assert os.path.isfile(
