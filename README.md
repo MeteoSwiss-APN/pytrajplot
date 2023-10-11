@@ -26,7 +26,7 @@ process. If that is not the case, install the latest Miniconda version with
     tools/setup_miniconda.sh
 
 or install it manually from the
-[miniconda webpage](https://docs.conda.io/en/latest/miniconda.html). 
+[miniconda webpage](https://docs.conda.io/en/latest/miniconda.html).
 To activate the base environment run `source miniconda/bin/activate`.
 Afterwards, follow the
 instructions here below to clone the GitHub repository, set up a conda environment and test all
@@ -82,7 +82,7 @@ every time you add new imports while developing.
 
 Instead of intalling the environment and the package with the above commands,
 you may alternatively use the available Makefile.
-Using the Makefile is deprecated, because MeteoSwiss' blueprint stopped the support. It will be removed in a future version. 
+Using the Makefile is deprecated, because MeteoSwiss' blueprint stopped the support. It will be removed in a future version.
 Please migrate to instruction in section [With Conda](#with-conda).
 Use `make help` to see other available make targets. Use the `--dry-run`
 option to see the commands `make` would run without executing them.
