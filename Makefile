@@ -135,8 +135,8 @@ pinned-dev:
 # Run the tests
 #==============================================================================
 
-.PHONY: tests   #CMD Run tests.
-tests:
+.PHONY: test   #CMD Run tests.
+test:
 	@echo -e "\n[make tests] running all tests"
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
 	pytest tests

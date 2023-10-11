@@ -82,13 +82,13 @@ def _get_traj_dict(data, number_of_trajectories=None, traj_length=None) -> dict:
 
 def _check_dateline_crossing(
     lon: pd.Series,
-    number_of_times: int,
+    time_steps_per_trajectory: int,
 ):
     """Check, wheter dateline gets crossed by *any* trajectory departing from this location.
 
     Args:
         lon (pandas series): one list, containing the longitude values for all trajectories
-        number_of_times (int): number of time steps in a trajectory
+        time_steps_per_trajectory (int): number of time steps in a trajectory
 
     Returns:
         cross_dateline (bool, (real, real)): true and min/max lon, if dateline gets crossed by any trajectory
@@ -114,7 +114,7 @@ def _check_dateline_crossing(
             if (
                 not np.isnan(lon[flip_index])
                 and not np.isnan(lon[flip_index - 1])
-                and flip_index % number_of_times != 0
+                and flip_index % time_steps_per_trajectory != 0
             ):
                 if not (
                     -20 < lon[flip_index] < 20

@@ -79,13 +79,14 @@ every time you add new imports while developing.
 ### Shortcut using Makefile
 
 Instead of intalling the environment and the package with the above commands,
-you may alternatively use the available Makfile.
-Note however that providing a Makefile is no longer supported by the MeteoSwiss blueprint and the Makefile may therefore be removed in a future release.
+you may alternatively use the available Makefile.
+Using the Makefile is deprecated, because MeteoSwiss' blueprint stopped the support. It will be removed in a future version. 
+Please migrate to instruction in section [With Conda](#with-conda).
 Use `make help` to see other available make targets. Use the `--dry-run`
 option to see the commands `make` would run without executing them.
 
     make install
-    make tests
+    make test
 
 ---
 ### Test results

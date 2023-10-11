@@ -427,7 +427,7 @@ def get_map_settings(lon, lat, case, number_of_times):
         # 0) check if dateline gets crossed;
         # if the dateline does not get crossed -->  longitude expansion = left & right boundary of trajectories
         cross_dateline, longitude_expansion = _check_dateline_crossing(
-            lon=lon, number_of_times=number_of_times
+            lon=lon, time_steps_per_trajectory=number_of_times
         )
 
         # 1) split lon/lat lists into separate trajectories.
