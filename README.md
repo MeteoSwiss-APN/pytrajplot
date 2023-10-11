@@ -27,7 +27,7 @@ process. If that is not the case, install the latest Miniconda version with
 
 or install it manually from the
 [miniconda webpage](https://docs.conda.io/en/latest/miniconda.html).
-To activate the base environment run `source miniconda/bin/activate`.
+To activate the base environment from the installed miniconda run `source miniconda/bin/activate`.
 Afterwards, follow the
 instructions here below to clone the GitHub repository, set up a conda environment and test all
 possible use-cases.
