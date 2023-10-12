@@ -484,7 +484,7 @@ def add_time_interval_points(
 def filter_by_domain(
     longitude: pd.Series,
     latitude: pd.Series,
-    domain_boundaries: list[float],
+    domain_boundaries: List[float],
     cross_dateline: bool,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Filter points out which are not within fiven domain boundaries.
