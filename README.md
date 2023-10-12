@@ -83,6 +83,7 @@ every time you add new imports while developing.
 Instead of intalling the environment and the package with the above commands,
 you may alternatively use the available Makefile.
 Using the Makefile is deprecated, because MeteoSwiss' blueprint stopped the support. It will be removed in a future version.
+Using the Makefile is deprecated, because MeteoSwiss' blueprint stopped the support. It will be removed in a future version.
 Please migrate to instruction in section [With Conda](#with-conda).
 Use `make help` to see other available make targets. Use the `--dry-run`
 option to see the commands `make` would run without executing them.
