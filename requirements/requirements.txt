@@ -1,13 +1,13 @@
+python==3.10.11
 click
 numpy
-pandas==2.1.1
+pandas>=2.0.1
 matplotlib
 cartopy
-shapely==1.7.1
+shapely
 pip
 pre-commit
 black
 isort
 pydocstyle
 pytest
-python>=3.10
