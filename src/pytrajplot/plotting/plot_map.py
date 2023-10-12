@@ -4,10 +4,6 @@
 from itertools import groupby
 from pathlib import Path
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Tuple
-from typing import Union
 
 # Third-party
 import cartopy
@@ -78,9 +74,9 @@ def add_features(ax: geoaxes.GeoAxesSubplot) -> None:
 def crop_map(
     ax: geoaxes.GeoAxesSubplot,
     domain: str,
-    custom_domain_boundaries: List[float],
-    origin_coordinates: Dict[str, Union[float, str]],
-) -> List[float]:
+    custom_domain_boundaries: list[float],
+    origin_coordinates: dict[str, float|str],
+) -> list[float]:
     """Crop map to given domain (i.e. centraleurope).
 
     Args:
@@ -138,8 +134,8 @@ def crop_map(
 
 
 def get_dynamic_zoom_boundary(
-    custom_domain_boundaries: List[float], origin_coordinates: Dict[str, float]
-) -> Tuple[float, float, float, float]:
+    custom_domain_boundaries: list[float], origin_coordinates: dict[str, float]
+) -> tuple[float, float, float, float]:
     # case 1: trajectory expansion mainly towards the east from origin
     if abs(custom_domain_boundaries[0] - origin_coordinates["lon"]) <= 10:
         left_boundary = origin_coordinates["lon"] - 2
@@ -320,7 +316,7 @@ def is_of_interest(name: str, capital_type: str, population: int, lon: float) ->
 
 def add_cities(
     ax: geoaxes.GeoAxesSubplot,
-    domain_boundaries: List[float],
+    domain_boundaries: list[float],
     domain: str,
     cross_dateline: bool,
 ) -> None:
@@ -447,7 +443,7 @@ def add_cities(
 
 
 def add_time_interval_points(
-    plot_dict: Dict[str, Union[List[float], str]],
+    plot_dict: dict[str, list[float]|str],
     ax: geoaxes.GeoAxesSubplot,
     i: int,
     linestyle: str,
@@ -488,9 +484,9 @@ def add_time_interval_points(
 def filter_by_domain(
     longitude: pd.Series,
     latitude: pd.Series,
-    domain_boundaries: List[float],
+    domain_boundaries: list[float],
     cross_dateline: bool,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Filter points out which are not within fiven domain boundaries.
 
     Args:
@@ -512,7 +508,7 @@ def add_time_interval_points_within_domain(
     ax: Any,
     i: int,
     linestyle: str,
-    domain_boundaries: List[float],
+    domain_boundaries: list[float],
     cross_dateline: bool,
 ) -> None:
     """Add time interval points to map..
@@ -554,7 +550,7 @@ def add_time_interval_points_within_domain(
 
 def retrieve_interval_points(
     plot_dict: dict, altitude_index: int
-) -> Tuple[pd.Series, pd.Series]:
+) -> tuple[pd.Series, pd.Series]:
     """Extract the interval points from plot_dict add them to ax.
 
     Args:
@@ -596,7 +592,7 @@ def retrieve_interval_points(
 
 
 def get_projected_point_on_domain_boundaries(
-    lat: float, lon: float, domain_boundaries: Tuple[float, float, float, float]
+    lat: float, lon: float, domain_boundaries: tuple[float, float, float, float]
 ) -> np.ndarray:
     """Calculate the projection of a given point onto a given boundary with the shortest distance.
 
@@ -642,7 +638,7 @@ def get_intersection_point_on_domain_boundaries(
     lon_in: float,
     lat_out: float,
     lon_out: float,
-    domain_boundaries: List[float],
+    domain_boundaries: list[float],
 ) -> np.ndarray:
     """Calculate the intersection point between two points and a given boundary (NOT used currently).
 
@@ -694,9 +690,9 @@ def get_intersection_point_on_domain_boundaries(
 def add_trajectories_within_domain(
     plot_dict: dict,
     side_traj: int,
-    altitude_levels: List[int],
+    altitude_levels: list[int],
     ax: geoaxes.GeoAxesSubplot,
-    domain_boundaries: List[float],
+    domain_boundaries: list[float],
     cross_dateline: bool,
 ) -> None:
     """Add trajectories to map.
@@ -833,9 +829,9 @@ def generate_map_plot(
     cross_dateline: bool,
     plot_dict: Dict,
     side_traj: int,
-    altitude_levels: List[int],
+    altitude_levels: list[int],
     domain: str,
-    trajectory_expansion: List[float],  # this is the dynamic domain
+    trajectory_expansion: list[float],  # this is the dynamic domain
     ax: geoaxes.GeoAxesSubplot = None,
 ) -> geoaxes.GeoAxesSubplot:
     """Generate Map Plot.
