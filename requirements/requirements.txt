@@ -10,3 +10,4 @@ black
 isort
 pydocstyle
 pytest
+python>=3.10
