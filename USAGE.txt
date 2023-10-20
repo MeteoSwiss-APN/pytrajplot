@@ -1,7 +1,0 @@
-=====
-Usage
-=====
-
-To use pytrajplot in a project::
-
-    import pytrajplot

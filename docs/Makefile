@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = python -msphinx
+SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = pytrajplot
 SOURCEDIR     = .
 BUILDDIR      = _build

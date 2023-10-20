@@ -3,15 +3,18 @@ requires = [
     "setuptools>=65",
     "wheel>=0.38",
 ]
+
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytrajplot"
-version = "0.1.0"
-description = "Pirmin Kaufmann's pytrajplot"
+version = "1.1.2"
+description = "Plot LAGRANTO trajectories starting/ending at the same location on a map together with vertical cross sections"
 readme = "README.md"
 keywords = [
-    "pytrajplot",
+    "PyTrajPlot",
+    "trajectories",
+    "LAGRANTO",
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -89,10 +92,10 @@ ignore_missing_imports = true
 max-line-length = 88
 # max-complexity = 10
 ignore = [
-    "E203",
-    "F811",
-    "I002",
-    "W503",
+    "E203", # Allow whitespace before ':' (https://github.com/PyCQA/pycodestyle/issues/373)
+    "F811", # Allow redefinition of unused name (necessary for typing.overload)
+    "I002", # Don't check for isort configuration
+    "W503", # Allow line break before binary operator (PEP 8-compatible)
 ]
 per-file-ignores = [
     "__init__.py: F401",  # Allow unused imports

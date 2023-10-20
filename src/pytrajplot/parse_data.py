@@ -463,19 +463,18 @@ def check_input_dir(input_dir, prefix_dict, separator):
 
     """
     print("--- Parsing Input Files")
-    start_dict, trajectory_dict, keys = {}, {}, []
+    start_dict, trajectory_dict = {}, {}
+    keys = []
     # iterate through the directory and read the start & plot_info files. collect keys, parse corresponding trajectory files afterwards
     for filename in os.listdir(input_dir):
         file_path = os.path.join(input_dir, filename)
-        if (
-            filename[: len(prefix_dict["start"])] == prefix_dict["start"]
-        ):  # if filename starts w/ start file prefix
+        if filename.startswith(prefix_dict["start"]):
+            # if filename starts w/ start file prefix
             key = filename[len(prefix_dict["start"]) :]
             if (
                 key not in keys
             ):  # filename[len(prefix_dict["start"]) :] ≡ key (i.e. 000-048F)
                 keys.append(key)
-
                 # check, that there is a matching trajectory file for each start file
                 assert os.path.isfile(
                     os.path.join(
@@ -486,10 +485,13 @@ def check_input_dir(input_dir, prefix_dict, separator):
 
             start_dict[key] = read_startf(startf_path=file_path, separator=separator)
 
-        if (
-            filename[: len(prefix_dict["plot_info"])] == prefix_dict["plot_info"]
-        ):  # if filename ≡ plot_info filename
+        if filename.startswith(prefix_dict["plot_info"]):
+            # if filename ≡ plot_info filename
             plot_info_dict = PLOT_INFO(file=file_path).data
+
+    # check if plot_info has been found
+    if plot_info_dict is None:
+        raise RuntimeError("ERROR: plot_info file not found:", prefix_dict["plot_info"])
 
     # for each start file (identified by its unique key) a corresponding trajectory file exists
     for key in keys:
@@ -499,5 +501,4 @@ def check_input_dir(input_dir, prefix_dict, separator):
             start_df=start_dict[key],
             plot_info_dict=plot_info_dict,
         )
-
     return trajectory_dict, plot_info_dict

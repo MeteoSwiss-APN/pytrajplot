@@ -1,11 +1,11 @@
-=======
 Credits
 =======
 
 Development Lead
 ----------------
 
-* Michel Zeller <michel.zeller@meteoswiss.ch>
+- Michel Zeller, MeteoSwiss 2021-2022
+- Pirmin Kaufmann, MeteoSwiss, <pirmin.kaufmann@meteoswiss.ch>
 
 Contributors
 ------------

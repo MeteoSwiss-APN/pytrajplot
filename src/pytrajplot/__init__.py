@@ -1,15 +1,16 @@
-"""Top-level package for pytrajplot."""
-
-__author__ = "Michel Zeller"
-__email__ = "michel.zeller@meteoswiss.ch"
-__version__ = "1.1.1"
-
+"""Top-level package for PyTrajPlot."""
 # Standard library
-# Standard Library
+import importlib.metadata
 from pathlib import Path
 
 # Third-party
 import cartopy
+
+__author__ = "Michel Zeller"
+__email__ = "michel.zeller@meteoswiss.ch"
+__version__ = importlib.metadata.version(__package__)
+
+del importlib
 
 
 def _check_dir_exists(path):

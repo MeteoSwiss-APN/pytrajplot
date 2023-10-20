@@ -32,7 +32,7 @@ description_files = [
 
 metadata = {
     "name": "pytrajplot",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Michel Zeller's pytrajplot",
     "long_description": read_present_files(description_files),
     "author": "Michel Zeller",

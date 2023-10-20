@@ -23,11 +23,14 @@ PINNED = 1
 # Name of development environment
 NAME_DEV = $(NAME)-dev
 # Files defining environment
-FILE_UNPINNED = requirements/requirements.txt
-FILE_PINNED = environment.yml
+FILE_UNPINNED     = requirements/requirements.txt
+FILE_PINNED       = requirements/environment.yml
 FILE_DEV_UNPINNED = requirements/dev-requirements.txt
-FILE_DEV_PINNED = dev-environment.yml
+FILE_DEV_PINNED   = requirements/dev-environment.yml
 #------------------------------------------------------------------------------
+
+# Determine name of current makefile
+THIS_MAKEFILE := $(firstword $(MAKEFILE_LIST))
 
 # Command marker for help target
 # (second line to add a blank without becoming a search target for grep)
@@ -67,9 +70,11 @@ endif
 help:
 	@echo -e "\nAdd PINNED=0 to the 'make' command for unpinned installation."
 	@echo -e "Add NAME=name_of_env to use a different environment name"
-	@echo -e "or  PREFIX=/path/to/env to install to a different location."
+	@echo -e "or  PREFIX=/path/env_name to install to a different location."
+	@echo -e "Note that following the new MeteoSwiss blueprint, this"
+	@echo -e "Makefile will no longer be provided in a future release."
 	@echo -e "\nTargets:"
-	@grep "$(MARKER)" Makefile | sed 's/.PHONY: //' | sed "s/$(MARKER)/\t/"
+	@grep "$(MARKER)" $(THIS_MAKEFILE) | sed 's/.PHONY: //' | sed "s/$(MARKER)/\t/"
 
 #==============================================================================
 # Installation
@@ -80,7 +85,7 @@ install: env
 	@echo -e "\n[make install] installing the package with runtime dependencies."
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
 	python -m pip install .
-	pytrajplot -V
+	pytrajplot --version
 	@echo "To activate this environment, use: conda activate $(NAME_OR_PREFIX)"
 
 .PHONY: install-dev #CMD Install the package as editable with runtime and development dependencies.
@@ -89,7 +94,7 @@ install-dev: env-dev
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX_DEV)
 	python -m pip install --editable .
 	pre-commit install
-	pytrajplot -V
+	pytrajplot --version
 	@echo "To activate this environment, use: conda activate $(NAME_OR_PREFIX_DEV)"
 
 #==============================================================================
@@ -98,11 +103,12 @@ install-dev: env-dev
 # Note: conda create only takes simple plain-text lists, but can take multiple files
 #       conda env create takes a yaml environment file, but only (the last) one of them.
 
+.PHONY: env     #CMD Add the environment for the package.
 env: $(FILE)
 	@echo -e "\n[make env] creating conda environment:"  $(NAME_OR_PREFIX)
 	@echo -e "[make env] from file:" $(FILE)
 	conda env create --force $(TARGET_ENV) --file $(FILE)
-	@echo -e "\n[make env-dev] conda environment created:"  $(NAME_OR_PREFIX_DEV)
+	@echo -e "\n[make env] conda environment created:"  $(NAME_OR_PREFIX)
 
 .PHONY: env-dev #CMD Add the development environment for the package.
 env-dev: $(FILE) $(FILE_DEV)
@@ -121,7 +127,7 @@ pinned:
 .PHONY: pinned-dev #CMD Save the current environment for pinned development installation.
 pinned-dev:
 	@echo -e "\n[make pinned-dev] creating file defining pinned conda environment"
-	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
+	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX_DEV)
 	conda env export --no-builds | tail -n +2 | head -n -2 > $(FILE_DEV_PINNED)
 	@echo "[make pinned-dev] Pinned environment saved in" $(FILE_DEV_PINNED)
 
@@ -129,10 +135,13 @@ pinned-dev:
 # Run the tests
 #==============================================================================
 
-.PHONY: test    #CMD Run tests.
+.PHONY: test   #CMD Run tests.
 test:
-	@echo -e "\n[make test] running all tests"
+	@echo -e "\n[make tests] running all tests"
 	$(CONDA_ACTIVATE) $(NAME_OR_PREFIX)
 	pytest tests
+	@echo -e "\n*** Creating plots from test input data ***"
+	tests/test_pytrajplot.sh
+	@echo "All test plots done."
 
 #==============================================================================

@@ -1,4 +1,4 @@
-Welcome to pytrajplot's documentation!
+Welcome to PyTrajPlot's documentation!
 ===========================================================
 
 .. toctree::
