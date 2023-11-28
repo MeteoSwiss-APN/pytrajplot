@@ -34,7 +34,7 @@ documentation = "https://github.io/MeteoSwiss-APN/pytrajplot"
 
 [project.scripts]
 # Format: <command> = "<package>.<module>:<function>"
-# pytrajplot = "pytrajplot.cli:main"
+pytrajplot = "pytrajplot.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
