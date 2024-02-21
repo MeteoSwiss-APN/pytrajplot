@@ -1,4 +1,5 @@
 """Subpackage ``pytrajplot.plotting``."""
+
 # Standard library
 from typing import List
 

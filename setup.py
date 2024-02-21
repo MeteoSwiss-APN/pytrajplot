@@ -1,4 +1,5 @@
 """Set up the project."""
+
 # Standard library
 from typing import List
 from typing import Sequence

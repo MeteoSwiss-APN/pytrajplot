@@ -1,4 +1,5 @@
 """Test module ``pytrajplot``."""
+
 # Third-party
 from click.testing import CliRunner
 

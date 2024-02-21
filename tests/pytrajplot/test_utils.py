@@ -1,4 +1,5 @@
 """Test module ``pytrajplot/utils.py``."""
+
 # Standard library
 import logging
 

@@ -100,6 +100,46 @@ def crop_map(
         ) = get_dynamic_zoom_boundary(custom_domain_boundaries, origin_coordinates)
 
     padding = 1  # padding on each side, for the dynamically created plots
+    if domain == "dynamic":
+        # Restrict aspect ratio to avoid overstretched maps
+        min_aspect = 1.8
+        max_aspect = 3
+        domain_aspect = (custom_domain_boundaries[1] - custom_domain_boundaries[0]) / (
+            custom_domain_boundaries[3] - custom_domain_boundaries[2]
+        )
+        if domain_aspect < min_aspect:
+            # Add half of the difference on each side
+            custom_domain_boundaries[0] -= 0.5 * (
+                min_aspect * (custom_domain_boundaries[3] - custom_domain_boundaries[2])
+                - (custom_domain_boundaries[1] - custom_domain_boundaries[0])
+            )
+            custom_domain_boundaries[1] += 0.5 * (
+                min_aspect * (custom_domain_boundaries[3] - custom_domain_boundaries[2])
+                - (custom_domain_boundaries[1] - custom_domain_boundaries[0])
+            )
+        if domain_aspect > max_aspect:
+            # Add half of the difference on each side but keep within [-90 .. 90]
+            custom_domain_boundaries[2] = max(
+                -90 + padding,
+                custom_domain_boundaries[2]
+                - 0.5
+                * (
+                    max_aspect
+                    * (custom_domain_boundaries[1] - custom_domain_boundaries[0])
+                    - (custom_domain_boundaries[3] - custom_domain_boundaries[2])
+                ),
+            )
+            custom_domain_boundaries[3] = min(
+                90 - padding,
+                custom_domain_boundaries[3]
+                + 0.5
+                * (
+                    max_aspect
+                    * (custom_domain_boundaries[1] - custom_domain_boundaries[0])
+                    - (custom_domain_boundaries[3] - custom_domain_boundaries[2])
+                ),
+            )
+
     domain_dict = {
         "centraleurope": {
             "domain": [1, 20, 42.5, 51.5]
@@ -127,10 +167,12 @@ def crop_map(
     domain_boundaries = domain_dict[domain]["domain"]
     ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree(central_longitude=0))
     lon_limits = ax.get_xlim()
-    if np.isclose(np.abs(lon_limits[0] - lon_limits[1]), 360, atol=1):
-        return []
-    else:
-        return domain_boundaries
+
+    # Uncomment if empty map with warning should be plotted under certain conditions
+    # if np.isclose(np.abs(lon_limits[0] - lon_limits[1]), 360, atol=1):
+    #     return []
+
+    return domain_boundaries
 
 
 def get_dynamic_zoom_boundary(
@@ -768,9 +810,9 @@ def add_trajectories_within_domain(
                             plot_latitude,  # define y-axis
                             linestyle,  # define linestyle
                             alpha=alpha,  # define line opacity
-                            label=textstr
-                            if is_main_trajectory
-                            else None,  # only provide labels for main trajectories
+                            label=(
+                                textstr if is_main_trajectory else None
+                            ),  # only provide labels for main trajectories
                             transform=ccrs.Geodetic(),
                             rasterized=True,
                         )

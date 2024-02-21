@@ -1,6 +1,5 @@
 """Some variables and resources for the plots."""
 
-
 # hard coded lists of cities, to be placed on pre-defined domains
 ch_cities_list = {
     "Milan": {"lon": 9.19, "lat": 45.4669},

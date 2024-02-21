@@ -1,4 +1,5 @@
 """Parse data from start, trajectory & plot info files."""
+
 # Standard library
 import datetime
 import math
@@ -86,9 +87,9 @@ def read_startf(startf_path, separator):
         unit = "m"
 
     start_df["side_traj"] = None  # 1 if there are side trajectories, else 0
-    start_df[
-        "altitude_levels"
-    ] = None  # #altitude levels for certain origin; variable within start file
+    start_df["altitude_levels"] = (
+        None  # #altitude levels for certain origin; variable within start file
+    )
     start_df["subplot_index"] = None
     start_df["max_start_altitude"] = None
 
@@ -97,9 +98,9 @@ def read_startf(startf_path, separator):
 
     if len(start_df) == 1:  # exactly one trajectory w/o side trajectories in start file
         start_df["side_traj"] = 0  # 1 if there are side trajectories, else 0
-        start_df[
-            "altitude_levels"
-        ] = 1  # #altitude levels for certain origin; variable within start file
+        start_df["altitude_levels"] = (
+            1  # #altitude levels for certain origin; variable within start file
+        )
         start_df["subplot_index"] = 0
         start_df["max_start_altitude"] = start_df["z"].loc[0]
 
@@ -132,12 +133,12 @@ def read_startf(startf_path, separator):
 
                     # The correct subplot index is assigned to the main + side trajectories. This can be achieved w/ the
                     # map_altidude_and_subplots function. The order of altitude levels in the start file is of no significance.
-                    start_df.loc[
-                        i : i + 4, "subplot_index"
-                    ] = map_altitudes_and_subplots(
-                        unit=unit,
-                        unique_start_altitudes=unique_altitude_levels_dict[origin],
-                        current_altitude=start_df["z"].loc[i],
+                    start_df.loc[i : i + 4, "subplot_index"] = (
+                        map_altitudes_and_subplots(
+                            unit=unit,
+                            unique_start_altitudes=unique_altitude_levels_dict[origin],
+                            current_altitude=start_df["z"].loc[i],
+                        )
                     )
 
                     if unit == "hPa":

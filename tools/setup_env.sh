@@ -66,12 +66,18 @@ echo "Creating ${CONDA} environment"
 # Install requirements in new env
 if ${PINNED}; then
     echo "Pinned installation"
-    # Note: Unlike the blueprint, the environment is created, not updated here
-    ${CONDA} env create --force --name ${ENV_NAME} --file $ENV_PINNED || exit
+    # Note: Unlike in the MeteoSwiss-APN/mch-python-blueprint,
+    #       the environment is created with all dependencies
+    #       at once (as recommended by conda)
+    # Note: From `conda env --help`: `--force` is deprecated and will be removed in 24.3.
+    #       Use `--yes` instead.
+    ${CONDA} env create --yes --name ${ENV_NAME} --file $ENV_PINNED || exit
 else
     echo "Unpinned installation"
-    # Note: Unlike the blueprint, a plain text file is used for unpinned requirements
-    # Note: Unlike the blueprint, the environment is created, not updated here
+    # Note: Unlike in the MeteoSwiss-APN/mch-python-blueprint,
+    #       a plain text file is used for unpinned requirements, and
+    #       the environment is created with all dependencies
+    #       at once (as recommended by conda)
     ${CONDA} create --force --name ${ENV_NAME} --file $ENV_UNPINNED --yes || exit
     if ${EXPORT}; then
         echo "Export pinned prod environment"
@@ -86,4 +92,4 @@ echo Environment created, install package with:
 #       If package installation should be done automatically,
 #       remove the leading 'echo' commands:
 echo conda activate ${ENV_NAME}
-echo python -m pip install .
+echo python -m pip install --no-deps .
