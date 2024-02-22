@@ -1,6 +1,5 @@
 """Compute dynamic domain & dynamic central longitude."""
 
-
 # interesting link: https://stackoverflow.com/questions/13856123/setting-up-a-map-which-crosses-the-dateline-in-cartopy
 # Standard library
 import csv  # necessary, if script should be used on its own

@@ -1,7 +1,7 @@
-python==3.10.11
+python==3.11.*
 click
 numpy
-pandas>=2.0.1
+pandas
 matplotlib
 cartopy
 shapely

@@ -1,4 +1,5 @@
 """Generate Altitude Figure."""
+
 # Standard library
 import datetime
 import locale

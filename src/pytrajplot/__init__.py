@@ -1,4 +1,5 @@
 """Top-level package for PyTrajPlot."""
+
 # Standard library
 import importlib.metadata
 from pathlib import Path
