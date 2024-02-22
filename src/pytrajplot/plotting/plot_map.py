@@ -126,13 +126,13 @@ def crop_map(
         if current_aspect_ratio > max_aspect_ratio:
             required_latitude_range = longitude_range / max_aspect_ratio
             additional_latitude = required_latitude_range - latitude_range
-            # Ensure adjustments keep latitude within [-90, 90] and add padding if necessary
+            # Ensure adjustments keep latitude within [-90, 90] after padding is added
             custom_domain_boundaries[2] = max(
                 -90 + padding, custom_domain_boundaries[2] - additional_latitude / 2
-            )
+            )  # Expand south boundary
             custom_domain_boundaries[3] = min(
                 90 - padding, custom_domain_boundaries[3] + additional_latitude / 2
-            )
+            )  # Expand north boundary
     domain_dict = {
         "centraleurope": {
             "domain": [1, 20, 42.5, 51.5]
