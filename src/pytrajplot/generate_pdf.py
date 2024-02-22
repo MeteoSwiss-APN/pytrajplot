@@ -597,10 +597,6 @@ def generate_pdf(
                     "lat"
                 ] = trajectory_df["lat"][first_row:next_first_row]
 
-                # TODO: FutureWarning: The behavior of array concatenation with empty entries is deprecated.
-                # In a future version, this will no longer exclude empty items when determining the result dtype.
-                # To retain the old behavior, exclude the empty entries before the concat operation.
-                # Line: trajectory_longitude_expansion = pd.concat(             (2 occurrencies)
                 if not trajectory_df["lon"][first_row:next_first_row].empty:
                     trajectory_longitude_expansion = pd.concat(
                         [
