@@ -44,7 +44,7 @@ is based on top-level dependencies listed in `requirements/requirements.txt`.
 A pinned installation in an conda environment
 with the default name `pytrajplot` is done with
 
-    tools/setup_env.sh 
+    tools/setup_env.sh
 
 Add the option `-n <package_env_name>` to create an environment with a custom name.
 
