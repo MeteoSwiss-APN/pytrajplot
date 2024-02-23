@@ -18,93 +18,95 @@ the `pytrajplot` directory.
     git clone https://github.com/MeteoSwiss-APN/pytrajplot.git
     cd pytrajplot
 
-### With Conda
+### Prerequisite
 
 Having Conda installed is a prerequisite for the further installation
-process. If that is not the case, install the latest Miniconda version with
+process. To install an appropriate Miniconda version, use
 
     tools/setup_miniconda.sh
 
-or install it manually from the
+or install the latest version manually from the
 [miniconda webpage](https://docs.conda.io/en/latest/miniconda.html).
-To activate the base environment from the installed miniconda run `source miniconda/bin/activate`.
-Afterwards, follow the
-instructions here below to clone the GitHub repository, set up a conda environment and test all
-possible use-cases.
+Then follow the
+instructions here below to set up a conda environment and test multiple use-cases.
 
-Create an environment and install the package dependencies with the provided script `setup_env.sh`.
+### Create environment
+
+Create an environment and install the package dependencies with the  script `setup_env.sh` provided in the `tools` directory.
 Check available options with
-```bash
-tools/setup_env.sh -h
-```
+
+    tools/setup_env.sh -h
+
 We distinguish pinned installations based on exported (reproducible) environments,
+saved in `requirements/environment.yml`,
 and free installations, where the installation
 is based on top-level dependencies listed in `requirements/requirements.txt`.
-A pinned installation is done with
+A pinned installation in an conda environment
+with the default name `pytrajplot` is done with
 
-    tools/setup_env.sh -n <package_env_name>
+    tools/setup_env.sh 
 
-If you start developing, you might want to do an unpinned installation and export the environment:
+Add the option `-n <package_env_name>` to create an environment with a custom name.
 
-    tools/setup_env.sh -u -e -n <package_env_name>
+If you start developing a new version, you might want to do an unpinned installation with option `-u` and export the environment with option `-e`:
 
-*Hint*: Use the flag `-m` to speed up the installation using mamba. You will of course have to
-install mamba first. We recommend to install mamba into your base
-environment `conda install -c conda-forge mamba`. If you install mamba in another (maybe dedicated)
-environment, environments installed with mamba will be located
-in `<miniconda_root_dir>/envs/mamba/envs`, which is not very practical.
+    tools/setup_env.sh -u -e
 
-The package itself is installed with `pip`.
+*Note*: The flag `-m` can be used to use `mamba` as solver
+instead of the built-in `conda`
+solver. However since `conda` version 23, the mamba solver is the default solver
+in conda an no speed up is achieved by this option,
+thus we no longer recommend its use.
 
-    conda activate <package_env_name>
-    pip install .
+### Install Package
+
+Activate the newly created environment with (replace `pytrajplot` by your custom
+name `<package_env_name>` if you have used the `-n <package_env_name>` option).
+
+    conda activate pytrajplot
+
+The package itself is installed with `pip`. As all dependencies are already
+installed by conda and should not be modified by pip, use the `--no-deps` flag.
+
+    pip install --no-deps .
 
 For development, install the package in editable mode:
 
-    conda activate <package_env_name>
-    pip install --editable .
+    pip install --editable --no-deps .
 
 *Warning:* Make sure you use the right pip, i.e. the one from the installed conda environment (`which pip` should point to something like `path/to/miniconda/envs/<package_env_name>/bin/pip`).
 
-Once your package is installed, run the tests by typing:
+Once your package is installed, run the basic tests by typing:
 
-```
-conda activate <package_env_name>
-pytest
-```
+    pytest
 
-If the tests pass, you are good to go.
+A more comprehensive set of tests can be exectuted by running the script
+
+    tests/test_pytrajplot.sh
+
 If developing, make sure to update the requirements file
 and export your environment after installation
 every time you add new imports while developing.
 
-### Shortcut using Makefile
-
-Instead of intalling the environment and the package with the above commands,
-you may alternatively use the available Makefile.
-Using the Makefile is deprecated, because MeteoSwiss' blueprint stopped the support. It will be removed in a future version.
-Using the Makefile is deprecated, because MeteoSwiss' blueprint stopped the support. It will be removed in a future version.
-Please migrate to instruction in section [With Conda](#with-conda).
-Use `make help` to see other available make targets. Use the `--dry-run`
-option to see the commands `make` would run without executing them.
-
-    make install
-    make test
-
 ---
+
 ### Test results
 
-If no errors occur, plots such as these should be saved in their respective folders in the `./local` directory.
+If no errors occur, the above test script save plots such as these
+here below in their respective folders in the `local` directory.
 ![](https://i.imgur.com/Zp4F9Z7.jpg)
 ![](https://i.imgur.com/4WvLK1x.jpg)
 
-
 ## Usage
 
-Activate the conda environment:
-```conda activate pytrajplot```
+Activate the conda environment (you might have chosen a different name for the environment than the default name `pytrajplot`):
+
+    conda activate pytrajplot
+
 To get a list of all available commands, just type:
-```pytrajplot --help```
+
+    pytrajplot --help
+
 The possible options are as follows:
 
 ```
@@ -137,8 +139,8 @@ Options:
 
 The only mandatory arguments are `INPUT_DIR` and `OUTPUT_DIR`. The input directory
 specifies the path to the source files. In the input directory, there should be
-at exactly **one plot_info** file, and for each trajectory file one
-corresponding start file.
+at exactly **one `plot_info`** file, and for each trajectory file one
+corresponding `start` file.
 
 ### File Nomenclature
 
@@ -150,15 +152,21 @@ The relevant part in the filename of the trajectory/start files, is the
 *key*. In general, the *key* looks like: `XXX-YYYF/B`. It has to satisfy the
 following *conditions*:
 
-1. keys must match between start/trajectory file
-```
-traj_prefix+key <---> start_prefix+key
-```
-2. keys must end with **F** / **B** to determine the trajectories direction (forward/backward)
+1. Keys must match between start/trajectory file
+
+    ```
+    traj_prefix+key <---> start_prefix+key
+    ```
+
+2. Keys must end with **F** / **B** to determine the trajectories direction (forward/backward)
+
 3. XXX refers to the start of the computation of trajectories (w.r.t the model base time,
    which is specified in the corresponding plot_info file)
+
 4. YYY refers to the end-time of the trajectory computation (w.r.t to the model base time.
+
 5. XXX and YYY are seperated by a dash
+
 6. The difference of XXX and YYY equals the trajectory length (in hours).
 
 Information in the header and footer of the output plots, is partially generated
@@ -166,7 +174,7 @@ from the information in the *key*.
 
 #### Examples
 
-Backward Trajectories; 33h in the past from model base time until model base time.
+Backward Trajectories; 33 h in the past from model base time until model base time.
 
 > startf_033-000B/tra_geom_033-000B
 
@@ -252,18 +260,6 @@ Again, this procedure outlines the inner workings of the plotting scripts. For
 greater insight, it is recommended to read the scripts and pay special attention
 to the comments and docstrings. All plotting-scripts are located
 [here](src/pytrajplot/plotting).
-
-
-
-## Future Developments
-
-Possible developments in the future:
-- [ ] Add debug statements and debug flag
-- [ ] Write Class for COSMO trajectory files
-- [ ] Write Class for HRES trajectory files
-- [ ] Write Class for start files
-- [ ] Make Code more efficient
-- [ ] Fix Aspect Ratio of Map, for trajectories with unusual longitudinal/latitudinal expansions
 
 ## Credits
 

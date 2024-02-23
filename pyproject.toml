@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytrajplot"
-version = "1.1.2"
+version = "1.1.3"
 description = "Plot LAGRANTO trajectories starting/ending at the same location on a map together with vertical cross sections"
 readme = "README.md"
 keywords = [
@@ -21,9 +21,9 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     {name="Pirmin Kaufmann", email="pirmin.kaufmann@meteoswiss.ch"},
 ]
