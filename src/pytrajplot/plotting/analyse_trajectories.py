@@ -9,7 +9,7 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from numpy.lib.function_base import mean
+from numpy import mean
 
 
 # FUNCTIONS
@@ -306,7 +306,8 @@ def _create_plot(traj_dict, central_longitude, dynamic_domain):
             dynamic_domain[2] - offset,
             dynamic_domain[3] + offset,
         ],
-        ccrs.PlateCarree(central_longitude=0),
+        #in the following line i substituted 0 with the second central_longitude
+        ccrs.PlateCarree(central_longitude=central_longitude),
     )
 
     # https://stackoverflow.com/questions/65086715/longitude-bounds-of-cartopy-crs-geodetic
