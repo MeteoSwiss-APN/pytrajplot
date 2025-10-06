@@ -360,8 +360,8 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
     # clean up the df in case its generated from a COSMO trajectory file
     if case == "COSMO":
         # at missing data points (i.e. if trajectory leaves computational domain), the z & hsurf values default to -999
-        traj_df.loc[(traj_df["z"] < 0), "z"] = np.NaN
-        traj_df.loc[(traj_df["hsurf"] < 0), "hsurf"] = np.NaN
+        traj_df.loc[(traj_df["z"] < 0), "z"] = np.nan
+        traj_df.loc[(traj_df["hsurf"] < 0), "hsurf"] = np.nan
         traj_df.dropna(
             subset=["lon"], inplace=True
         )  # remove rows containing only the origin/z_type
@@ -369,25 +369,25 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
 
     # clean up the df in case its generated from a HRES trajectory file
     if case == "HRES":
-        traj_df.loc[(traj_df["lon"] == -999.00), "lon"] = np.NaN
-        traj_df.loc[(traj_df["lat"] == -999.00), "lat"] = np.NaN
-        traj_df.loc[(traj_df["z"] == -999), "z"] = np.NaN
+        traj_df.loc[(traj_df["lon"] == -999.00), "lon"] = np.nan
+        traj_df.loc[(traj_df["lat"] == -999.00), "lat"] = np.nan
+        traj_df.loc[(traj_df["z"] == -999), "z"] = np.nan
 
     # add various (empty) keys to the trajectory dataframe
     traj_df["z_type"] = None
     traj_df["origin"] = None
     traj_df["side_traj"] = None
-    traj_df["start_altitude"] = np.NaN
-    traj_df["lon_precise"] = np.NaN
-    traj_df["lat_precise"] = np.NaN
+    traj_df["start_altitude"] = np.nan
+    traj_df["lon_precise"] = np.nan
+    traj_df["lat_precise"] = np.nan
     traj_df["altitude_levels"] = None
     traj_df["#trajectories"] = number_of_trajectories
     traj_df["block_length"] = number_of_times
     traj_df["trajectory_direction"] = trajectory_file_path[
         -1:
     ]  # last letter of key = F/B --> direction of trajectory
-    traj_df["subplot_index"] = np.NaN
-    traj_df["max_start_altitude"] = np.NaN
+    traj_df["subplot_index"] = np.nan
+    traj_df["max_start_altitude"] = np.nan
 
     # add information to newly created (empty) keys in trajectory dataframe
     # basically, at this point the information from the start_df, gets merged into the trajectory dataframe
@@ -443,8 +443,8 @@ def read_trajectory(trajectory_file_path, start_df, plot_info_dict):
         reference_time=reference_time,
     )
 
-    # change the lon/lat values where the trajectory leaves the domain from their computational domain-boundary values to np.NaN.
-    traj_df.loc[np.isnan(traj_df["z"]), ["lon", "lat"]] = np.NaN
+    # change the lon/lat values where the trajectory leaves the domain from their computational domain-boundary values to np.nan.
+    traj_df.loc[np.isnan(traj_df["z"]), ["lon", "lat"]] = np.nan
 
     return traj_df
 

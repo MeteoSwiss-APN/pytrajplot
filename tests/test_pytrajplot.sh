@@ -28,7 +28,7 @@ pytrajplot $input_dir_tests/test_hres/2_altitudes $output_dir_tests/test_hres/2_
 pytrajplot $input_dir_tests/test_hres/1_altitudes $output_dir_tests/test_hres/1_altitudes --datatype png --domain europe
 
 echo "Test HRES backward trajectory"
-pytrajplot $input_dir_tests/test_hres/backward $output_dir_tests/test_hres/backward --datatype png --domain europe
+pytrajplot $input_dir_tests/test_hres/backward $output_dir_tests/test_hres/backward --datatype png --domain europe --domain dynamic
 
 echo "Test all domains combined w/ HRES model"
 pytrajplot $input_dir_tests/test_hres/4_altitudes $output_dir_tests/test_hres/4_altitudes --datatype png --domain ch --domain alps --domain centraleurope --domain europe --domain dynamic
@@ -37,7 +37,7 @@ echo "Test HRES dateline crossing"
 pytrajplot $input_dir_tests/test_hres/dateline $output_dir_tests/test_hres/dateline --datatype png --domain dynamic
 
 echo "Test HRES w/o side trajectories and the german case"
-pytrajplot $input_dir_tests/test_hres/dateline $output_dir_tests/test_hres/dateline/german --datatype png --domain europe --language de
+pytrajplot $input_dir_tests/test_hres/dateline $output_dir_tests/test_hres/dateline/german --datatype png --domain dynamic --language de
 
 echo "Test HRES Europe with trajectory crossing of zero longitude from east and then leaving domain"
 # (failed in v1.0.0 due to NaNs in the argument of the numpy max function - v1.0.1 uses nanmax instead)
