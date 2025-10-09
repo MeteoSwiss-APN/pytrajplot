@@ -26,6 +26,9 @@ jobs:
         channels: conda-forge
         channel-priority: flexible
         show-channel-urls: true
+    - name: Create env
+      run: |
+        pip install --no-deps --editable .
     - name: Run pytest
       run: |
         conda activate
