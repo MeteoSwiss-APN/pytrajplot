@@ -47,6 +47,9 @@ echo "Test HRES trajectory ending at zero longitude and next ancillary trajector
 # (failed in v1.1.1 due to erroneously detecting a date line crossing but corresponding dictionary reamining undefined)
 pytrajplot $input_dir_tests/test_hres/zero_last_lon $output_dir_tests/test_hres/zero_last_lon
 
+echo "Test HRES trajectories crossing both 0 lon line and dateline"
+pytrajplot  $input_dir_tests/test_hres/zero_lon_dateline $output_dir_tests/test_hres/zero_lon_dateline  --datatype png --domain dynamic
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~COSMO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 echo "Test COSMO forward/backward trajectories w/ all COSMO domains (ch, ch_hd, alps)"
 pytrajplot $input_dir_tests/test_cosmo/forward  $output_dir_tests/test_cosmo/forward --datatype png --domain ch --domain alps
