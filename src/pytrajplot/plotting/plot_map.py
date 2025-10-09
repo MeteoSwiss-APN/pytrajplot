@@ -807,7 +807,7 @@ def add_trajectories_within_domain(
             for traj in range(5):
                 latitude = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
-                #NEW: unwraps the longitude over the dateline
+                # Unwrap the longitude over the dateline
                 longitude_unwrapped = _unwrap_dateline_series(longitude)
                 ystart = latitude.iloc[0]
                 xstart = longitude.iloc[0]
