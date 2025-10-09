@@ -40,22 +40,6 @@ We distinguish pinned installations based on exported (reproducible) environment
 saved in `requirements/environment.yml`,
 and free installations, where the installation
 is based on top-level dependencies listed in `requirements/requirements.txt`.
-A pinned installation in an conda environment
-with the default name `pytrajplot` is done with
-
-    tools/setup_env.sh
-
-Add the option `-n <package_env_name>` to create an environment with a custom name.
-
-If you start developing a new version, you might want to do an unpinned installation with option `-u` and export the environment with option `-e`:
-
-    tools/setup_env.sh -u -e
-
-*Note*: The flag `-m` can be used to use `mamba` as solver
-instead of the built-in `conda`
-solver. However since `conda` version 23, the mamba solver is the default solver
-in conda an no speed up is achieved by this option,
-thus we no longer recommend its use.
 
 ### Install Package
 
