@@ -28,4 +28,6 @@ jobs:
         show-channel-urls: true
     - name: Run pytest
       run: |
+        conda activate
+        conda activate pytrajplot
         pytest
