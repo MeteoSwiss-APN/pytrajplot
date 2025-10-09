@@ -861,7 +861,7 @@ def add_trajectories_within_domain(
                             transform=ccrs.Geodetic(),
                             rasterized=True,
                         )
-                    #I ADDED THE FOLLOWING IF: IT PLOTS THE SLICE OF TRAJ CLIPPED OVER THE DATELINE
+                    # The following plots the slice of the trajectory beyond the dateline that gets clipped
                     if cross_dateline:
                         lon_slice, lat_slice= create_trajectory_slice_over_dateline(longitude_unwrapped, latitude, 180.0)
                         ax.plot(
