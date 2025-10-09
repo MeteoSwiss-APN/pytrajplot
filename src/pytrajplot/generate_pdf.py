@@ -525,8 +525,8 @@ def generate_pdf(
         # initialise two empty panda series, which ultimately contain the longitude/latitude values of all trajectories
         # departing from current origin. --> to compute dynamic domain and check dateline crossing
         trajectory_longitude_expansion, trajectory_latitude_expansion = (
-            pd.Series(),
-            pd.Series(),
+            pd.Series(dtype=float),
+            pd.Series(dtype=float),
         )
 
         row_index = 0  # index of the current trajectory; helper variable to compute the rows, that make up individual trajectories
@@ -675,8 +675,8 @@ def generate_pdf(
 
                     # reset the traj_expansion pandas series before next iteration
                     trajectory_longitude_expansion, trajectory_latitude_expansion = (
-                        pd.Series(),
-                        pd.Series(),
+                        pd.Series(dtype=float),
+                        pd.Series(dtype=float),
                     )
 
             # analogous to case w/ side trajectories. compare there for reference.
@@ -799,7 +799,7 @@ def generate_pdf(
                     )
                     # reset the traj_expansion pandas series before next iteration
                     trajectory_longitude_expansion, trajectory_latitude_expansion = (
-                        pd.Series(),
-                        pd.Series(),
+                        pd.Series(dtype=float),
+                        pd.Series(dtype=float),
                     )
     return
