@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 # Local
-from ..__init__ import cities_data_path
+from .. import cities_data_path
 from .plot_utils import alps_cities_list
 from .plot_utils import centraleurope_cities_list
 from .plot_utils import ch_cities_list
@@ -216,10 +216,6 @@ def is_visible(lat, lon, domain_boundaries, cross_dateline) -> bool:
                             bool       True if city is within domain boundaries, else false.
 
     """
-    if cross_dateline:
-        if lon < 0:
-            lon = 360 - abs(lon)
-
     lon = float(lon.iloc[0]) if isinstance(lon, pd.Series) else float(lon)
     lat = float(lat.iloc[0]) if isinstance(lat, pd.Series) else float(lat)
     is_in_domain = (
@@ -721,6 +717,64 @@ def get_intersection_point_on_domain_boundaries(
     intersection_point = intersection_point + 0.001 * (point_in - intersection_point)
     return intersection_point
 
+#the next two functions are used later to plot the slice of traj beyond the dateline
+def _unwrap_dateline_series(lon: pd.Series | np.ndarray) -> pd.Series:
+    """Makes the trajectory continuous avoiding the jump -180↔+180 (e.g. -179 → -181)."""
+    arr = np.asarray(lon, dtype=float)
+    if arr.size == 0:
+        return pd.Series(arr, index=getattr(lon, "index", None))
+    diffs = np.diff(arr)
+    offset = 0.0
+    out = [arr[0]]
+    for d, x in zip(diffs, arr[1:]):
+        if d > 180:      # e.g. 179 → -179  (big backwards jump)
+            offset -= 360
+        elif d < -180:   # e.g. -179 → 179  (big forwards jump)
+            offset += 360
+        out.append(x + offset)
+    return pd.Series(out, index=getattr(lon, "index", None))
+
+def create_trajectory_slice_over_dateline(
+    lon: pd.Series | np.ndarray,
+    lat: pd.Series | np.ndarray,
+    threshold: float = 180.0
+) -> tuple[pd.Series, pd.Series]:
+    """
+    gives back the subset (lon_slice, lat_slice) of the points that, after the unwrapping, have |lon| >= threshold (default 180).
+    
+    Parameters
+    ---------
+    lon : pd.Series | np.ndarray
+        Longitudes of the trajectory.
+    lat : pd.Series | np.ndarray
+        Corresponding latitudes (same lenght).
+    threshold : float, default 180.0
+        threshold for the unwrapped longitudes |lon_unwrapped|.
+
+    Returns
+    -------
+    (lon_slice, lat_slice) : tuple[pd.Series, pd.Series]
+        filtered series (maintain the original indexes if lon/lat were Series).
+    """
+    # Convert to Series
+    lon_s = lon if isinstance(lon, pd.Series) else pd.Series(np.asarray(lon, dtype=float))
+    lat_s = lat if isinstance(lat, pd.Series) else pd.Series(np.asarray(lat, dtype=float))
+
+    if len(lon_s) != len(lat_s):
+        raise ValueError("lon e lat must have the same length.")
+
+    # Unwrap longitudes
+    lon_unwrapped = _unwrap_dateline_series(lon_s)
+
+    # identify points over the dateline
+    mask = np.abs(lon_unwrapped.values) >= float(threshold)
+
+    # apply the mask mantaining the index
+    lon_slice = lon_unwrapped[mask]
+    lat_slice = lat_s[mask]
+
+    return lon_slice, lat_slice
+
 
 def add_trajectories_within_domain(
     plot_dict: dict,
@@ -753,10 +807,8 @@ def add_trajectories_within_domain(
             for traj in range(5):
                 latitude = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["lat"]
                 longitude = plot_dict["altitude_" + str(i)]["traj_" + str(traj)]["lon"]
-                if cross_dateline:
-                    longitude = longitude.apply(
-                        lambda lon: 360 - np.abs(lon) if lon < 0 else lon
-                    )
+                # Unwrap the longitude over the dateline
+                longitude_unwrapped = _unwrap_dateline_series(longitude)
                 ystart = latitude.iloc[0]
                 xstart = longitude.iloc[0]
                 linestyle = subplot_properties_dict[sub_index]
@@ -809,6 +861,21 @@ def add_trajectories_within_domain(
                             transform=ccrs.Geodetic(),
                             rasterized=True,
                         )
+                    # The following plots the slice of the trajectory beyond the dateline that gets clipped
+                    if cross_dateline:
+                        lon_slice, lat_slice= create_trajectory_slice_over_dateline(longitude_unwrapped, latitude, 180.0)
+                        ax.plot(
+                            lon_slice,  # define x-axis
+                            lat_slice,  # define y-axis
+                            linestyle,  # define linestyle
+                            alpha=alpha,  # define line opacity
+                            label=(
+                                None
+                            ),  # We don't want this slice to have its own label
+                            transform=ccrs.Geodetic(),
+                            rasterized=True,
+                        )
+
                     if is_main_trajectory:
                         # add time interval points to main trajectory
                         add_time_interval_points_within_domain(
@@ -894,7 +961,7 @@ def generate_map_plot(
         domain=domain,
         custom_domain_boundaries=trajectory_expansion,
         origin_coordinates=origin_coordinates,
-    )  # sets extent of map
+    )   
     if not domain_boundaries:
         return ax.text(
             0.5,

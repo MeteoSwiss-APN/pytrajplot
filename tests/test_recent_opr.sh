@@ -6,14 +6,14 @@
 # Conda default environment
 conda_env=pytrajplot
 # Lagranto-output storage location
-store_osm=/store/mch/msopr/osm
+store_osm=/store_new/mch/msopr/osm
 # pytrajplot output location
-pytrajplot_out=.
+pytrajplot_out=local
 # Graphics format
-datatype_opt="--datatype png --datatype pdf"
+datatype_opt="--datatype png" # --datatype pdf"
 # Domain options for
-# COSMO-1E-CTR (c1), IFS-HRES-Europe (ie), IFS-HRES global (ig)
-domain_opt_c1="--domain ch --domain alps"
+# COSMO-1E-CTR (i1), IFS-HRES-Europe (ie), IFS-HRES global (ig)
+domain_opt_i1="--domain ch --domain alps"
 domain_opt_ie="--domain alps --domain centraleurope --domain europe"
 domain_opt_ig="--domain dynamic --domain dynamic_zoom"
 # --------
@@ -32,7 +32,8 @@ bt_00=$(date --utc --date="today 00" +%Y%m%d%H)
 bt_03=$(date --utc --date="today 03" +%Y%m%d%H)
 
 # Load conda env for pytrajplot if CONDA_PREFIX not defined
-[[ -z $CONDA_PREFIX ]] && conda activate $conda_env
+#[[ -z $CONDA_PREFIX ]] &&
+conda activate $conda_env
 echo CONDA_PREFIX=$CONDA_PREFIX
 # Report version
 $CONDA_PREFIX/bin/pytrajplot --version
@@ -46,17 +47,17 @@ for basetime in $bt_06 $bt_12 $bt_18 $bt_21 $bt_00 $bt_03 ; do
     echo Basetime: $(date --utc --date="${basetime:0:8} $hh" "+%F %H UTC")
 
     # Operational INPUT_DIRs:
-    input_dir_c1=$(echo $store_osm/COSMO-1E/FCST${yy}/${yymmddhh}_4??/lagranto_c/000)
+    input_dir_i1=$(echo $store_osm/ICON-CH1-EPS/FCST${yy}/${yymmddhh}_???/lagranto_c/000)
     input_dir_ie=$store_osm/IFS-HRES/IFS-HRES-LAGRANTO${yy}/${yymmddhh}_LIH/lagranto_f
     input_dir_ig=$store_osm/IFS-HRES/IFS-HRES-LAGRANTO${yy}/${yymmddhh}_LIH/lagranto_c
 
     # Output directories
-    output_dir_c1=$pytrajplot_out/plot_c1_${basetime}
+    output_dir_i1=$pytrajplot_out/plot_i1_${basetime}
     output_dir_ie=$pytrajplot_out/plot_ie_${basetime}
     output_dir_ig=$pytrajplot_out/plot_ig_${basetime}
 
     # Submit jobs
-    for model in c1 ie ig ; do
+    for model in i1 ie ig ; do
         eval input_dir=\$input_dir_$model
         eval output_dir=\$output_dir_$model
         eval domain_opt=\$domain_opt_$model

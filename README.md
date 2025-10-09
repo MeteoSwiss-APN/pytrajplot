@@ -32,10 +32,9 @@ instructions here below to set up a conda environment and test multiple use-case
 
 ### Create environment
 
-Create an environment and install the package dependencies with the  script `setup_env.sh` provided in the `tools` directory.
-Check available options with
+Create an environment and install the package dependencies with conda
 
-    tools/setup_env.sh -h
+     conda env create -n pytrajplot -f requirements/environment.yml
 
 We distinguish pinned installations based on exported (reproducible) environments,
 saved in `requirements/environment.yml`,
@@ -72,7 +71,7 @@ installed by conda and should not be modified by pip, use the `--no-deps` flag.
 
 For development, install the package in editable mode:
 
-    pip install --editable --no-deps .
+    pip install --no-deps --editable .
 
 *Warning:* Make sure you use the right pip, i.e. the one from the installed conda environment (`which pip` should point to something like `path/to/miniconda/envs/<package_env_name>/bin/pip`).
 
