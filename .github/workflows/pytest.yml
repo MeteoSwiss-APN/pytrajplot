@@ -26,11 +26,13 @@ jobs:
         channels: conda-forge
         channel-priority: flexible
         show-channel-urls: true
-    - name: Create env
-      run: |
-        pip install --no-deps --editable .
-    - name: Run pytest
+    - name: Create env from pinned reqs
       run: |
         conda activate
-        conda activate pytrajplot
-        pytest
+        conda  env create --name pytrajplot --file requirements/environment.yml
+    - name: Install project into env
+      run: |
+        conda run --name pytrajplot pip install --no-deps .
+    - name: Run pytest
+      run: |
+        conda run --name pytrajplot pytest run --all-files
