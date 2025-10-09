@@ -717,7 +717,7 @@ def get_intersection_point_on_domain_boundaries(
     intersection_point = intersection_point + 0.001 * (point_in - intersection_point)
     return intersection_point
 
-#the next two functions sre used later to plot the slice of traj beyond the dateline
+#the next two functions are used later to plot the slice of traj beyond the dateline
 def _unwrap_dateline_series(lon: pd.Series | np.ndarray) -> pd.Series:
     """Makes the trajectory continuous avoiding the jump -180↔+180 (e.g. -179 → -181)."""
     arr = np.asarray(lon, dtype=float)
