@@ -14,7 +14,7 @@ __version__ = importlib.metadata.version(__package__)
 del importlib
 
 
-def _check_dir_exists(path):
+def _check_dir_exists(path: Path):
     """Check that a directory exists."""
     if not path.exists():
         raise Exception("data directory is missing", path)

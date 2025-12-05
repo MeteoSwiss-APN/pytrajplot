@@ -1,6 +1,7 @@
 PyTrajPlot
 ==========
 
+# TODO move back to markdown
 PyTrajPlot is a Python-based tool to visualize trajectories calculated with `LAGRANTO <https://www.research-collection.ethz.ch/handle/20.500.11850/103598>`__
 based on ECMWF's `IFS-HRES <https://www.ecmwf.int/en/forecasts/documentation-and-support>`__
 (on an European or global domain) or the `COSMO <https://www.cosmo-model.org>`__ model
