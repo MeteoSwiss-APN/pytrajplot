@@ -20,7 +20,7 @@ WORKDIR /src/app-root
 
 RUN pip install -r requirements.txt --no-cache-dir --no-deps --root-user-action=ignore
 COPY pytrajplot /src/app-root/pytrajplot
-RUN pip install /src/app-root --no-cache-dir --root-user-action=ignore
+RUN pip install /src/app-root/pytrajplot --no-cache-dir --root-user-action=ignore
 
 FROM base AS tester
 ARG VERSION
