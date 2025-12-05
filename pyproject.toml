@@ -8,6 +8,7 @@ readme = "README.rst"
 packages = [
     { include = "pytrajplot" },
 ]
+
 [[tool.poetry.source]]
 name = "meteoswiss"
 url = "https://service.meteoswiss.ch/nexus/repository/python-all/simple"
