@@ -114,3 +114,5 @@ local/
 *.csv
 *.png
 *scratch
+
+test/integration/output

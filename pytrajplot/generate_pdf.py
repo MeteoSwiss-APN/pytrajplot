@@ -360,7 +360,7 @@ def assemble_pdf(
         horizontalalignment="left",
         verticalalignment="top",
         fontdict={
-            "size": 6,
+            "fontsize": 6,
             "color": "k",
         },
     )

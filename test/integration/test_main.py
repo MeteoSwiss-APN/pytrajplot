@@ -8,7 +8,7 @@ import pytest
 from pytrajplot import main
 
 
-hres_test_input = [
+hres_test_args = [
     ['1_altitudes', '1_altitudes', {'datatype': 'png', 'domain': 'europe'}],
     ['2_altitudes', '2_altitudes', {'datatype': 'png', 'domain': 'europe'}],
     ['3_altitudes', '3_altitudes', {'datatype': 'png', 'domain': 'europe'}],
@@ -47,6 +47,12 @@ hres_test_input = [
 ]
 
 
+
+cosmo_test_args = [
+    ['forward', 'forward', {'datatype': 'png', 'domain': ['ch','alps']}],
+    ['backward', 'backward', {'datatype': 'png', 'domain': ['ch','alps']}]
+]
+
 def create_args(input_dir: str, output_dir: str, opts: dict):
     args = []
 
@@ -71,13 +77,24 @@ def create_args(input_dir: str, output_dir: str, opts: dict):
             args.append(cli_key)
     return args
 
-@pytest.mark.parametrize("input", hres_test_input)
-def test_hres(input, hres_tests, output_dir):
-    input_dir, out_dir, opts = input
-    input_dir = str(hres_tests / input_dir)
-    out_dir = str(output_dir / out_dir)
-    args = create_args(input_dir, out_dir, opts)
-    print(args)
+@pytest.mark.parametrize("input_args", hres_test_args)
+def test_hres(input_args, hres_input, output_dir):
+    in_pathname, out_pathname, opts = input_args
+
+    input_dir = str(hres_input / in_pathname)
+    output_dir = str(output_dir / 'hres' / out_pathname)
+
+    args = create_args(input_dir, output_dir, opts)
     runner = CliRunner()
     runner.invoke(main.cli, args)
-    assert False
+
+@pytest.mark.parametrize("input_args", cosmo_test_args)
+def test_cosmo(input_args, cosmo_input, output_dir):
+    in_pathname, out_pathname, opts = input_args
+
+    input_dir = str(cosmo_input / in_pathname)
+    output_dir = str(output_dir / 'cosmo' / out_pathname)
+
+    args = create_args(input_dir, output_dir, opts)
+    runner = CliRunner()
+    runner.invoke(main.cli, args)
