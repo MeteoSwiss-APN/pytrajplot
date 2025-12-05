@@ -36,12 +36,6 @@ def generate_info_header(language, plot_dict, ax=None):
         if plot_dict[key]["subplot_index"] == (len(plot_dict.keys()) - 1):
             elevation = int(plot_dict[key]["y_surf"].iloc[0])
 
-    # if not elevation:
-    #     if language == "en":
-    #         elevation = "not available"
-    #     else:
-    #         elevation = "nicht verfügbar"
-
     if y_type == "hpa":
         unit = "hPa"
     else:

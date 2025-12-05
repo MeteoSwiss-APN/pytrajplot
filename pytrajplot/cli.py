@@ -1,8 +1,5 @@
 """Command line interface of pytrajplot."""
 
-# Standard library
-import time
-
 # Third-party
 import click
 

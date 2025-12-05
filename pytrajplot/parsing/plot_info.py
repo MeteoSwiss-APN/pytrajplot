@@ -1,7 +1,6 @@
 """plot info file support."""
 
 # Standard library
-import pprint
 from typing import Any
 from typing import Dict
 
@@ -42,5 +41,3 @@ class PLOT_INFO:
                     self.data["mbt"] = "".join(data)
                 if key == "Model name":
                     self.data["model_name"] = "".join(data)
-        # DEBUG: uncomment the following line, to check the dict
-        # pprint.pprint(self.data)

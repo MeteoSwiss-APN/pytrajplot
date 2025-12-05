@@ -32,14 +32,6 @@ def add_features(ax: geoaxes.GeoAxesSubplot) -> None:
         ax:                 Axes       Current map to add features to
 
     """
-    # point cartopy to the folder containing the shapefiles for the features on the map
-    # earth_data_path = Path("src/pytrajplot/resources/")
-    # assert (
-    #     earth_data_path.exists()
-    # ), f"The natural earth data could not be found at {earth_data_path}"
-    # # earth_data_path = str(earth_data_path)
-    # cartopy.config["pre_existing_data_dir"] = earth_data_path
-    # cartopy.config["data_dir"] = earth_data_path
     # add grid & labels to map
     gl = ax.gridlines(
         crs=ccrs.PlateCarree(),
@@ -159,11 +151,6 @@ def crop_map(
     }
     domain_boundaries = domain_dict[domain]["domain"]
     ax.set_extent(domain_boundaries, crs=ccrs.PlateCarree(central_longitude=0))
-    lon_limits = ax.get_xlim()
-
-    # Uncomment if empty map with warning should be plotted under certain conditions
-    # if np.isclose(np.abs(lon_limits[0] - lon_limits[1]), 360, atol=1):
-    #     return []
 
     return domain_boundaries
 
@@ -387,10 +374,7 @@ def add_cities(
             )
 
     if "dynamic" in domain:
-        # cities_data_path = Path("src/pytrajplot/resources/cities/")
-        # assert (
-        #     cities_data_path.exists()
-        # ), f"The cities data could not be found at {cities_data_path}"
+
         cities_df = pd.read_csv(Path(cities_data_path, "worldcities.csv"))
 
         # remove less important cities to reduce size of dataframe (from 41001 rows to 8695)
@@ -741,7 +725,7 @@ def create_trajectory_slice_over_dateline(
 ) -> tuple[pd.Series, pd.Series]:
     """
     gives back the subset (lon_slice, lat_slice) of the points that, after the unwrapping, have |lon| >= threshold (default 180).
-    
+
     Parameters
     ---------
     lon : pd.Series | np.ndarray
@@ -961,7 +945,7 @@ def generate_map_plot(
         domain=domain,
         custom_domain_boundaries=trajectory_expansion,
         origin_coordinates=origin_coordinates,
-    )   
+    )
     if not domain_boundaries:
         return ax.text(
             0.5,
@@ -974,7 +958,6 @@ def generate_map_plot(
             rasterized=True,
         )
 
-    # print(f"Cropping map took:\t\t{end-start} seconds")
     # if the start point of the trajectories is not within the domain boundaries (i.e. Teheran is certainly not in Switzerland or even Europe), this plot can be skipped
     lat = pd.DataFrame(plot_dict["altitude_1"]["traj_0"]["lat"], columns=["lat"])
     lon = pd.DataFrame(plot_dict["altitude_1"]["traj_0"]["lon"], columns=["lon"])
