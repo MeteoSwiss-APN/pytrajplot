@@ -90,12 +90,8 @@ local:
               commands: pytrajplot greeting "the greeting command"
 
 variables:
-  solution: lagranto
+  solution: dispersionmodelling
   project: pytrajplot
-  notifyOnNightlyFailure: victoria.cherkas@meteoswiss.ch
+  notifyOnNightlyFailure: p_disperionmodelling@meteoswiss.ch
   semanticVersion: 0.0.0  # is overwritten in Jenkins
-  containerImageName: docker-intern-nexus.meteoswiss.ch/lagranto/pytrajplot
-  ocpHostNameForEnv:
-    devt: api.devt.cp1.meteoswiss.ch:6443
-    depl: api.depl.cp1.meteoswiss.ch:6443
-    prod: api.prod.cp1.meteoswiss.ch:6443
+  containerImageName: docker-intern-nexus.meteoswiss.ch/dispersionmodelling/pytrajplot
