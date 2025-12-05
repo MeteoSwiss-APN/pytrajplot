@@ -21,7 +21,7 @@ from .plotting.plot_map import generate_map_plot
 plt.rc("axes", labelsize=8)  # change the font size of the axis labels
 
 
-def create_plot_dict(altitude_levels):
+def create_plot_dict(altitude_levels: int) -> dict:
     """Create dict of dicts to be filled with information for all plots.
 
     Args:
@@ -104,7 +104,7 @@ def create_plot_dict(altitude_levels):
     return plot_dict
 
 
-def generate_filename(plot_info_dict, plot_dict, origin, domain, key):
+def generate_filename(plot_info_dict: dict, plot_dict: dict, origin: str, domain: str, key: str) -> str:
     """Generate the filename of the output file.
 
     Args:
@@ -153,7 +153,7 @@ def assemble_pdf(
     projection,
     trajectory_expansion,
     cross_dateline,
-):
+) -> None:
     """Assemble final output pdf/png.
 
     Args:
@@ -477,7 +477,7 @@ def generate_pdf(
     language,
     domains,
     output_types,
-):
+) -> None:
     """Iterate through trajectory dict. For each key, generate altitude plots for all origins/altitude levels.
 
     Args:
@@ -802,4 +802,3 @@ def generate_pdf(
                         pd.Series(dtype=float),
                         pd.Series(dtype=float),
                     )
-    return

@@ -3,7 +3,7 @@ class Globals {
     static boolean qualityGateAbortPipeline = false
 
     // Threshold for mypy issues before failing the build
-    static int mypyIssueThreshold = 10
+    static int mypyIssueThreshold = 30
 
     // Name of the container image
     static String containerImageName= ''

@@ -1,4 +1,5 @@
 """Parse data from start, trajectory & plot info files."""
+from typing import Tuple
 
 # Standard library
 import datetime
@@ -57,7 +58,7 @@ def map_altitudes_and_subplots(unit, unique_start_altitudes, current_altitude):
     return altitude_mapping_dict[current_altitude]
 
 
-def read_startf(startf_path, separator):
+def read_startf(startf_path: str, separator: str) -> pd.DataFrame:
     """Read the start file, containing initial information of all trajectories for a corresponding trajectory file.
 
     Args:
@@ -197,7 +198,7 @@ def read_startf(startf_path, separator):
     return start_df
 
 
-def traj_helper_fct(case, file_path, firstline, start_df):
+def traj_helper_fct(case: str, file_path: str, firstline: str, start_df: pd.DataFrame) -> Tuple[int, int]:
     """Handle the different type of trajectory files (COSMO/HRES). Compute the number of rows that make up one trajectory and the number of trajectories.
 
     Args:

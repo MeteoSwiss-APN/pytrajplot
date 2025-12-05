@@ -1,4 +1,5 @@
 """Command line interface of pytrajplot."""
+from typing import Tuple, Dict
 
 # Third-party
 import click
@@ -10,15 +11,14 @@ from pytrajplot.parse_data import check_input_dir
 from pytrajplot.utils import count_to_log_level
 
 
-# pylint: disable=W0613  # unused-argument (param)
-def print_version(ctx, param, value: bool) -> None:
+def print_version(ctx: click.Context, _param: click.Parameter, value: bool) -> None:
     """Print the version number and exit."""
     if value:
         click.echo(__version__)
         ctx.exit(0)
 
 
-def interpret_options(start_prefix, traj_prefix, info_name, language):
+def interpret_options(start_prefix: str, traj_prefix: str, info_name: str, language: str) -> Tuple[Dict[str, str], str]:
     """Reformat command line inputs.
 
     Args:
