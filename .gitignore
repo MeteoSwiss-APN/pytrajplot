@@ -9,7 +9,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-env-dev/
 build/
 develop-eggs/
 dist/
@@ -47,6 +46,11 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+junit*
+
+# mchbuild reports
+test_reports/
+security_reports/
 
 # Translations
 *.mo
@@ -64,16 +68,13 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+doc/_build/
 
 # PyBuilder
 target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
-# pyenv
-.python-version
 
 # celery beat schedule file
 celerybeat-schedule
@@ -86,14 +87,16 @@ celerybeat-schedule
 
 # virtualenv
 .venv
-.venvs
 venv/
-venvs/
-venv_*/
+ENV/
 
-# Spyder project settings
-.spyderproject
+# IDE project settings
+.editorconfig
 .spyproject
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
 
 # Rope project settings
 .ropeproject
@@ -103,10 +106,6 @@ venv_*/
 
 # mypy
 .mypy_cache/
-.project
-
-# VS Code
-.vscode
 
 # Local files, e.g. for test output
 local/

@@ -1,0 +1,101 @@
+default:
+  - build:
+      - checkGivenSemanticVersion:
+          checkSemanticVersion:
+      - getSemanticVersion:
+          gitCalculateSemanticVersion:
+      - getImageName:
+          containerConstructImageName:
+      - artifacts:
+          - containerBuildImage:
+              imageName: ${var.containerImageName}-tester
+              imageTag: ${var.semanticVersion}
+              target: tester
+              extraArgs:
+                - --build-arg
+                - VERSION=${var.semanticVersion}
+          - containerBuildImage:
+              imageName: ${var.containerImageName}
+              imageTag: ${var.semanticVersion}
+              target: runner
+              extraArgs:
+                - --build-arg
+                - VERSION=${var.semanticVersion}
+              pullAlways: false
+      - docs:
+          - script: mkdir -p doc/_build
+          - pythonContainerDocs:
+              imageName: ${var.containerImageName}-tester
+              imageTag: ${var.semanticVersion}
+              pullAlways: false
+              packageManager: ''
+              removeLocalImage: false
+  - test:
+      - unit:
+          - pythonContainerTest:
+              imageName: ${var.containerImageName}-tester
+              imageTag: ${var.semanticVersion}
+              pullAlways: false
+              packageManager: ''
+              removeLocalImage: false
+      - lint:
+          - pythonContainerLint:
+              imageName: ${var.containerImageName}-tester
+              imageTag: ${var.semanticVersion}
+              pullAlways: false
+              packageManager: ''
+              removeLocalImage: false
+          - pythonContainerTypeCheck:
+              imageName: ${var.containerImageName}-tester
+              imageTag: ${var.semanticVersion}
+              pullAlways: false
+              packageManager: ''
+              removeLocalImage: false
+  - publish:
+      - artifacts:
+          - containerPublishImage:
+              imageName: ${var.containerImageName}
+              imageTag: ${var.semanticVersion}
+      - docs:
+          - openshiftPublishDocs:
+              docSrc: doc/_build/
+              docType: python
+  - clean:
+      - images:
+          script: |
+            if test -n "${var.semanticVersion}"; then
+              podman image rm -f $(podman image ls -q \
+                -f "label=ch.meteoswiss.project=${var.project}-${var.semanticVersion}") || :
+            fi
+
+# Alternative setup for installing and testing the service locally using the system's Python environment.
+local:
+  - build:
+      - install:
+          - pythonLocalInstall:
+      - docs:
+          - pythonLocalDocs:
+      - format:
+          - pythonLocalFormat:
+              inPlace: true
+  - test:
+      - unit:
+          - pythonLocalTest:
+      - lint:
+          - pythonLocalLint:
+          - pythonLocalTypeCheck:
+  - run:
+      - main:
+          - pythonLocalRun:
+              commands: pytrajplot greeting "the greeting command"
+
+variables:
+  solution: lagranto
+  project: pytrajplot
+  notifyOnNightlyFailure: victoria.cherkas@meteoswiss.ch
+  semanticVersion: 0.0.0  # is overwritten in Jenkins
+  containerImageName: docker-intern-nexus.meteoswiss.ch/lagranto/pytrajplot
+  ocpHostNameForEnv:
+    devt: api.devt.cp1.meteoswiss.ch:6443
+    depl: api.depl.cp1.meteoswiss.ch:6443
+    prod: api.prod.cp1.meteoswiss.ch:6443
