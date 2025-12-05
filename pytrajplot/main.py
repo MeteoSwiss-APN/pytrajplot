@@ -132,7 +132,7 @@ def interpret_options(start_prefix, traj_prefix, info_name, language):
     expose_value=False,
     callback=print_version,
 )
-def main(
+def cli(
     *,
     info_name: str,
     start_prefix: str,
