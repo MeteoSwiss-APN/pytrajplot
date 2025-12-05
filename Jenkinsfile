@@ -149,17 +149,6 @@ pipeline {
             }
         }
 
-        stage('Build Docs') {
-            steps {
-                script {
-                    echo '---- BUILDING PROJECT DOCUMENTATION ----'
-                    sh """
-                        mchbuild -s semanticVersion=${Globals.semanticVersion} -s containerImageName=${Globals.containerImageName} build.docs
-                    """
-                }
-            }
-        }
-
         stage('Publish Artifacts & Docs') {
             environment {
                 REGISTRY_AUTH_FILE = "$workspace/.containers/auth.json"
@@ -170,17 +159,6 @@ pipeline {
                     sh """
                         mchbuild -s semanticVersion=${Globals.semanticVersion} -s containerImageName=${Globals.containerImageName} publish.artifacts
                     """
-                }
-
-                script {
-                    if (env.TAG_NAME) {  // Indicates a release build
-                        echo "---- PUBLISHING DOCUMENTATION ----"
-                        withCredentials([string(credentialsId: 'documentation-main-prod-token', variable: 'DOC_TOKEN')]) {
-                            sh """
-                                mchbuild -s deploymentEnvironment=prod -s docVersion=${Globals.semanticVersion} publish.docs
-                            """
-                        }
-                    }
                 }
             }
         }

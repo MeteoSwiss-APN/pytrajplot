@@ -163,4 +163,3 @@ def cli(
         output_types=datatype,
     )
     print("--- Done.")
-    return
