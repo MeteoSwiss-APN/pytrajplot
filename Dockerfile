@@ -20,6 +20,7 @@ WORKDIR /src/app-root
 
 RUN pip install -r requirements.txt --no-cache-dir --no-deps --root-user-action=ignore
 COPY pytrajplot /src/app-root/pytrajplot
+COPY pyproject.toml /src/app-root/
 RUN pip install /src/app-root/pytrajplot --no-cache-dir --root-user-action=ignore
 
 FROM base AS tester
@@ -29,7 +30,6 @@ LABEL ch.meteoswiss.project=pytrajplot-${VERSION}
 COPY --from=builder /src/app-root/requirements_dev.txt /src/app-root/requirements_dev.txt
 RUN pip install -r /src/app-root/requirements_dev.txt --no-cache-dir --no-deps --root-user-action=ignore
 
-COPY pyproject.toml /src/app-root/
 COPY test /src/app-root/test
 
 FROM base AS runner
