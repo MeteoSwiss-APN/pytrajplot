@@ -12,10 +12,10 @@ pytrajplot_out=local
 # Graphics format
 datatype_opt="--datatype png" # --datatype pdf"
 # Domain options for
-# COSMO-1E-CTR (i1), IFS-HRES-Europe (ie), IFS-HRES global (ig)
-domain_opt_i1="--domain ch --domain alps"
-domain_opt_ie="--domain alps --domain centraleurope --domain europe"
-domain_opt_ig="--domain dynamic --domain dynamic_zoom"
+# ICON-CH1-EPS Control Run (icon1), IFS-HRES-Europe (ifs_e), IFS-HRES global (ifs_g)
+domain_opt_icon1="--domain ch --domain alps"
+domain_opt_ifs_e="--domain alps --domain centraleurope --domain europe"
+domain_opt_ifs_g="--domain dynamic --domain dynamic_zoom"
 # --------
 
 # Yesterday 06 UTC
@@ -32,11 +32,11 @@ bt_00=$(date --utc --date="today 00" +%Y%m%d%H)
 bt_03=$(date --utc --date="today 03" +%Y%m%d%H)
 
 # Load conda env for pytrajplot if CONDA_PREFIX not defined
-#[[ -z $CONDA_PREFIX ]] &&
-conda activate $conda_env
+[[ -z $CONDA_PREFIX ]] && conda activate $conda_env
 echo CONDA_PREFIX=$CONDA_PREFIX
 # Report version
-$CONDA_PREFIX/bin/pytrajplot --version
+ls -l $CONDA_PREFIX/bin/pytrajplot     # fast
+#$CONDA_PREFIX/bin/pytrajplot --version # very slow on balfrin
 
 for basetime in $bt_06 $bt_12 $bt_18 $bt_21 $bt_00 $bt_03 ; do
     yy=${basetime:2:2}
@@ -47,17 +47,19 @@ for basetime in $bt_06 $bt_12 $bt_18 $bt_21 $bt_00 $bt_03 ; do
     echo Basetime: $(date --utc --date="${basetime:0:8} $hh" "+%F %H UTC")
 
     # Operational INPUT_DIRs:
-    input_dir_i1=$(echo $store_osm/ICON-CH1-EPS/FCST${yy}/${yymmddhh}_???/lagranto_c/000)
-    input_dir_ie=$store_osm/IFS-HRES/IFS-HRES-LAGRANTO${yy}/${yymmddhh}_LIH/lagranto_f
-    input_dir_ig=$store_osm/IFS-HRES/IFS-HRES-LAGRANTO${yy}/${yymmddhh}_LIH/lagranto_c
+    input_dir_icon1=$(echo $store_osm/ICON-CH1-EPS/FCST${yy}/${yymmddhh}_???/lagranto_c/000)
+    input_dir_ifs_e=$store_osm/IFS-HRES/IFS-HRES-LAGRANTO${yy}/${yymmddhh}_LIH/lagranto_f
+    input_dir_ifs_g=$store_osm/IFS-HRES/IFS-HRES-LAGRANTO${yy}/${yymmddhh}_LIH/lagranto_c
 
     # Output directories
-    output_dir_i1=$pytrajplot_out/plot_i1_${basetime}
-    output_dir_ie=$pytrajplot_out/plot_ie_${basetime}
-    output_dir_ig=$pytrajplot_out/plot_ig_${basetime}
+    output_dir_icon1=$pytrajplot_out/plot_icon1_${basetime}
+    output_dir_ifs_e=$pytrajplot_out/plot_ifs_e_${basetime}
+    output_dir_ifs_g=$pytrajplot_out/plot_ifs_g_${basetime}
 
     # Submit jobs
-    for model in i1 ie ig ; do
+    for model in icon1 ifs_e ifs_g ; do
+        [[ $hh == 03 || $hh == 09 || $hh == 15 || $hh == 21 ]] && [[ $model != icon1 ]] && continue
+        [[ $hh == 06 || $hh == 18 ]] && [[ $model == ifs_g ]] && continue
         eval input_dir=\$input_dir_$model
         eval output_dir=\$output_dir_$model
         eval domain_opt=\$domain_opt_$model
