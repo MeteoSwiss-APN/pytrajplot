@@ -53,7 +53,7 @@ cosmo_test_args = [
     ['backward', 'backward', {'datatype': 'png', 'domain': ['ch','alps']}]
 ]
 
-def create_args(input_dir: str, output_dir: str, opts: dict):
+def create_args(input_dir: str, output_dir: str, opts: dict) -> list:
     args = []
 
     # Positional arguments

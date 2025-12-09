@@ -149,7 +149,7 @@ pipeline {
             }
         }
 
-        stage('Publish Artifacts & Docs') {
+        stage('Publish Artifacts') {
             environment {
                 REGISTRY_AUTH_FILE = "$workspace/.containers/auth.json"
             }
