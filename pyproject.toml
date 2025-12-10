@@ -4,7 +4,7 @@ version = "2.0.0"
 license = "BSD-3-Clause"
 authors = ["Pirmin Kaufmann <pirmin.kaufmann@meteoswiss.ch>"]
 description = "Plot LAGRANTO trajectories starting/ending at the same location on a map together with vertical cross sections"
-readme = "README.rst"
+readme = "README.md"
 packages = [
     { include = "pytrajplot" },
 ]
