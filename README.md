@@ -6,21 +6,18 @@ model outputs from ECMWF's [IFS](https://www.ecmwf.int/en/forecasts/documentatio
 model (European/global domains), the [COSMO](https://www.cosmo-model.org) model, or the
 [ICON](https://www.icon-model.org) model (limited domain centered over Switzerland).
 
-## Installation
-
-pip install pytrajplot -i https://service.meteoswiss.ch/nexus/repository/python-all/simple
-
-## Development setup (Poetry)
+## Installation using Conda and Poetry
 
 ### Get source code
 
-Create a local copy of the git repository:
+Create a local copy of the git repository and change working directory to it:
 
 ```bash
 git clone https://github.com/MeteoSwiss-APN/pytrajplot.git
+cd pytrajplot
 ```
 
-### If working with Conda: Create environment
+### Create Conda environment
 
 Create an environment with Conda and activate it
 
@@ -29,10 +26,10 @@ conda create -n pytrajplot python=3.13 poetry=1.8
 conda activate pytrajplot
 ```
 
-### Build the project
+### Build the project (Poetry)
+Alternative build with mchbuild see further below.
 
 ```bash
-cd pytrajplot
 poetry install
 ```
 
@@ -55,11 +52,10 @@ poetry run pylint pytrajplot
 poetry run mypy pytrajplot
 ```
 
-## Development setup (mchbuild)
+### Build the project (mchbuild)
 
 ```bash
 pipx install mchbuild
-cd pytrajplot
 mchbuild local.build.install
 # Optional
 mchbuild local.build.format
@@ -69,7 +65,7 @@ mchbuild local.test.lint
 mchbuild local.run
 ```
 
-More information: see `.mch-ci.yml` and the [mchbuild documentation](https://meteoswiss.atlassian.net/wiki/x/YoM-Jg?atlOrigin=eyJpIjoiNDgxYmJjMDhmNDViNGIyNmI1OGU4NzY4NTFhNzViZWEiLCJwIjoiYyJ9).
+More information: see [`.mch-ci.yml`](.mch-ci.yml) and the [mchbuild documentation](https://meteoswiss.atlassian.net/wiki/x/YoM-Jg?atlOrigin=eyJpIjoiNDgxYmJjMDhmNDViNGIyNmI1OGU4NzY4NTFhNzViZWEiLCJwIjoiYyJ9).
 
 ## Usage
 
@@ -105,44 +101,45 @@ Options:
 ```
 
 Only `INPUT_DIR` and `OUTPUT_DIR` are mandatory. The input directory must contain
-exactly one `plot_info` file and, for each trajectory file starting with `tra_geom`, one corresponding
-`startf` file.
+exactly one `plot_info` file and one or more pairs of one trajectory file and one starting points file each.
 
-## File nomenclature
+### File naming convention
 
 The name of the plot information file (default `plot_info`) and the prefixes of the 
 trajectory data file (default `tra_geom_`) and the starting point file (default `startf_`)
-can be specified.
+can be specified with options.
 
-The relevant part of the trajectory/start filenames is the *key*, generally
+The relevant part of the trajectory-data/starting-points filenames is the *key*, generally
 formatted as `XXX-YYYF` or `XXX-YYYB`. See below for the meaning of the parts.
 
-Requirements:
+Naming requirements:
 
-1. Keys must match between start and trajectory files (i.e. `traj_prefix+key` matches `start_prefix+key`).
-2. Keys must end with `F` or `B` to indicate trajectory direction.
-3. `XXX` refers to the start of the computation (relative to model base time).
-4. `YYY` refers to the end time (relative to model base time).
-5. `XXX` and `YYY` are separated by a dash.
-6. `YYY - XXX` equals the trajectory length in hours.
+1.  Keys must match between start and trajectory files (i.e. `traj_prefix+key`
+    matches `start_prefix+key`).
+2.  Keys must end with `F` or `B` to indicate trajectory direction.
+3.  `XXX` refers to the 3-digit start hour of the computed trajectory,
+    relative to the base time (initial time) of the weather prediction model.
+4.  `YYY` refers to the 3-digit end hour of the trajectory, relative to model base time.
+5.  `XXX` and `YYY` are separated by a dash.
+6.  The difference between `YYY` and `XXX` equals the trajectory length in
+    hours. For backward trajectories, `XXX` is greater than `YYY`.
 
 Information in the header and footer of output plots is partially generated
 from the key.
 
-## Examples
+### Examples
 
-Backward trajectories (33 h in the past):
+Backward trajectories (starting at 33 h in the future, going backwards to the model base time):
 
 ```
 startf_033-000B/tra_geom_033-000B
 ```
 
-Forward trajectories (48 h into the future):
+Forward trajectories (from model base time 48 h into the future):
 
 ```
 startf_000-048F/tra_geom_000-048F
 ```
-
 ## Code overview
 
 This is a short guide showing how a `pytrajplot` invocation flows through the
@@ -152,30 +149,33 @@ Example output:
 
 ```
 pytrajplot tests/test_hres/4_altitudes/ plots
---- Parsing input files
---- Assembling output
+--- Parsing Input Files
+--- Assembling Output
 --- Done.
 ```
 
-0. `pytrajplot/cli.py` — argument parsing (function: `interpret_options`).
+1. `pytrajplot/cli.py` — argument parsing (function: `interpret_options`).
 
-1. Parsing input files: `pytrajplot/parse_data.py` — the `check_input_dir` function
-   scans the input directory and parses `start` and `plot_info` files. The
-   `read_startf` and `PLOT_INFO` utilities parse those files; `read_trajectory`
-   parses trajectory files.
+2.  Parsing input files:
+    [`pytrajplot/parse_data.py`](pytrajplot/parse_data.py) — 
+    the `check_input_dir` function
+    scans the input directory and parses `start` and `plot_info` files. The
+    `read_startf` and `PLOT_INFO` utilities parse those files; `read_trajectory`
+    parses trajectory files.
 
-The parsing pipeline returns two dictionaries: `trajectory_dict` (main) where
-each key maps to a pandas DataFrame with combined start/trajectory data, and a
-second dictionary containing plot_info data.
+    The parsing pipeline returns two dictionaries: `trajectory_dict` (main) where
+    each key maps to a pandas DataFrame with combined start/trajectory data, and a
+    second dictionary containing plot_info data.
 
-2. Assembling output: `pytrajplot/generate_pdf.py` — converts each DataFrame into
-   plots by calling the plotting pipeline (`assemble_pdf`) which:
+3.  Assembling output:
+    [`pytrajplot/generate_pdf.py`](pytrajplot/generate_pdf.py) —
+    converts each DataFrame to plots by calling the plotting pipeline (function `assemble_pdf`), which:
 
    - creates the output directory (if needed),
    - adds altitude plots, header/footer and map figures,
    - saves figures.
 
-See `src/pytrajplot/plotting` for plotting scripts.
+See the [`src/pytrajplot/plotting`](src/pytrajplot/plotting) directory for plotting scripts.
 
 > Fun fact: MeteoSwiss generates roughly 2800 trajectory plots per day for the
 > IFS and ICON-CH1-EPS models.
@@ -188,7 +188,7 @@ follow semantic versioning (https://semver.org/) and be PEP 440 compatible
 
 ## Deploy
 
-CI pipelines publish artifacts to the artifact registry. For k8s deployments,
+The continuous integration (CI) pipelines publish artifacts to the artifact registry. For Kubernetes (k8s) deployments,
 create a deployment pipeline using `Jenkinsfile_k8s_deploy` as `Jenkinsfile`
 and trigger it from Jenkins with the chosen branch or tag. For ACPM-style
 deployments, update the artifact list in the deployment repository with the
