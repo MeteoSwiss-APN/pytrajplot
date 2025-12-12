@@ -33,7 +33,7 @@ Alternative build with mchbuild see further below.
 poetry install
 ```
 
-### Run tests
+#### Run tests
 
 ```bash
 poetry run pytest
@@ -45,11 +45,17 @@ If no errors occur, the tests save plots in their respective folders in the
 ![example1](https://i.imgur.com/Zp4F9Z7.jpg)
 ![example2](https://i.imgur.com/4WvLK1x.jpg)
 
-### Run quality tools
+#### Run quality tools
 
 ```bash
 poetry run pylint pytrajplot
 poetry run mypy pytrajplot
+```
+
+#### Build the documentation
+
+```bash
+python -m sphinx -b html -W -c doc doc doc/_build/html
 ```
 
 ### Build the project (mchbuild)
