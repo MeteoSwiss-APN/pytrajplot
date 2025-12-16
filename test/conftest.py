@@ -8,9 +8,6 @@ def pytest_sessionstart(session):
     print(f"\n=== pytrajplot version: {main.__version__} ===")
     print(f"\n=== pytrajplot: {shutil.which('pytrajplot')} ===")
 
-# Legacy fixtures `hres_input` and `cosmo_input` were removed. Use
-# the unified `input_dir` fixture which selects the correct model
-# path based on the test parameterization (see below).
 
 @pytest.fixture(scope="session")
 def output_dir() -> Path:
