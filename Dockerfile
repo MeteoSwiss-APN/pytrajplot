@@ -20,7 +20,7 @@ WORKDIR /src/app-root
 
 RUN pip install -r requirements.txt --no-cache-dir --no-deps --root-user-action=ignore
 COPY pytrajplot /src/app-root/pytrajplot
-COPY pyproject.toml README.rst /src/app-root/
+COPY pyproject.toml README.md /src/app-root/
 RUN pip install /src/app-root --no-cache-dir --root-user-action=ignore
 
 FROM base AS tester

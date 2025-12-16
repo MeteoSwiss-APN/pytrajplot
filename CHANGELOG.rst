@@ -2,40 +2,54 @@
 Changelog
 =========
 
-Version 0.2.0
+Version 2.0.0
 -------------
 
 Features
 ''''''''
 
-- Lorem ipsum dolor sit
-- Consectetur adipiscing elit
-- Sed do eiusmod tempor incididunt
+- Compliance with MeteoSwiss Python blueprint
+- Using Poetry for packaging
+- Improved documentation with Sphinx
+- CI/CD using mchbuild
+- Containerization with Docker
 
 Bug Fixes
 '''''''''
 
-- Ut labore et dolore magna aliqua
+- None
 
 Breaking Changes
 ''''''''''''''''
 
-- Ut enim ad minim veniam
-- Quis nostrud exercitation ullamco laboris
+- None
 
 
-Version 0.1.0
+Version 1.1.4
 -------------
 
 Features
 ''''''''
 
-- Nisi ut aliquip
-- Ex ea commodo consequat
+- No new features
 
 Bug Fixes
 '''''''''
 
-- Duis aute irure dolor in
-- Voluptate velit esse
-- Cillum dolore eu fugiat nulla pariatur excepteur sint oocaecat
+- Fix bug causing disappearing parts of trajectories when
+  crossing the zero meridian twice
+
+
+Version 1.1.1
+-------------
+
+Features
+''''''''
+
+- Independent base time for plot annotation
+  and reference time for trajectory data
+
+Bug Fixes
+'''''''''
+
+- Minor bug fixes

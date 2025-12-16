@@ -4,7 +4,7 @@ version = "2.0.0"
 license = "BSD-3-Clause"
 authors = ["Pirmin Kaufmann <pirmin.kaufmann@meteoswiss.ch>"]
 description = "Plot LAGRANTO trajectories starting/ending at the same location on a map together with vertical cross sections"
-readme = "README.rst"
+readme = "README.md"
 packages = [
     { include = "pytrajplot" },
 ]
@@ -22,6 +22,7 @@ cartopy = "^0.25.0"
 matplotlib = "^3.10.7"
 numpy = "^2.3.5"
 pandas = "^2.3.3"
+recommonmark = "^0.7.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.18.1"
@@ -29,6 +30,7 @@ pydata-sphinx-theme = "^0.16.1"
 pylint = "^3.3.8"
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
+recommonmark = "^0.7.1"
 sphinx = "^8.2.3"
 sphinx-autoapi = "^3.6.0"
 yapf = "^0.43.0"
