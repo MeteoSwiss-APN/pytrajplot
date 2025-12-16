@@ -23,14 +23,14 @@ test_sets = [
         'model': 'hres',
         'arguments': ['2_altitudes', '2_altitudes', {'datatype': 'png', 'domain': 'europe'}],
         'expected_output': [
-            './test_hres/2_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
         ]
     },
     {
         'model': 'hres',
         'arguments': ['3_altitudes', '3_altitudes', {'datatype': 'png', 'domain': 'europe'}],
         'expected_output': [
-            './test_hres/3_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
         ]
     },
 
@@ -39,7 +39,7 @@ test_sets = [
         'model': 'hres',
         'arguments': ['backward', 'backward', {'datatype': 'png', 'domain': ['europe', 'dynamic']}],
         'expected_output': [
-            './test_hres/backward/20210505T00_Geneve_LAGRANTO-IFS-HRES-Europe_Trajektorien_B_036_europe.png'
+            '20210505T00_Geneve_LAGRANTO-IFS-HRES-Europe_Trajektorien_B_036_europe.png'
         ]
     },
 
@@ -51,11 +51,11 @@ test_sets = [
             'domain': ['ch', 'alps', 'centraleurope', 'europe', 'dynamic']
         }],
         'expected_output': [
-            './test_hres/4_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_centraleurope.png',
-            './test_hres/4_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_alps.png',
-            './test_hres/4_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_dynamic.png',
-            './test_hres/4_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_ch.png',
-            './test_hres/4_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_centraleurope.png',
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_alps.png',
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_dynamic.png',
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_ch.png',
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
         ]
     },
 
@@ -64,7 +64,7 @@ test_sets = [
         'model': 'hres',
         'arguments': ['dateline', 'dateline', {'datatype': 'png', 'domain': 'dynamic'}],
         'expected_output': [
-            './test_hres/dateline/20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png'
+            '20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png'
         ]
     },
 
@@ -77,7 +77,7 @@ test_sets = [
             'language': 'de'
         }],
         'expected_output': [
-            './test_hres/dateline/german/20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png'
+            '20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png'
         ]
     },
 
@@ -86,37 +86,37 @@ test_sets = [
         'model': 'hres',
         'arguments': ['zero_lon_from_east', 'zero_lon_from_east', {}],
         'expected_output': [
-            './test_hres/zero_lon_from_east/20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
-            './test_hres/zero_lon_from_east/20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf'
+            '20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
+            '20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
+            '20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
+            '20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
+            '20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
+            '20220401T00_Chernobyl_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
+            '20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
+            '20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
+            '20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
+            '20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
+            '20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
+            '20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
+            '20220401T00_Chmelnyzkyj_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
+            '20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
+            '20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
+            '20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
+            '20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
+            '20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
+            '20220401T00_Riwne_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
+            '20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
+            '20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
+            '20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
+            '20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
+            '20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
+            '20220401T00_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
+            '20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
+            '20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
+            '20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
+            '20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
+            '20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf',
+            '20220401T00_Zaporozhye_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf'
         ]
     },
 
@@ -125,12 +125,12 @@ test_sets = [
         'model': 'hres',
         'arguments': ['zero_last_lon', 'zero_last_lon', {}],
         'expected_output': [
-            './test_hres/zero_last_lon/20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
-            './test_hres/zero_last_lon/20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
-            './test_hres/zero_last_lon/20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
-            './test_hres/zero_last_lon/20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
-            './test_hres/zero_last_lon/20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
-            './test_hres/zero_last_lon/20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf'
+            '20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic.pdf',
+            '20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_ch.pdf',
+            '20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_alps.pdf',
+            '20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_centraleurope.pdf',
+            '20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_europe.pdf',
+            '20230205T12_Sued-Ukraine_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_084_dynamic_zoom.pdf'
         ]
     },
 
@@ -142,7 +142,7 @@ test_sets = [
             'domain': 'dynamic'
         }],
         'expected_output': [
-            './test_hres/zero_lon_dateline/20240913T00_Lugano_LAGRANTO-IFS-HRES_Trajektorien_B_144_dynamic.png'
+            '20240913T00_Lugano_LAGRANTO-IFS-HRES_Trajektorien_B_144_dynamic.png'
         ]
     },
 
@@ -151,16 +151,16 @@ test_sets = [
         'model': 'cosmo',
         'arguments': ['forward', 'forward', {'datatype': 'png', 'domain': ['ch', 'alps']}],
         'expected_output': [
-            './test_cosmo/forward/20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch.png',
-            './test_cosmo/forward/20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_alps.png'
+            '20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch.png',
+            '.20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_alps.png'
         ]
     },
     {
         'model': 'cosmo',
         'arguments': ['backward', 'backward', {'datatype': 'png', 'domain': ['ch', 'alps']}],
         'expected_output': [
-            './test_cosmo/backward/20211103T09_Geneve_LAGRANTO-COSMO-1E_Trajektorien_B_033_alps.png',
-            './test_cosmo/backward/20211103T09_Geneve_LAGRANTO-COSMO-1E_Trajektorien_B_033_ch.png'
+            '20211103T09_Geneve_LAGRANTO-COSMO-1E_Trajektorien_B_033_alps.png',
+            '20211103T09_Geneve_LAGRANTO-COSMO-1E_Trajektorien_B_033_ch.png'
         ]
     }
 ]
