@@ -16,7 +16,7 @@ test_sets = [
         'model': 'hres',
         'arguments': ['1_altitudes', '1_altitudes', {'datatype': 'png', 'domain': 'europe'}],
         'expected_output': [
-            './test_hres/1_altitudes/20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
         ]
     },
     {
