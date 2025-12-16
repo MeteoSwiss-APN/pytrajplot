@@ -194,8 +194,6 @@ follow semantic versioning (https://semver.org/) and be PEP 440 compatible
 
 ## Deploy
 
-The continuous integration (CI) pipelines publish artifacts to the artifact registry. For Kubernetes (k8s) deployments,
-create a deployment pipeline using `Jenkinsfile_k8s_deploy` as `Jenkinsfile`
-and trigger it from Jenkins with the chosen branch or tag. For ACPM-style
+The continuous integration (CI) pipelines publish artifacts to the artifact registry. For ACPM-style
 deployments, update the artifact list in the deployment repository with the
 new version.
