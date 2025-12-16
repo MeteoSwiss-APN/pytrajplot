@@ -8,6 +8,10 @@ def pytest_sessionstart(session):
     print(f"\n=== pytrajplot version: {main.__version__} ===")
     print(f"\n=== pytrajplot: {shutil.which('pytrajplot')} ===")
 
+@pytest.fixture(autouse=True)
+def set_test_locale():
+    os.environ["LC_ALL"] = "C"
+    os.environ["LANG"] = "C"
 
 @pytest.fixture(scope="session")
 def output_dir() -> Path:

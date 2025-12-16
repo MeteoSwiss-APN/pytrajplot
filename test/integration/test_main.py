@@ -152,7 +152,7 @@ test_sets = [
         'arguments': ['forward', 'forward', {'datatype': 'png', 'domain': ['ch', 'alps']}],
         'expected_output': [
             '20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch.png',
-            '.20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_alps.png'
+            '20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_alps.png'
         ]
     },
     {
