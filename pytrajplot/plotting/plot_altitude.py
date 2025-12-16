@@ -99,10 +99,13 @@ def generate_altitude_plot(
     """
     ax = ax or plt.gca()
 
-    if language == "en":
-        locale.setlocale(locale.LC_ALL, "en_GB.UTF-8")
-    else:  # language == "de"
-        locale.setlocale(locale.LC_ALL, "de_DE.UTF-8")
+    try:
+        if language == "en":
+            locale.setlocale(locale.LC_ALL, "en_GB.UTF-8")
+        else:  # language == "de"
+            locale.setlocale(locale.LC_ALL, "de_DE.UTF-8")
+    except locale.Error:
+        locale.setlocale(locale.LC_ALL, "C")
 
     if sub_index != (altitude_levels - 1):
         ax.set_xticklabels([])
