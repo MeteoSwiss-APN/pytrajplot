@@ -1,96 +1,88 @@
 # PyTrajPlot
 
-PyTrajPlot is a Python-based tool to visualize trajectories calculated with
-[LAGRANTO](https://www.research-collection.ethz.ch/handle/20.500.11850/103598)
-based on ECMWF's [IFS-HRES](https://www.ecmwf.int/en/forecasts/documentation-and-support)
-(on an European or global domain) or the [COSMO](https://www.cosmo-model.org) model
-(on a limited domain centered over Switzerland).
+PyTrajPlot is a Python tool to visualize trajectories calculated with
+[LAGRANTO](https://www.research-collection.ethz.ch/handle/20.500.11850/103598) based on
+model outputs from ECMWF's [IFS](https://www.ecmwf.int/en/forecasts/documentation-and-support)
+model (European/global domains), the [COSMO](https://www.cosmo-model.org) model, or the
+[ICON](https://www.icon-model.org) model (limited domain centered over Switzerland).
 
-## Installation
+## Installation using Conda and Poetry
 
-PyTrajPlot is hosted on
-[GitHub](https://github.com/MeteoSwiss-APN/pytrajplot). For the available
-releases, see [Releases](https://github.com/MeteoSwiss-APN/pytrajplot/releases).
+### Get source code
 
-Create a local copy of the repository and continue installation from the root of
-the `pytrajplot` directory.
+Create a local copy of the git repository and change working directory to it:
 
-    git clone https://github.com/MeteoSwiss-APN/pytrajplot.git
-    cd pytrajplot
+```bash
+git clone https://github.com/MeteoSwiss-APN/pytrajplot.git
+cd pytrajplot
+```
 
-### Prerequisite
+### Create Conda environment
 
-Having Conda installed is a prerequisite for the further installation
-process. To install an appropriate Miniconda version, use
+Create an environment with Conda and activate it
 
-    tools/setup_miniconda.sh
+```bash
+conda create -n pytrajplot python=3.13 poetry=1.8
+conda activate pytrajplot
+```
 
-or install the latest version manually from the
-[miniconda webpage](https://docs.conda.io/en/latest/miniconda.html).
-Then follow the
-instructions here below to set up a conda environment and test multiple use-cases.
+### Build the project (Poetry)
+Alternative build with mchbuild see further below.
 
-### Create environment
+```bash
+poetry install
+```
 
-Create an environment and install the package dependencies with conda
+#### Run tests
 
-     conda env create -n pytrajplot -f requirements/environment.yml
+```bash
+poetry run pytest
+```
 
-We distinguish pinned installations based on exported (reproducible) environments,
-saved in `requirements/environment.yml`,
-and free installations, where the installation
-is based on top-level dependencies listed in `requirements/requirements.txt`.
+If no errors occur, the tests save plots in their respective folders in the
+`local` directory. Example output images:
 
-### Install Package
+![example1](https://i.imgur.com/Zp4F9Z7.jpg)
+![example2](https://i.imgur.com/4WvLK1x.jpg)
 
-Activate the newly created environment with (replace `pytrajplot` by your custom
-name `<package_env_name>` if you have used the `-n <package_env_name>` option).
+#### Run quality tools
 
-    conda activate pytrajplot
+```bash
+poetry run pylint pytrajplot
+poetry run mypy pytrajplot
+```
 
-The package itself is installed with `pip`. As all dependencies are already
-installed by conda and should not be modified by pip, use the `--no-deps` flag.
+#### Build the documentation
 
-    pip install --no-deps .
+```bash
+python -m sphinx -b html -W -c doc doc doc/_build/html
+```
 
-For development, install the package in editable mode:
+### Build the project (mchbuild)
 
-    pip install --no-deps --editable .
+```bash
+pipx install mchbuild
+mchbuild local.build.install
+# Optional
+mchbuild local.build.format
+mchbuild local.build.docs
+mchbuild local.test.unit
+mchbuild local.test.lint
+mchbuild local.run
+```
 
-*Warning:* Make sure you use the right pip, i.e. the one from the installed conda environment (`which pip` should point to something like `path/to/miniconda/envs/<package_env_name>/bin/pip`).
-
-Once your package is installed, run the basic tests by typing:
-
-    pytest
-
-A more comprehensive set of tests can be exectuted by running the script
-
-    tests/test_pytrajplot.sh
-
-If developing, make sure to update the requirements file
-and export your environment after installation
-every time you add new imports while developing.
-
----
-
-### Test results
-
-If no errors occur, the above test script save plots such as these
-here below in their respective folders in the `local` directory.
-![](https://i.imgur.com/Zp4F9Z7.jpg)
-![](https://i.imgur.com/4WvLK1x.jpg)
+More information: see [`.mch-ci.yml`](.mch-ci.yml) and the [mchbuild documentation](https://meteoswiss.atlassian.net/wiki/x/YoM-Jg?atlOrigin=eyJpIjoiNDgxYmJjMDhmNDViNGIyNmI1OGU4NzY4NTFhNzViZWEiLCJwIjoiYyJ9).
 
 ## Usage
 
-Activate the conda environment (you might have chosen a different name for the environment than the default name `pytrajplot`):
+Get a short help with a list of available options:
 
-    conda activate pytrajplot
+```bash
+pytrajplot --help
+```
 
-To get a list of all available commands, just type:
+Output of the above command at the time of writing this documentation:
 
-    pytrajplot --help
-
-The possible options are as follows:
 
 ```
 Usage: pytrajplot [OPTIONS] INPUT_DIR OUTPUT_DIR
@@ -99,153 +91,109 @@ Options:
   --start-prefix TEXT             Prefix for the start files. Default: startf_
   --traj-prefix TEXT              Prefix for the start files. Default:
                                   tra_geom_
-
-  --info-name TEXT                Prefix for the plot info files. Default:
-                                  plot_info
-
+  --info-name TEXT                Name of plot_info file. Default: plot_info
   --separator TEXT                Separator str between origin of trajectory
                                   and side trajectory index. Default: ~
-
-  --language [en|english|de|ger|german|Deutsch]
+  --language [en|english|de|ger|german|Deutsch|deutsch]
                                   Choose language. Default: en
   --domain [ch|europe|centraleurope|alps|dynamic|dynamic_zoom]
                                   Choose domains for map plots. Default:
                                   centraleurope, europe, dynamic
-
   --datatype [eps|jpeg|jpg|pdf|pgf|png|ps|raw|rgba|svg|svgz|tif|tiff]
                                   Choose data type(s) of final result.
                                   Default: pdf
-
   -V, --version                   Print version and exit.
   --help                          Show this message and exit.
 ```
 
-The only mandatory arguments are `INPUT_DIR` and `OUTPUT_DIR`. The input directory
-specifies the path to the source files. In the input directory, there should be
-at exactly **one `plot_info`** file, and for each trajectory file one
-corresponding `start` file.
+Only `INPUT_DIR` and `OUTPUT_DIR` are mandatory. The input directory must contain
+exactly one `plot_info` file and one or more pairs of one trajectory file and one starting points file each.
 
-### File Nomenclature
+### File naming convention
 
-Should the prefixes of the file names deviate from the default values
-(*tra_geom_*, *startf_*, *plot_info*), it is possible to specify the prefix of
-the start and trajectory files, as well as the name of the plot_info file.
+The name of the plot information file (default `plot_info`) and the prefixes of the 
+trajectory data file (default `tra_geom_`) and the starting point file (default `startf_`)
+can be specified with options.
 
-The relevant part in the filename of the trajectory/start files, is the
-*key*. In general, the *key* looks like: `XXX-YYYF/B`. It has to satisfy the
-following *conditions*:
+The relevant part of the trajectory-data/starting-points filenames is the *key*, generally
+formatted as `XXX-YYYF` or `XXX-YYYB`. See below for the meaning of the parts.
 
-1. Keys must match between start/trajectory file
+Naming requirements:
 
-    ```
-    traj_prefix+key <---> start_prefix+key
-    ```
+1.  Keys must match between start and trajectory files (i.e. `traj_prefix+key`
+    matches `start_prefix+key`).
+2.  Keys must end with `F` or `B` to indicate trajectory direction.
+3.  `XXX` refers to the 3-digit start hour of the computed trajectory,
+    relative to the base time (initial time) of the weather prediction model.
+4.  `YYY` refers to the 3-digit end hour of the trajectory, relative to model base time.
+5.  `XXX` and `YYY` are separated by a dash.
+6.  The difference between `YYY` and `XXX` equals the trajectory length in
+    hours. For backward trajectories, `XXX` is greater than `YYY`.
 
-2. Keys must end with **F** / **B** to determine the trajectories direction (forward/backward)
+Information in the header and footer of output plots is partially generated
+from the key.
 
-3. XXX refers to the start of the computation of trajectories (w.r.t the model base time,
-   which is specified in the corresponding plot_info file)
+### Examples
 
-4. YYY refers to the end-time of the trajectory computation (w.r.t to the model base time.
+Backward trajectories (starting at 33 h in the future, going backwards to the model base time):
 
-5. XXX and YYY are seperated by a dash
+```
+startf_033-000B/tra_geom_033-000B
+```
 
-6. The difference of XXX and YYY equals the trajectory length (in hours).
+Forward trajectories (from model base time 48 h into the future):
 
-Information in the header and footer of the output plots, is partially generated
-from the information in the *key*.
+```
+startf_000-048F/tra_geom_000-048F
+```
+## Code overview
 
-#### Examples
+This is a short guide showing how a `pytrajplot` invocation flows through the
+codebase. See the referenced modules for implementation details.
 
-Backward Trajectories; 33 h in the past from model base time until model base time.
-
-> startf_033-000B/tra_geom_033-000B
-
-Forwart trajectories; 48h to the future from model base time.
-
-> startf_000-048F/tra_geom_000-048F
-
-### Code Overview
-
-This part is a small step-by-step guide, how an exemplary `pytrajplot` command
-runs through the code with references to the corresponding (Python) scripts and
-functions.
-
-#### Example
+Example output:
 
 ```
 pytrajplot tests/test_hres/4_altitudes/ plots
 --- Parsing Input Files
---- Assembling Ouput
+--- Assembling Output
 --- Done.
 ```
 
-##### 0. [cli.py](src/pytrajplot/cli.py)
+1. `pytrajplot/cli.py` — argument parsing (function: `interpret_options`).
 
-Before the input files get parsed, the user inputs need to be parsed using the
-function `interpret_options`.
+2.  Parsing input files:
+    [`pytrajplot/parse_data.py`](pytrajplot/parse_data.py) — 
+    the `check_input_dir` function
+    scans the input directory and parses `start` and `plot_info` files. The
+    `read_startf` and `PLOT_INFO` utilities parse those files; `read_trajectory`
+    parses trajectory files.
 
-##### 1. Parsing Input Files: [parse_data.py](src/pytrajplot/parse_data.py)
+    The parsing pipeline returns two dictionaries: `trajectory_dict` (main) where
+    each key maps to a pandas DataFrame with combined start/trajectory data, and a
+    second dictionary containing plot_info data.
 
-In the next step the `check_input_dir` function from the data parser script is
-initialised.
+3.  Assembling output:
+    [`pytrajplot/generate_pdf.py`](pytrajplot/generate_pdf.py) —
+    converts each DataFrame to plots by calling the plotting pipeline (function `assemble_pdf`), which:
 
-###### Procedure
+   - creates the output directory (if needed),
+   - adds altitude plots, header/footer and map figures,
+   - saves figures.
 
-1. iterate through the directory and read the start & plot_info files. simultaneously collect all present keys
-   *Remark:* The start file is parsed using the `read_startf` function and
-   the plot_info file is parsed using the `PLOT_INFO` [class](src/pytrajplot/parsing/plot_info.py).
-2. for each found key, parse corresponding trajectory file using the `read_trajectory` function.
+See the [`src/pytrajplot/plotting`](src/pytrajplot/plotting) directory for plotting scripts.
 
-There is a number of different helper-functions involved in the parsing of these
-files. The code is well commented and the docstrings should provide further
-information on the use of each function, see
-[here](src/pytrajplot/parse_data.py).
+> Fun fact: MeteoSwiss generates roughly 2800 trajectory plots per day for the
+> IFS and ICON-CH1-EPS models.
 
-Ultimately, the parsing-pipeline returns two *dictionaries*. The main
-dictionary, containing all information, is the `trajectory_dict`. Each key
-contains a `pandas dataframe`, with the combined information of the
-corresponding start/trajectory file. The second dictionary contains the relevant
-information of the plot_info file, which corresponds to all start/trajecotry
-files.
+## Release
 
-##### 3. Assembling Ouput: [generate_pdf.py](src/pytrajplot/generate_pdf.py)
+Releases follow a GitOps flow and are triggered by creating Git tags. Tags must
+follow semantic versioning (https://semver.org/) and be PEP 440 compatible
+(https://peps.python.org/pep-0440/).
 
-Once all the data from one directory is in this usable dictionary format, the
-plotting pipeline is initialised. The first part of the
-[generate_pdf](src/pytrajplot/generate_pdf.py) script iterates through this
-dictionary, retrieves the dataframes and "parses" them. For each trajectory
-origin, the plotting pipeline is called and one plot generated. Usually, there
-are several trajectories/origins per dataframe.
+## Deploy
 
-*Fun Fact:* @MeteoSwiss approximately 2800 trajectory plots are generated each day for the IFS-HRES (over Europe and globally) and COSMO-1E models.
-
-###### Procedure
-
-1. iterate through `trajectory_dict`
-2. retrieve `df` for current key
-3. iterate through dataframe
-4. for each origin, present in current dataframe, fill a new dictionary (`plot_dict`) with plot-specific information.
-5. initialise pipeline with the plot_dict by calling `assemble_pdf`
-    5.1 create output directory (if it doesn't exist)
-    5.2 add altitude plot to figure
-    5.3 add footer to figure
-    5.4 add header to figure
-    5.5 add map figure
-6. save figure
-7. repeat steps 3.-6. until all plots for the current dataframes/domains/datatypes have been generated
-8. repeat steps 2.-7. until all figures for all start/trajectory files have been generated
-9. return `-- done`
-
-###### Remark
-
-Again, this procedure outlines the inner workings of the plotting scripts. For
-greater insight, it is recommended to read the scripts and pay special attention
-to the comments and docstrings. All plotting-scripts are located
-[here](src/pytrajplot/plotting).
-
-## Credits
-
-This package was created with
-[Cookiecutter](https://github.com/audreyr/cookiecutter) and the MeteoSwiss
-blueprint for the CSCS systems.
+The continuous integration (CI) pipelines publish artifacts to the artifact registry. For ACPM-style
+deployments, update the artifact list in the deployment repository with the
+new version.
