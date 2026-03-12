@@ -1,5 +1,5 @@
 """Command line interface of pytrajplot."""
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 import logging
 import os
 from pathlib import Path
@@ -46,7 +46,7 @@ def replace_variables(template_content: str) -> str:
     return result
 
 
-def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str = None) -> bool:
+def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str | None = None) -> bool:
     """
     Check if plot_info file exists in input directory.
     If not found, fetch from SSM parameter and create it replacing variables.
@@ -235,7 +235,7 @@ def cli(
     language: str,
     domain: str,
     datatype: str,
-    ssm_parameter_path: str = None,
+    ssm_parameter_path: str | None = None,
     skip_ssm_fallback: bool = False,
 ) -> None:
     # Check if plot_info file exists (create from SSM if needed)
