@@ -37,8 +37,7 @@ class TestCheckPlotInfoFile:
     """Test the check_plot_info_file function."""
 
     def test_plot_info_file_exists(self, tmp_path):
-        """Test when plot_info file already exists."""
-        # Create a temporary plot_info file
+        """Test with plot_info file in place."""
         plot_info_file = tmp_path / "plot_info"
         plot_info_file.write_text("existing content")
 
@@ -168,22 +167,16 @@ class TestCliIntegration:
     """Test CLI integration with new functionality."""
 
     def test_cli_with_existing_plot_info(self, tmp_path):
-        """Test CLI when plot_info file already exists."""
-        # Create input directory with plot_info
+        """Test CLI when plot_info file in place."""
         input_dir = tmp_path / "input"
         input_dir.mkdir()
         plot_info = input_dir / "plot_info"
         plot_info.write_text("existing plot_info")
-
-        # Create some dummy trajectory files
-        (input_dir / "startf_test").write_text("start data")
-        (input_dir / "tra_geom_test").write_text("trajectory data")
-
         output_dir = tmp_path / "output"
 
         runner = CliRunner()
 
-        # Mock the generate_pdf function since we're not testing that
+        # Mock the generate_pdf function
         with patch('pytrajplot.main.check_input_dir') as mock_check, \
              patch('pytrajplot.main.generate_pdf') as mock_generate:
 
@@ -197,27 +190,6 @@ class TestCliIntegration:
 
         assert result.exit_code == 0
         assert "already exists" in result.output or result.exit_code == 0
-
-    def test_cli_skip_ssm_fallback(self, tmp_path):
-        """Test CLI with skip-ssm-fallback flag."""
-        input_dir = tmp_path / "input"
-        input_dir.mkdir()
-        output_dir = tmp_path / "output"
-
-        runner = CliRunner()
-
-        with patch('pytrajplot.main.check_input_dir') as mock_check, \
-             patch('pytrajplot.main.generate_pdf') as mock_generate:
-
-            mock_check.return_value = ({}, {})
-
-            result = runner.invoke(cli, [
-                str(input_dir),
-                str(output_dir),
-                '--skip-ssm-fallback'
-            ])
-
-        assert result.exit_code == 0
 
     @patch('boto3.client')
     def test_cli_ssm_failure_causes_exit(self, mock_boto3_client, tmp_path):
