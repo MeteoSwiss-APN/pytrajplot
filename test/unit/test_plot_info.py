@@ -7,7 +7,8 @@ from unittest.mock import Mock, patch, mock_open, MagicMock
 from click.testing import CliRunner
 from botocore.exceptions import ClientError
 
-from pytrajplot.main import replace_variables, check_plot_info_file, cli
+from pytrajplot.parsing.plot_info import replace_variables, check_plot_info_file
+from pytrajplot.main import cli
 
 
 class TestReplaceVariables:
