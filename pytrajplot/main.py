@@ -133,14 +133,10 @@ def interpret_options(start_prefix: str, traj_prefix: str, info_name: str, langu
 @click.option(
     "--ssm-parameter-path",
     type=str,
-    help="SSM parameter path for plot_info template. Uses SSM_PARAMETER_PATH env var if not specified.",
+    default=None,
+    help="SSM parameter path for plot_info template. Falls back to SSM_PARAMETER_PATH env var if not specified.",
 )
-@click.option(
-    "--skip-ssm-fallback",
-    is_flag=True,
-    default=True,
-    help="Skip SSM parameter fallback if plot_info file is missing.",
-)
+
 @click.option(
     "--version",
     "-V",
@@ -161,19 +157,17 @@ def cli(
     domain: str,
     datatype: str,
     ssm_parameter_path: str | None = None,
-    skip_ssm_fallback: bool = False,
 ) -> None:
     # Check if plot_info file exists (create from SSM if needed)
-    if not skip_ssm_fallback:
-        plot_info_created = check_plot_info_file(
-            input_dir=input_dir,
-            info_name=info_name,
-            ssm_parameter_path=ssm_parameter_path
-        )
+    plot_info_created = check_plot_info_file(
+        input_dir=input_dir,
+        info_name=info_name,
+        ssm_parameter_path=ssm_parameter_path
+    )
 
-        if not plot_info_created:
-            logger.error("Failed to check if plot_info file exists. Use --skip-ssm-fallback to continue anyway.")
-            raise click.ClickException("Missing plot_info file and failed to create from SSM parameter.")
+    if not plot_info_created:
+        logger.error("Failed to check if plot_info file exists.")
+        raise click.ClickException("Missing plot_info file and failed to create from SSM parameter.")
 
     prefix_dict, language = interpret_options(
         start_prefix=start_prefix,

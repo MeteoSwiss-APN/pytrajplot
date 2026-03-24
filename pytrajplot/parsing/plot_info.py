@@ -89,19 +89,22 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
     input_path = Path(input_dir)
     plot_info_file = input_path / info_name
 
-    # Check if plot_info file already exists
+    # If file exists, use it regardless of SSM config
     if plot_info_file.exists():
         logger.info(f"Plot info file already exists: {plot_info_file}")
         return True
-
+    
     # File doesn't exist, try to create it from SSM parameter
-    logger.info(f"Plot info file not found: {plot_info_file}")
+    ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
+    if not ssm_param_path:
+        logger.error(f"Plot info file not found and no ssm parameter set: {plot_info_file}")
+        return False
 
     try:
         # Get SSM parameter path from argument or environment
-        ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH', '/pytrajplot/icon/plot_info')
+        #ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
         logger.info(f"Fetching SSM parameter: {ssm_param_path}")
-
+        
         # Fetch template from SSM Parameter
         ssm_client = boto3.client('ssm')
         response = ssm_client.get_parameter(

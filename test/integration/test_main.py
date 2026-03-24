@@ -171,7 +171,6 @@ def create_args(input_dir: str, output_dir: str, opts: dict) -> list:
     # Positional arguments
     args.append(input_dir)
     args.append(output_dir)
-    args.append("--skip-ssm-fallback")
 
     # Keyword arguments
     for key, value in opts.items():

@@ -131,6 +131,7 @@ class TestCheckPlotInfoFile:
         }
 
         result = check_plot_info_file(
+            ssm_parameter_path="/test/parameter",
             input_dir=str(tmp_path),
             info_name="plot_info"
         )
@@ -186,7 +187,6 @@ class TestCliIntegration:
             result = runner.invoke(cli, [
                 str(input_dir),
                 str(output_dir),
-                '--skip-ssm-fallback'  # Skip SSM to avoid AWS calls
             ])
 
         assert result.exit_code == 0
@@ -210,6 +210,7 @@ class TestCliIntegration:
 
         runner = CliRunner()
         result = runner.invoke(cli, [
+            '--ssm-parameter-path', '/test/path',
             str(input_dir),
             str(output_dir)
         ])
