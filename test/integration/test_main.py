@@ -208,4 +208,3 @@ def test_pytrajplot(input_args, input_dir, output_dir):
     for rel in expected:
         expected_file = Path(output_path) / Path(rel).name
         assert expected_file.exists(), f"Expected output not found: {expected_file}"
-

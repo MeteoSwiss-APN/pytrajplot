@@ -1,5 +1,7 @@
 """Command line interface of pytrajplot."""
 from typing import Tuple, Dict
+import logging
+import os
 
 # Third-party
 import click
@@ -9,14 +11,18 @@ from pytrajplot import __version__
 from pytrajplot.generate_pdf import generate_pdf
 from pytrajplot.parse_data import check_input_dir
 from pytrajplot.utils import count_to_log_level
+from pytrajplot.parsing.plot_info import check_plot_info_file
 
+# Setup logging
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=log_level)
+logger = logging.getLogger(__name__)
 
 def print_version(ctx: click.Context, _param: click.Parameter, value: bool) -> None:
     """Print the version number and exit."""
     if value:
         click.echo(__version__)
         ctx.exit(0)
-
 
 def interpret_options(start_prefix: str, traj_prefix: str, info_name: str, language: str) -> Tuple[Dict[str, str], str]:
     """Reformat command line inputs.
@@ -125,6 +131,13 @@ def interpret_options(start_prefix: str, traj_prefix: str, info_name: str, langu
     help="Choose data type(s) of final result. Default: pdf",
 )
 @click.option(
+    "--ssm-parameter-path",
+    type=str,
+    default=None,
+    help="SSM parameter path for plot_info template. Falls back to SSM_PARAMETER_PATH env var if not specified.",
+)
+
+@click.option(
     "--version",
     "-V",
     help="Print version and exit.",
@@ -143,7 +156,24 @@ def cli(
     language: str,
     domain: str,
     datatype: str,
+    ssm_parameter_path: str | None = None,
 ) -> None:
+    # Check if plot_info file exists (create from SSM if needed)
+    plot_info_created = check_plot_info_file(
+        input_dir=input_dir,
+        info_name=info_name,
+        ssm_parameter_path=ssm_parameter_path
+    )
+
+    if not plot_info_created:
+        if ssm_parameter_path :
+            logger.error("File %s/%s does not exist and plot_info could not be created from SSM parameter.", input_dir, info_name)
+            raise click.ClickException("Missing plot_info file and failed to create from SSM parameter.")
+
+        logger.error("File %s/%s does not exist.", input_dir, info_name)
+        raise click.ClickException(
+            "Missing plot_info file."
+        )
     prefix_dict, language = interpret_options(
         start_prefix=start_prefix,
         traj_prefix=traj_prefix,
