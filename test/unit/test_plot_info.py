@@ -7,8 +7,22 @@ from unittest.mock import Mock, patch, mock_open, MagicMock
 from click.testing import CliRunner
 from botocore.exceptions import ClientError
 
-from pytrajplot.parsing.plot_info import replace_variables, check_plot_info_file
+from pytrajplot.parsing.plot_info import replace_variables, check_plot_info_file, _format_model_base_time
 from pytrajplot.main import cli
+
+
+class TestFormatModelBaseTime:
+    """Test the _format_model_base_time helper."""
+
+    def test_formats_correctly(self):
+        assert _format_model_base_time("202504030900") == "2025-04-03 09:00 UTC"
+
+    def test_midnight(self):
+        assert _format_model_base_time("202501010000") == "2025-01-01 00:00 UTC"
+
+    def test_invalid_format_raises(self):
+        with pytest.raises(ValueError):
+            _format_model_base_time("20250403_0900")
 
 
 class TestReplaceVariables:
@@ -32,6 +46,22 @@ class TestReplaceVariables:
         result = replace_variables(template)
 
         assert result == "Start value1 middle value2 end value3"
+
+    def test_model_base_time_is_formatted(self, monkeypatch):
+        """MODEL_BASE_TIME must be converted from YYYYMMDDHHMM to YYYY-MM-DD HH:MM UTC."""
+        monkeypatch.setenv("MODEL_BASE_TIME", "202504030900")
+
+        result = replace_variables("Model base time: $MODEL_BASE_TIME")
+
+        assert result == "Model base time: 2025-04-03 09:00 UTC"
+
+    def test_model_base_time_raw_value_unchanged_in_env(self, monkeypatch):
+        """replace_variables must not mutate os.environ."""
+        monkeypatch.setenv("MODEL_BASE_TIME", "202504030900")
+
+        replace_variables("$MODEL_BASE_TIME")
+
+        assert os.environ["MODEL_BASE_TIME"] == "202504030900"
 
 
 class TestCheckPlotInfoFile:
@@ -84,8 +114,8 @@ class TestCheckPlotInfoFile:
 
     @patch('boto3.client')
     def test_create_plot_info_template(self, mock_boto3_client, tmp_path, monkeypatch):
-        """Test plot_info template and vars substitutions."""
-        monkeypatch.setenv("LAGRANTO_MODEL_BASE_TIME", "20240115_00")
+        """Test plot_info template and vars substitutions including MODEL_BASE_TIME formatting."""
+        monkeypatch.setenv("MODEL_BASE_TIME", "202401150000")
         monkeypatch.setenv("LM_NL_C_TTAG", "ICON-CH2-EPS")
         monkeypatch.setenv("LM_NL_POLLONLM_C", "-170.0")
         monkeypatch.setenv("LM_NL_POLLATLM_C", "43.0")
@@ -98,7 +128,7 @@ class TestCheckPlotInfoFile:
 
         # Lagranto configuration template
         template_content = '''
-        Model base time:                            $LAGRANTO_MODEL_BASE_TIME
+        Model base time:                            $MODEL_BASE_TIME
         Model name:                                 $LM_NL_C_TTAG
         North pole longitude:                       $LM_NL_POLLONLM_C
         North pole latitude:                        $LM_NL_POLLATLM_C
@@ -111,7 +141,7 @@ class TestCheckPlotInfoFile:
         '''
 
         expected_content = '''
-        Model base time:                            20240115_00
+        Model base time:                            2024-01-15 00:00 UTC
         Model name:                                 ICON-CH2-EPS
         North pole longitude:                       -170.0
         North pole latitude:                        43.0

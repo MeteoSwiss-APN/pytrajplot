@@ -37,6 +37,7 @@ yapf = "^0.43.0"
 
 [tool.poetry.scripts]
 pytrajplot = "pytrajplot.main:cli"
+pytrajplot-aws = "pytrajplot.aws_wrapper:cli"
 
 [tool.yapf]
 based_on_style = "pep8"

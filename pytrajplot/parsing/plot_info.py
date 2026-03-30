@@ -3,6 +3,7 @@
 # Standard library
 from typing import Any
 from typing import Dict
+import datetime
 import os
 import logging
 from pathlib import Path
@@ -54,19 +55,33 @@ class PLOT_INFO:
                     self.data["model_name"] = "".join(data)
 
 
+def _format_model_base_time(raw: str) -> str:
+    """Convert MODEL_BASE_TIME from YYYYMMDDHHMM to YYYY-MM-DD HH:MM UTC.
+
+    Args:
+        raw: Model base time string in YYYYMMDDHHMM format (e.g. '202504030900')
+
+    Returns:
+        Formatted string suitable for plot_info (e.g. '2025-04-03 09:00 UTC')
+    """
+    return datetime.datetime.strptime(raw, "%Y%m%d%H%M").strftime("%Y-%m-%d %H:%M UTC")
+
+
 def replace_variables(template_content: str) -> str:
     """
     Replace $VAR with actual environment variable values.
+    MODEL_BASE_TIME is converted from YYYYMMDDHHMM to YYYY-MM-DD HH:MM UTC before substitution.
     Args:
         template_content: Template string with $VARIABLE placeholders
     Returns:
         String with variables replaced by environment values
     """
     result = template_content
-    # Get all environment variables as dict
     env_vars = dict(os.environ)
 
-    # Replace variables found in the template
+    if "MODEL_BASE_TIME" in env_vars:
+        env_vars["MODEL_BASE_TIME"] = _format_model_base_time(env_vars["MODEL_BASE_TIME"])
+
     for env_key, env_value in env_vars.items():
         placeholder = f'${env_key}'
         if placeholder in result:
@@ -93,7 +108,7 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
     if plot_info_file.exists():
         logger.info(f"Plot info file already exists: {plot_info_file}")
         return True
-    
+
     # File doesn't exist, try to create it from SSM parameter
     ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
     if not ssm_param_path:
@@ -101,10 +116,8 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
         return False
 
     try:
-        # Get SSM parameter path from argument or environment
-        #ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
         logger.info(f"Fetching SSM parameter: {ssm_param_path}")
-        
+
         # Fetch template from SSM Parameter
         ssm_client = boto3.client('ssm')
         response = ssm_client.get_parameter(
