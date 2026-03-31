@@ -210,7 +210,7 @@ class TestCliIntegration:
 
         # Mock the generate_pdf function
         with patch('pytrajplot.main.check_input_dir') as mock_check, \
-             patch('pytrajplot.main.generate_pdf') as mock_generate:
+             patch('pytrajplot.main.generate_pdf'):
 
             mock_check.return_value = ({}, {})
 

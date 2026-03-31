@@ -167,7 +167,7 @@ def cli(
 
     if not plot_info_created:
         if ssm_parameter_path :
-            logger.error("File %s/%s does not exist and plot_info could not be created from SSM parameter.", input_dir, info_name)
+            logger.error("File %s/%s doesn't exist and couldn't be created from SSM parameter.", input_dir, info_name)
             raise click.ClickException("Missing plot_info file and failed to create from SSM parameter.")
 
         logger.error("File %s/%s does not exist.", input_dir, info_name)

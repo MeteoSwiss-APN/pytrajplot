@@ -86,7 +86,7 @@ def replace_variables(template_content: str) -> str:
         placeholder = f'${env_key}'
         if placeholder in result:
             result = result.replace(placeholder, env_value)
-            logger.info(f"Replaced {placeholder} with {env_value}")
+            logger.info("Replaced %s with %s", placeholder, env_value)
     return result
 
 
@@ -106,17 +106,16 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
 
     # If file exists, use it regardless of SSM config
     if plot_info_file.exists():
-        logger.info(f"Plot info file already exists: {plot_info_file}")
+        logger.info("Plot info file already exists: %s", plot_info_file)
         return True
-
     # File doesn't exist, try to create it from SSM parameter
     ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
     if not ssm_param_path:
-        logger.error(f"Plot info file not found and no ssm parameter set: {plot_info_file}")
+        logger.error("Plot info file not found and no ssm parameter set: %s", plot_info_file)
         return False
 
     try:
-        logger.info(f"Fetching SSM parameter: {ssm_param_path}")
+        logger.info("Fetching SSM parameter: %s", ssm_param_path)
 
         # Fetch template from SSM Parameter
         ssm_client = boto3.client('ssm')
@@ -127,7 +126,7 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
 
         # Get the template content
         template_content = response['Parameter']['Value']
-        logger.info(f"Template content length: {len(template_content)} chars")
+        logger.info("Template content length: %s chars", len(template_content))
 
         # Replace variables with environment variable values
         substituted_content = replace_variables(template_content)
@@ -136,10 +135,10 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
         with open(plot_info_file, 'w') as f:
             f.write(substituted_content)
 
-        logger.info(f"Successfully created plot info file: {plot_info_file}")
+        logger.info("Successfully created plot info file: %s", plot_info_file)
         return True
 
     except Exception as e:
-        logger.error(f"Failed to create plot info file from SSM parameter: {str(e)}")
-        logger.error(f"SSM parameter path: {ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH', 'not_set')}")
+        logger.error("Failed to create plot info file from SSM parameter: %s", e)
+        logger.error("SSM parameter path: %s", ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH', 'not_set'))
         return False
