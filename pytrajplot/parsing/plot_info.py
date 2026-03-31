@@ -25,7 +25,7 @@ class PLOT_INFO:
 
     """
 
-    def __init__(self, file) -> None:
+    def __init__(self, file: str | Path) -> None:
         """Create an instance of ``PLOT_INFO``.
 
         Args:

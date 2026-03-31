@@ -1,6 +1,7 @@
 """S3 utility functions for pytrajplot AWS integration."""
 import logging
 import os
+from typing import Any
 
 from botocore.exceptions import ClientError
 
@@ -9,7 +10,7 @@ logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
 
-def download_s3_prefix(s3_client: object, bucket: str, prefix: str, local_dir: str) -> None:
+def download_s3_prefix(s3_client: Any, bucket: str, prefix: str, local_dir: str) -> None:
     """Download all objects under an S3 prefix into a local directory, preserving relative paths.
 
     Raises:
@@ -42,7 +43,7 @@ def download_s3_prefix(s3_client: object, bucket: str, prefix: str, local_dir: s
         raise RuntimeError(f"No files found at s3://{bucket}/{prefix} — bucket prefix is empty or does not exist.")
 
 
-def upload_dir_to_s3(s3_client: object, local_dir: str, bucket: str, prefix: str) -> None:
+def upload_dir_to_s3(s3_client: Any, local_dir: str, bucket: str, prefix: str) -> None:
     """Upload all files in a local directory to an S3 prefix.
 
     Raises:
