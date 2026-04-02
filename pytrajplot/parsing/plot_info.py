@@ -41,18 +41,23 @@ class PLOT_INFO:
 
     def _parse(self) -> None:
         """Parse the plot info file."""
-        # read the plot_info file
         with open(self.file, "r") as file:
-            for line in file:
-                elements = line.strip().split(":", maxsplit=1)
-                # Skip extraction of header information if line contains no ":"
-                if len(elements) == 1:
-                    continue
-                key, data = elements[0], elements[1].lstrip()
-                if key == "Model base time":
-                    self.data["mbt"] = "".join(data)
-                if key == "Model name":
-                    self.data["model_name"] = "".join(data)
+            raw_content = file.read()
+
+        logger.info("plot_info file content (%s):\n%s", self.file, raw_content)
+
+        for line in raw_content.splitlines():
+            elements = line.strip().split(":", maxsplit=1)
+            # Skip extraction of header information if line contains no ":"
+            if len(elements) == 1:
+                continue
+            key, data = elements[0], elements[1].lstrip()
+            if key == "Model base time":
+                self.data["mbt"] = "".join(data)
+            if key == "Model name":
+                self.data["model_name"] = "".join(data)
+
+        logger.info("plot_info parsed dict: %s", self.data)
 
 
 def _format_model_base_time(raw: str) -> str:
