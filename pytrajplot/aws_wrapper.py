@@ -80,6 +80,7 @@ def cli(
     """
     s3_client = boto3.client("s3")
     s3_input_prefix = f"{model_name}/{model_base_time[:8]}_{model_base_time[8:]}"
+    s3_output_prefix = s3_output_prefix or s3_input_prefix
 
     with tempfile.TemporaryDirectory() as input_dir, tempfile.TemporaryDirectory() as output_dir:
         logger.info("Downloading input files from s3://%s/%s", s3_input_bucket, s3_input_prefix)

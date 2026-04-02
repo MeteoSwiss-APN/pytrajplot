@@ -95,3 +95,18 @@ class TestAwsWrapperCli:
         _, _, bucket, prefix = mock_upload.call_args.args
         assert bucket == "output-bucket"
         assert prefix == "results/2025/"
+
+    @patch("pytrajplot.aws_wrapper.upload_dir_to_s3")
+    @patch("pytrajplot.aws_wrapper.download_s3_prefix")
+    @patch("pytrajplot.aws_wrapper.pytrajplot_cli")
+    @patch("pytrajplot.aws_wrapper.boto3.client")
+    def test_output_prefix_defaults_to_input_prefix(
+        self, mock_boto3, mock_pytrajplot, mock_download, mock_upload
+    ):
+        """When --s3-output-prefix is omitted, output prefix matches the input prefix."""
+        mock_boto3.return_value = MagicMock()
+
+        self.call(REQUIRED_ARGS)
+
+        _, _, _, prefix = mock_upload.call_args.args
+        assert prefix == "ICON-CH1-EPS/20250403_0900"
