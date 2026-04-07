@@ -88,6 +88,25 @@ class TestUploadDirToS3:
         assert "output/file1.pdf" in uploaded_keys
         assert "output/sub/file2.png" in uploaded_keys
 
+    def test_metadata_passed_as_extra_args(self, tmp_path):
+        (tmp_path / "file.pdf").write_text("x")
+        s3 = MagicMock()
+        metadata = {"product_publisher": "forecast-iconch1eps-trajectories"}
+
+        upload_dir_to_s3(s3, str(tmp_path), "my-bucket", "output/", metadata=metadata)
+
+        call_kwargs = s3.upload_file.call_args.kwargs
+        assert call_kwargs.get("ExtraArgs") == {"Metadata": metadata}
+
+    def test_no_metadata_passes_empty_extra_args(self, tmp_path):
+        (tmp_path / "file.pdf").write_text("x")
+        s3 = MagicMock()
+
+        upload_dir_to_s3(s3, str(tmp_path), "my-bucket", "output/")
+
+        call_kwargs = s3.upload_file.call_args.kwargs
+        assert call_kwargs.get("ExtraArgs") == {}
+
     def test_empty_directory_raises_runtime_error(self, tmp_path):
         s3 = MagicMock()
 

@@ -43,13 +43,23 @@ def download_s3_prefix(s3_client: Any, bucket: str, prefix: str, local_dir: str)
         raise RuntimeError(f"No files found at s3://{bucket}/{prefix} — bucket prefix is empty or does not exist.")
 
 
-def upload_dir_to_s3(s3_client: Any, local_dir: str, bucket: str, prefix: str) -> None:
+def upload_dir_to_s3(
+    s3_client: Any,
+    local_dir: str,
+    bucket: str,
+    prefix: str,
+    metadata: dict[str, str] | None = None,
+) -> None:
     """Upload all files in a local directory to an S3 prefix.
+
+    Args:
+        metadata: Optional S3 object metadata key-value pairs applied to every uploaded object.
 
     Raises:
         RuntimeError: If the output directory is empty (pytrajplot produced no output).
         RuntimeError: If the bucket does not exist or access is denied.
     """
+    extra_args = {"Metadata": metadata} if metadata else {}
     uploaded = 0
     try:
         for root, _, files in os.walk(local_dir):
@@ -58,7 +68,7 @@ def upload_dir_to_s3(s3_client: Any, local_dir: str, bucket: str, prefix: str) -
                 relative_path = os.path.relpath(local_path, local_dir)
                 s3_key = f"{prefix.rstrip('/')}/{relative_path}" if prefix else relative_path
                 logger.info("Uploading %s -> s3://%s/%s", local_path, bucket, s3_key)
-                s3_client.upload_file(local_path, bucket, s3_key)
+                s3_client.upload_file(local_path, bucket, s3_key, ExtraArgs=extra_args)
                 uploaded += 1
     except ClientError as e:
         code = e.response["Error"]["Code"]
