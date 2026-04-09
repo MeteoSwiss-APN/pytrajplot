@@ -91,7 +91,7 @@ class TestUploadDirToS3:
     def test_metadata_passed_as_extra_args(self, tmp_path):
         (tmp_path / "file.pdf").write_text("x")
         s3 = MagicMock()
-        metadata = {"product_publisher": "forecast-iconch1eps-trajectories"}
+        metadata = {"product_type": "forecast-iconch1eps-trajectories"}
 
         upload_dir_to_s3(s3, str(tmp_path), "my-bucket", "output/", metadata=metadata)
 

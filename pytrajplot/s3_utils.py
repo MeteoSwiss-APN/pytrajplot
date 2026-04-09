@@ -1,12 +1,11 @@
 """S3 utility functions for pytrajplot AWS integration."""
 import logging
 import os
+from pathlib import Path
 from typing import Any
 
 from botocore.exceptions import ClientError
 
-log_level = os.getenv("LOG_LEVEL", "INFO").upper()
-logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
 
@@ -26,10 +25,10 @@ def download_s3_prefix(s3_client: Any, bucket: str, prefix: str, local_dir: str)
                 relative_path = key[len(prefix):].lstrip("/")
                 if not relative_path:
                     continue
-                local_path = os.path.join(local_dir, relative_path)
-                os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                local_path = Path(local_dir) / relative_path
+                local_path.parent.mkdir(parents=True, exist_ok=True)
                 logger.info("Downloading s3://%s/%s -> %s", bucket, key, local_path)
-                s3_client.download_file(bucket, key, local_path)
+                s3_client.download_file(bucket, key, str(local_path))
                 downloaded += 1
     except ClientError as e:
         code = e.response["Error"]["Code"]
@@ -64,11 +63,11 @@ def upload_dir_to_s3(
     try:
         for root, _, files in os.walk(local_dir):
             for filename in files:
-                local_path = os.path.join(root, filename)
-                relative_path = os.path.relpath(local_path, local_dir)
+                local_path = Path(root) / filename
+                relative_path = str(local_path.relative_to(local_dir))
                 s3_key = f"{prefix.rstrip('/')}/{relative_path}" if prefix else relative_path
                 logger.info("Uploading %s -> s3://%s/%s", local_path, bucket, s3_key)
-                s3_client.upload_file(local_path, bucket, s3_key, ExtraArgs=extra_args)
+                s3_client.upload_file(str(local_path), bucket, s3_key, ExtraArgs=extra_args)
                 uploaded += 1
     except ClientError as e:
         code = e.response["Error"]["Code"]

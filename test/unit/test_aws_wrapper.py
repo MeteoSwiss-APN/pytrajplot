@@ -35,6 +35,17 @@ class TestAwsWrapperCli:
         result = self.call([])
         assert result.exit_code != 0
 
+    def test_invalid_model_base_time(self):
+        args = [
+            "--s3-input-bucket", "input-bucket",
+            "--model-name", "ICON-CH1-EPS",
+            "--model-base-time", "test-date",
+            "--s3-output-bucket", "output-bucket",
+        ]
+        result = self.call(args)
+        assert result.exit_code != 0
+        assert "--model-base-time" in result.output
+
     @patch("pytrajplot.aws_wrapper.upload_dir_to_s3")
     @patch("pytrajplot.aws_wrapper.download_s3_prefix")
     @patch("pytrajplot.aws_wrapper.pytrajplot_cli")
@@ -122,14 +133,14 @@ class TestAwsWrapperCli:
         self.call(REQUIRED_ARGS)  # REQUIRED_ARGS uses ICON-CH1-EPS
 
         metadata = mock_upload.call_args.kwargs.get("metadata")
-        assert metadata == {"product_publisher": "forecast-iconch1eps-trajectories"}
+        assert metadata == {"product_type": "forecast-iconch1eps-trajectories"}
 
     @patch("pytrajplot.aws_wrapper.upload_dir_to_s3")
     @patch("pytrajplot.aws_wrapper.download_s3_prefix")
     @patch("pytrajplot.aws_wrapper.pytrajplot_cli")
     @patch("pytrajplot.aws_wrapper.boto3.client")
     def test_ifs_metadata(self, mock_boto3, mock_pytrajplot, mock_download, mock_upload):
-        """IFS model sets product_publisher to forecast-ifs-trajectories."""
+        """IFS model sets product_type to forecast-ifs-trajectories."""
         mock_boto3.return_value = MagicMock()
         ifs_args = [
             "--s3-input-bucket", "input-bucket",
@@ -141,4 +152,4 @@ class TestAwsWrapperCli:
         self.call(ifs_args)
 
         metadata = mock_upload.call_args.kwargs.get("metadata")
-        assert metadata == {"product_publisher": "forecast-ifs-trajectories"}
+        assert metadata == {"product_type": "forecast-ifs-trajectories"}

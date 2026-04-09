@@ -44,8 +44,6 @@ class PLOT_INFO:
         with open(self.file, "r") as file:
             raw_content = file.read()
 
-        logger.info("plot_info file content (%s):\n%s", self.file, raw_content)
-
         for line in raw_content.splitlines():
             elements = line.strip().split(":", maxsplit=1)
             # Skip extraction of header information if line contains no ":"

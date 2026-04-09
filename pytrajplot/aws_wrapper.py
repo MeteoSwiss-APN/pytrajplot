@@ -8,6 +8,7 @@ S3-specific options are defined here; all other pytrajplot options are passed th
 import logging
 import os
 import tempfile
+from datetime import datetime
 
 import boto3
 import click
@@ -79,19 +80,22 @@ def cli(
     All standard pytrajplot options (--language, --domain, --datatype, etc.) are passed through.
     """
     s3_client = boto3.client("s3")
-    s3_input_prefix = f"{model_name}/{model_base_time[:8]}_{model_base_time[8:]}"
+    try:
+        base_time = datetime.strptime(model_base_time, "%Y%m%d%H%M")
+    except ValueError as e:
+        raise click.BadParameter(str(e), param_hint="'--model-base-time'") from e
+    s3_input_prefix = f"{model_name}/{base_time:%Y%m%d}_{base_time:%H%M}"
     s3_output_prefix = s3_output_prefix or s3_input_prefix
 
-    _product_publisher_map = {
+    _product_type_map = {
         "ICON-CH1-EPS": "forecast-iconch1eps-trajectories",
         "IFS": "forecast-ifs-trajectories",
     }
-    product_publisher = _product_publisher_map.get(model_name.upper())
-    if product_publisher is None:
-        # Fallback: derive from model name (lower-case, strip hyphens)
-        product_publisher = f"forecast-{model_name.lower().replace('-', '')}-trajectories"
-        logger.warning("Unknown model '%s'; using derived product_publisher '%s'", model_name, product_publisher)
-    s3_metadata = {"product_publisher": product_publisher}
+    product_type = _product_type_map.get(model_name.upper())
+    if product_type is None:
+        product_type = f"forecast-{model_name.lower().replace('-', '')}-trajectories"
+        logger.warning("Unknown model '%s'; using default product_type '%s'", model_name, product_type)
+    s3_metadata = {"product_type": product_type}
 
     with tempfile.TemporaryDirectory() as input_dir, tempfile.TemporaryDirectory() as output_dir:
         logger.info("Downloading input files from s3://%s/%s", s3_input_bucket, s3_input_prefix)
@@ -108,4 +112,4 @@ def cli(
         )
         upload_dir_to_s3(s3_client, output_dir, s3_output_bucket, s3_output_prefix, metadata=s3_metadata)
 
-    print("--- Done.")
+    logger.info("Output files uploaded successfully!")
