@@ -13,7 +13,7 @@ import click
 from pytrajplot import __version__
 from pytrajplot.generate_pdf import generate_pdf
 from pytrajplot.parse_data import check_input_dir
-from pytrajplot.utils import count_to_log_level
+from pytrajplot.utils import count_to_log_level, get_product_type
 from pytrajplot.parsing.plot_info import check_plot_info_file
 from pytrajplot.s3_utils import download_s3_prefix, upload_dir_to_s3
 
@@ -21,11 +21,6 @@ from pytrajplot.s3_utils import download_s3_prefix, upload_dir_to_s3
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
-
-_PRODUCT_TYPE_MAP = {
-    "ICON-CH1-EPS": "forecast-iconch1eps-trajectories",
-    "IFS": "forecast-ifs-trajectories",
-}
 
 
 def print_version(ctx: click.Context, _param: click.Parameter, value: bool) -> None:
@@ -270,10 +265,7 @@ def cli(
         s3_input_prefix = f"{model_name}/{base_time:%Y%m%d}_{base_time:%H%M}"
         s3_output_prefix = s3_output_prefix or s3_input_prefix
 
-        product_type = _PRODUCT_TYPE_MAP.get(model_name.upper())
-        if product_type is None:
-            product_type = f"forecast-{model_name.lower().replace('-', '')}-trajectories"
-            logger.warning("Unknown model '%s'; using default product_type '%s'", model_name, product_type)
+        product_type = get_product_type(model_name)
         s3_metadata = {"product_type": product_type}
 
         s3_client = boto3.client("s3")
