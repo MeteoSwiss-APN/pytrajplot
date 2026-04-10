@@ -254,18 +254,13 @@ def cli(
     --s3-output-bucket; INPUT_DIR and OUTPUT_DIR are managed internally.
     S3 options can also be set via environment variables for AWS deployments.
     """
-    s3_mode = s3_input_bucket is not None
-
-    if s3_mode:
-        missing = [
-            flag for flag, val in [
-                ("--model-name", model_name),
-                ("--model-base-time", model_base_time),
-                ("--s3-output-bucket", s3_output_bucket),
-            ] if val is None
-        ]
-        if missing:
-            raise click.UsageError(f"S3 mode requires: {', '.join(missing)}")
+    if s3_input_bucket is not None:
+        if model_name is None:
+            raise click.UsageError("S3 mode requires --model-name.")
+        if model_base_time is None:
+            raise click.UsageError("S3 mode requires --model-base-time.")
+        if s3_output_bucket is None:
+            raise click.UsageError("S3 mode requires --s3-output-bucket.")
 
         try:
             base_time = datetime.strptime(model_base_time, "%Y%m%d%H%M")
