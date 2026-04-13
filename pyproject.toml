@@ -2,7 +2,7 @@
 name = "pytrajplot"
 version = "2.1.0"
 license = "BSD-3-Clause"
-authors = ["Michel Zeller", "Marco Ketzel", "Pirmin Kaufmann <pirmin.kaufmann@meteoswiss.ch>", "Peider Könz", "Victoria Cherkas"]
+authors = ["Michel Zeller", "Marco Ketzel", "Pirmin Kaufmann <pirmin.kaufmann@meteoswiss.ch>", "Peider Könz", "Victoria Cherkas", "Paulina Grochal"]
 description = "Plot LAGRANTO trajectories starting/ending at the same location on a map together with vertical cross sections"
 readme = "README.md"
 packages = [
