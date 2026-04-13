@@ -5,7 +5,6 @@ import logging
 
 _PRODUCT_TYPE_MAP: dict[str, str] = {
     "ICON-CH1-EPS": "forecast-iconch1eps-trajectories",
-    "ICON-CH1-CTRL": "forecast-iconch1eps-trajectories",
     "IFS": "forecast-ifs-trajectories",
 }
 
