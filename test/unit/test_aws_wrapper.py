@@ -1,0 +1,131 @@
+"""Unit tests for S3 mode of the pytrajplot CLI."""
+from unittest.mock import MagicMock, patch
+from click.testing import CliRunner
+
+from pytrajplot.main import cli, __version__
+
+
+S3_ARGS = [
+    "--s3-input-bucket", "input-bucket",
+    "--model-name", "ICON-CH1-EPS",
+    "--model-base-time", "202504030900",
+    "--s3-output-bucket", "output-bucket",
+]
+
+
+class TestS3ModeCli:
+    """Tests for S3 mode triggered via --s3-input-bucket."""
+
+    def call(self, args=None):
+        runner = CliRunner()
+        return runner.invoke(cli, args)
+
+    def test_help_mentions_s3(self):
+        result = self.call(["--help"])
+        assert result.exit_code == 0
+        assert "S3" in result.output
+
+    def test_version(self):
+        result = self.call(["-V"])
+        assert result.exit_code == 0
+        assert __version__ in result.output
+
+    def test_s3_mode_missing_required_options_fails(self):
+        result = self.call(["--s3-input-bucket", "input-bucket"])
+        assert result.exit_code != 0
+
+    def test_invalid_model_base_time(self):
+        args = [
+            "--s3-input-bucket", "input-bucket",
+            "--model-name", "ICON-CH1-EPS",
+            "--model-base-time", "test-date",
+            "--s3-output-bucket", "output-bucket",
+        ]
+        result = self.call(args)
+        assert result.exit_code != 0
+        assert "--model-base-time" in result.output
+
+    @patch("pytrajplot.main.upload_dir_to_s3")
+    @patch("pytrajplot.main.download_s3_prefix")
+    @patch("pytrajplot.main._run_pytrajplot")
+    @patch("pytrajplot.main.boto3.client")
+    def test_success_flow(self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload):
+        mock_boto3.return_value = MagicMock()
+
+        result = self.call(S3_ARGS)
+
+        assert result.exit_code == 0
+        mock_download.assert_called_once()
+        mock_run_pytrajplot.assert_called_once()
+        mock_upload.assert_called_once()
+
+    @patch("pytrajplot.main.upload_dir_to_s3")
+    @patch("pytrajplot.main.download_s3_prefix")
+    @patch("pytrajplot.main._run_pytrajplot")
+    @patch("pytrajplot.main.boto3.client")
+    def test_s3_input_prefix_format(self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload):
+        """Input prefix is built as model_name/YYYYMMDD_HHMM."""
+        mock_boto3.return_value = MagicMock()
+
+        self.call(S3_ARGS)
+
+        _, _, prefix, _ = mock_download.call_args.args
+        assert prefix == "ICON-CH1-EPS/20250403_0900"
+
+    @patch("pytrajplot.main.upload_dir_to_s3")
+    @patch("pytrajplot.main.download_s3_prefix")
+    @patch("pytrajplot.main._run_pytrajplot")
+    @patch("pytrajplot.main.boto3.client")
+    def test_output_prefix_passed_to_upload(self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload):
+        mock_boto3.return_value = MagicMock()
+
+        self.call(S3_ARGS + ["--s3-output-prefix", "results/2025/"])
+
+        _, _, bucket, prefix = mock_upload.call_args.args
+        assert bucket == "output-bucket"
+        assert prefix == "results/2025/"
+
+    @patch("pytrajplot.main.upload_dir_to_s3")
+    @patch("pytrajplot.main.download_s3_prefix")
+    @patch("pytrajplot.main._run_pytrajplot")
+    @patch("pytrajplot.main.boto3.client")
+    def test_output_prefix_defaults_to_input_prefix(self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload):
+        """When --s3-output-prefix is omitted, output prefix matches the input prefix."""
+        mock_boto3.return_value = MagicMock()
+
+        self.call(S3_ARGS)
+
+        _, _, _, prefix = mock_upload.call_args.args
+        assert prefix == "ICON-CH1-EPS/20250403_0900"
+
+    @patch("pytrajplot.main.upload_dir_to_s3")
+    @patch("pytrajplot.main.download_s3_prefix")
+    @patch("pytrajplot.main._run_pytrajplot")
+    @patch("pytrajplot.main.boto3.client")
+    def test_iconch1eps_metadata(self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload):
+        """ICON-CH1-EPS model sets product_type to forecast-iconch1eps-trajectories."""
+        mock_boto3.return_value = MagicMock()
+
+        self.call(S3_ARGS)
+
+        metadata = mock_upload.call_args.kwargs.get("metadata")
+        assert metadata == {"product_type": "forecast-iconch1eps-trajectories"}
+
+    @patch("pytrajplot.main.upload_dir_to_s3")
+    @patch("pytrajplot.main.download_s3_prefix")
+    @patch("pytrajplot.main._run_pytrajplot")
+    @patch("pytrajplot.main.boto3.client")
+    def test_ifs_metadata(self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload):
+        """IFS model sets product_type to forecast-ifs-trajectories."""
+        mock_boto3.return_value = MagicMock()
+        ifs_args = [
+            "--s3-input-bucket", "input-bucket",
+            "--model-name", "IFS",
+            "--model-base-time", "202504030900",
+            "--s3-output-bucket", "output-bucket",
+        ]
+
+        self.call(ifs_args)
+
+        metadata = mock_upload.call_args.kwargs.get("metadata")
+        assert metadata == {"product_type": "forecast-ifs-trajectories"}

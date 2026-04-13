@@ -16,21 +16,21 @@ test_sets = [
         'model': 'hres',
         'arguments': ['1_altitudes', '1_altitudes', {'datatype': 'png', 'domain': 'europe'}],
         'expected_output': [
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~europe~Linate~20210503T12.png'
         ]
     },
     {
         'model': 'hres',
         'arguments': ['2_altitudes', '2_altitudes', {'datatype': 'png', 'domain': 'europe'}],
         'expected_output': [
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~europe~Linate~20210503T12.png'
         ]
     },
     {
         'model': 'hres',
         'arguments': ['3_altitudes', '3_altitudes', {'datatype': 'png', 'domain': 'europe'}],
         'expected_output': [
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~europe~Linate~20210503T12.png'
         ]
     },
 
@@ -39,7 +39,7 @@ test_sets = [
         'model': 'hres',
         'arguments': ['backward', 'backward', {'datatype': 'png', 'domain': ['europe', 'dynamic']}],
         'expected_output': [
-            '20210505T00_Geneve_LAGRANTO-IFS-HRES-Europe_Trajektorien_B_036_europe.png'
+            'forecast-ifshreseurope-trajectories~20210505T00~backward~europe~Geneve~20210506T12.png'
         ]
     },
 
@@ -51,11 +51,11 @@ test_sets = [
             'domain': ['ch', 'alps', 'centraleurope', 'europe', 'dynamic']
         }],
         'expected_output': [
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_centraleurope.png',
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_alps.png',
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_dynamic.png',
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_ch.png',
-            '20210503T12_Linate_LAGRANTO-IFS-HRES-Europe_Trajektorien_F_048_europe.png'
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~centraleurope~Linate~20210503T12.png',
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~alps~Linate~20210503T12.png',
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~dynamic~Linate~20210503T12.png',
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~ch~Linate~20210503T12.png',
+            'forecast-ifshreseurope-trajectories~20210503T12~forward~europe~Linate~20210503T12.png'
         ]
     },
 
@@ -64,7 +64,7 @@ test_sets = [
         'model': 'hres',
         'arguments': ['dateline', 'dateline', {'datatype': 'png', 'domain': 'dynamic'}],
         'expected_output': [
-            '20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png'
+            'forecast-ifshres-trajectories~20210503T18~forward~dynamic~Punggye-ri~20210504T00.png'
         ]
     },
 
@@ -77,7 +77,7 @@ test_sets = [
             'language': 'de'
         }],
         'expected_output': [
-            '20210503T18_Punggye-ri_LAGRANTO-IFS-HRES_Trajektorien_F_138_dynamic.png'
+            'forecast-ifshres-trajectories~20210503T18~forward~dynamic~Punggye-ri~20210504T00.png'
         ]
     },
 
@@ -142,7 +142,7 @@ test_sets = [
             'domain': 'dynamic'
         }],
         'expected_output': [
-            '20240913T00_Lugano_LAGRANTO-IFS-HRES_Trajektorien_B_144_dynamic.png'
+            'forecast-ifshres-trajectories~20240913T00~backward~dynamic~Lugano~20240919T00.png'
         ]
     },
 
@@ -151,16 +151,16 @@ test_sets = [
         'model': 'cosmo',
         'arguments': ['forward', 'forward', {'datatype': 'png', 'domain': ['ch', 'alps']}],
         'expected_output': [
-            '20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_ch.png',
-            '20211011T00_Geneve_LAGRANTO-COSMO-1E_Trajektorien_F_033_alps.png'
+            'forecast-cosmo1e-trajectories~20211011T00~forward~ch~Geneve~20211011T00.png',
+            'forecast-cosmo1e-trajectories~20211011T00~forward~alps~Geneve~20211011T00.png'
         ]
     },
     {
         'model': 'cosmo',
         'arguments': ['backward', 'backward', {'datatype': 'png', 'domain': ['ch', 'alps']}],
         'expected_output': [
-            '20211103T09_Geneve_LAGRANTO-COSMO-1E_Trajektorien_B_033_alps.png',
-            '20211103T09_Geneve_LAGRANTO-COSMO-1E_Trajektorien_B_033_ch.png'
+            'forecast-cosmo1e-trajectories~20211103T09~backward~alps~Geneve~20211104T18.png',
+            'forecast-cosmo1e-trajectories~20211103T09~backward~ch~Geneve~20211104T18.png'
         ]
     }
 ]

@@ -2,6 +2,7 @@
 
 # Standard library
 from pathlib import Path
+from datetime import timedelta
 
 # Third-party
 import cartopy.crs as ccrs
@@ -9,8 +10,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+
 # Local
 from . import __version__
+from .utils import get_product_type
 from .plotting.analyse_trajectories import _analyse_trajectories
 from .plotting.analyse_trajectories import _check_dateline_crossing
 from .plotting.analyse_trajectories import _get_traj_dict
@@ -104,7 +107,9 @@ def create_plot_dict(altitude_levels: int) -> dict:
     return plot_dict
 
 
-def generate_filename(plot_info_dict: dict, plot_dict: dict, origin: str, domain: str, key: str) -> str:
+def generate_filename(
+    plot_info_dict: dict, plot_dict: dict, origin: str, domain: str, key: str, file_type: str,
+) -> str:
     """Generate the filename of the output file.
 
     Args:
@@ -113,19 +118,26 @@ def generate_filename(plot_info_dict: dict, plot_dict: dict, origin: str, domain
         origin:             str         Origin where the trajectory started
         domain:             str         Domain of the map.
         key:                str         ID of the start and trajectory file
+        file_type:          str         Output file type (e.g. 'pdf', 'png')
 
     Returns:
         final_filename:    str          Name of output file
 
     """
     start_time = plot_dict["altitude_1"]["start_time"]
-    date = start_time.strftime("%Y%m%d")
-
-    # model run time = absolute difference between the two numbers in key
-    runtime = abs(int(key[4:7]) - int(key[0:3]))
-
     trajectory_direction = plot_dict["altitude_1"]["trajectory_direction"]
-    final_filename = (
+    hours_offset = int(key[0:3])
+
+    if file_type == "png":
+        product_type = get_product_type(plot_info_dict["model_name"])
+        base_time = start_time.strftime("%Y%m%dT%H")
+        direction = "forward" if trajectory_direction == "F" else "backward"
+        end_time = (start_time + timedelta(hours=hours_offset)).strftime("%Y%m%dT%H")
+        return f"{product_type}~{base_time}~{direction}~{domain}~{origin}~{end_time}"
+
+    date = start_time.strftime("%Y%m%d")
+    runtime = abs(int(key[4:7]) - int(key[0:3]))
+    return (
         date
         + f"T{int(start_time.hour):02}"
         + f"_{origin}_"
@@ -135,7 +147,6 @@ def generate_filename(plot_info_dict: dict, plot_dict: dict, origin: str, domain
         + f"{runtime:03}_"
         + f"{domain}"
     )
-    return final_filename
 
 
 def assemble_pdf(
@@ -387,9 +398,8 @@ def assemble_pdf(
         )
 
         # SAVE FIGURE
-        filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key)
-
         for file_type in output_types:
+            filename = generate_filename(plot_info_dict, plot_dict, origin, domain, key, file_type)
             plt.savefig(str(outpath) + f"/{filename}.{file_type}", bbox_inches="tight")
 
         # CLEAR HEADER/MAP AXES FOR NEXT ITERATION

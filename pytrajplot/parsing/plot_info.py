@@ -3,6 +3,7 @@
 # Standard library
 from typing import Any
 from typing import Dict
+import datetime
 import os
 import logging
 from pathlib import Path
@@ -24,7 +25,7 @@ class PLOT_INFO:
 
     """
 
-    def __init__(self, file) -> None:
+    def __init__(self, file: str | Path) -> None:
         """Create an instance of ``PLOT_INFO``.
 
         Args:
@@ -40,38 +41,55 @@ class PLOT_INFO:
 
     def _parse(self) -> None:
         """Parse the plot info file."""
-        # read the plot_info file
         with open(self.file, "r") as file:
-            for line in file:
-                elements = line.strip().split(":", maxsplit=1)
-                # Skip extraction of header information if line contains no ":"
-                if len(elements) == 1:
-                    continue
-                key, data = elements[0], elements[1].lstrip()
-                if key == "Model base time":
-                    self.data["mbt"] = "".join(data)
-                if key == "Model name":
-                    self.data["model_name"] = "".join(data)
+            raw_content = file.read()
+
+        for line in raw_content.splitlines():
+            elements = line.strip().split(":", maxsplit=1)
+            # Skip extraction of header information if line contains no ":"
+            if len(elements) == 1:
+                continue
+            key, data = elements[0], elements[1].lstrip()
+            if key == "Model base time":
+                self.data["mbt"] = "".join(data)
+            if key == "Model name":
+                self.data["model_name"] = "".join(data)
+
+        logger.info("plot_info parsed dict: %s", self.data)
+
+
+def _format_model_base_time(raw: str) -> str:
+    """Convert MODEL_BASE_TIME from YYYYMMDDHHMM to YYYY-MM-DD HH:MM UTC.
+
+    Args:
+        raw: Model base time string in YYYYMMDDHHMM format (e.g. '202504030900')
+
+    Returns:
+        Formatted string suitable for plot_info (e.g. '2025-04-03 09:00 UTC')
+    """
+    return datetime.datetime.strptime(raw, "%Y%m%d%H%M").strftime("%Y-%m-%d %H:%M UTC")
 
 
 def replace_variables(template_content: str) -> str:
     """
     Replace $VAR with actual environment variable values.
+    MODEL_BASE_TIME is converted from YYYYMMDDHHMM to YYYY-MM-DD HH:MM UTC before substitution.
     Args:
         template_content: Template string with $VARIABLE placeholders
     Returns:
         String with variables replaced by environment values
     """
     result = template_content
-    # Get all environment variables as dict
     env_vars = dict(os.environ)
 
-    # Replace variables found in the template
+    if "MODEL_BASE_TIME" in env_vars:
+        env_vars["MODEL_BASE_TIME"] = _format_model_base_time(env_vars["MODEL_BASE_TIME"])
+
     for env_key, env_value in env_vars.items():
         placeholder = f'${env_key}'
         if placeholder in result:
             result = result.replace(placeholder, env_value)
-            logger.info(f"Replaced {placeholder} with {env_value}")
+            logger.info("Replaced %s with %s", placeholder, env_value)
     return result
 
 
@@ -91,20 +109,17 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
 
     # If file exists, use it regardless of SSM config
     if plot_info_file.exists():
-        logger.info(f"Plot info file already exists: {plot_info_file}")
+        logger.info("Plot info file already exists: %s", plot_info_file)
         return True
-    
     # File doesn't exist, try to create it from SSM parameter
     ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
     if not ssm_param_path:
-        logger.error(f"Plot info file not found and no ssm parameter set: {plot_info_file}")
+        logger.error("Plot info file not found and no ssm parameter set: %s", plot_info_file)
         return False
 
     try:
-        # Get SSM parameter path from argument or environment
-        #ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
-        logger.info(f"Fetching SSM parameter: {ssm_param_path}")
-        
+        logger.info("Fetching SSM parameter: %s", ssm_param_path)
+
         # Fetch template from SSM Parameter
         ssm_client = boto3.client('ssm')
         response = ssm_client.get_parameter(
@@ -114,7 +129,7 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
 
         # Get the template content
         template_content = response['Parameter']['Value']
-        logger.info(f"Template content length: {len(template_content)} chars")
+        logger.info("Template content length: %s chars", len(template_content))
 
         # Replace variables with environment variable values
         substituted_content = replace_variables(template_content)
@@ -123,10 +138,10 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
         with open(plot_info_file, 'w') as f:
             f.write(substituted_content)
 
-        logger.info(f"Successfully created plot info file: {plot_info_file}")
+        logger.info("Successfully created plot info file: %s", plot_info_file)
         return True
 
     except Exception as e:
-        logger.error(f"Failed to create plot info file from SSM parameter: {str(e)}")
-        logger.error(f"SSM parameter path: {ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH', 'not_set')}")
+        logger.error("Failed to create plot info file from SSM parameter: %s", e)
+        logger.error("SSM parameter path: %s", ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH', 'not_set'))
         return False
