@@ -702,6 +702,39 @@ def get_intersection_point_on_domain_boundaries(
     return intersection_point
 
 #the next two functions are used later to plot the slice of traj beyond the dateline
+def _filter_nan_coordinates(
+    lon: pd.Series | np.ndarray,
+    lat: pd.Series | np.ndarray
+) -> tuple[pd.Series | np.ndarray, pd.Series | np.ndarray]:
+    """Filter out NaN values from longitude and latitude arrays.
+    
+    Args:
+        lon: Longitude values
+        lat: Latitude values
+        
+    Returns:
+        Tuple of (lon_filtered, lat_filtered) with NaN values removed
+    """
+    # Convert to Series if needed for uniform handling
+    lon_s = lon if isinstance(lon, pd.Series) else pd.Series(np.asarray(lon, dtype=float))
+    lat_s = lat if isinstance(lat, pd.Series) else pd.Series(np.asarray(lat, dtype=float))
+    
+    # Create mask for valid (non-NaN) values
+    valid_mask = ~(lon_s.isna() | lat_s.isna())
+    
+    # Apply mask
+    lon_filtered = lon_s[valid_mask]
+    lat_filtered = lat_s[valid_mask]
+    
+    # Return in original format if numpy array was provided
+    if not isinstance(lon, pd.Series):
+        lon_filtered = lon_filtered.values
+    if not isinstance(lat, pd.Series):
+        lat_filtered = lat_filtered.values
+        
+    return lon_filtered, lat_filtered
+
+
 def _unwrap_dateline_series(lon: pd.Series | np.ndarray) -> pd.Series:
     """Makes the trajectory continuous avoiding the jump -180↔+180 (e.g. -179 → -181)."""
     arr = np.asarray(lon, dtype=float)
@@ -834,31 +867,39 @@ def add_trajectories_within_domain(
                                 [plot_latitude, pd.Series(latitude.iloc[intv[1] + 1])]
                             )
 
-                        ax.plot(
-                            plot_longitude,  # define x-axis
-                            plot_latitude,  # define y-axis
-                            linestyle,  # define linestyle
-                            alpha=alpha,  # define line opacity
-                            label=(
-                                textstr if is_main_trajectory else None
-                            ),  # only provide labels for main trajectories
-                            transform=ccrs.Geodetic(),
-                            rasterized=True,
-                        )
+                        # Filter out NaN values before plotting to avoid Shapely warnings
+                        plot_longitude, plot_latitude = _filter_nan_coordinates(plot_longitude, plot_latitude)
+                        
+                        # Only plot if there are valid coordinates
+                        if len(plot_longitude) > 0:
+                            ax.plot(
+                                plot_longitude,  # define x-axis
+                                plot_latitude,  # define y-axis
+                                linestyle,  # define linestyle
+                                alpha=alpha,  # define line opacity
+                                label=(
+                                    textstr if is_main_trajectory else None
+                                ),  # only provide labels for main trajectories
+                                transform=ccrs.Geodetic(),
+                                rasterized=True,
+                            )
                     # The following plots the slice of the trajectory beyond the dateline that gets clipped
                     if cross_dateline:
                         lon_slice, lat_slice= create_trajectory_slice_over_dateline(longitude_unwrapped, latitude, 180.0)
-                        ax.plot(
-                            lon_slice,  # define x-axis
-                            lat_slice,  # define y-axis
-                            linestyle,  # define linestyle
-                            alpha=alpha,  # define line opacity
-                            label=(
-                                None
-                            ),  # We don't want this slice to have its own label
-                            transform=ccrs.Geodetic(),
-                            rasterized=True,
-                        )
+                        # Filter out NaN values before plotting to avoid Shapely warnings
+                        lon_slice, lat_slice = _filter_nan_coordinates(lon_slice, lat_slice)
+                        if len(lon_slice) > 0:
+                            ax.plot(
+                                lon_slice,  # define x-axis
+                                lat_slice,  # define y-axis
+                                linestyle,  # define linestyle
+                                alpha=alpha,  # define line opacity
+                                label=(
+                                    None
+                                ),  # We don't want this slice to have its own label
+                                transform=ccrs.Geodetic(),
+                                rasterized=True,
+                            )
 
                     if is_main_trajectory:
                         # add time interval points to main trajectory
@@ -880,16 +921,20 @@ def add_trajectories_within_domain(
             linestyle = subplot_properties_dict[sub_index]
             alpha = plot_dict["altitude_" + str(i)]["traj_0"]["alpha"]
 
+            # Filter out NaN values before plotting to avoid Shapely warnings
+            lon_filtered, lat_filtered = _filter_nan_coordinates(longitude, latitude)
+            
             # plot main trajectory
-            ax.plot(
-                longitude,  # define x-axis
-                latitude,  # define y-axis
-                linestyle,  # define linestyle
-                alpha=alpha,  # define line opacity
-                label=textstr,
-                transform=ccrs.Geodetic(),
-                rasterized=True,
-            )
+            if len(lon_filtered) > 0:
+                ax.plot(
+                    lon_filtered,  # define x-axis
+                    lat_filtered,  # define y-axis
+                    linestyle,  # define linestyle
+                    alpha=alpha,  # define line opacity
+                    label=textstr,
+                    transform=ccrs.Geodetic(),
+                    rasterized=True,
+                )
 
             # add time interval points to main trajectory
             add_time_interval_points(
