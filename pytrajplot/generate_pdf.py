@@ -126,7 +126,6 @@ def generate_filename(
     """
     start_time = plot_dict["altitude_1"]["start_time"]
     trajectory_direction = plot_dict["altitude_1"]["trajectory_direction"]
-    #hours_offset = int(key[0:3])
     date = start_time.strftime("%Y%m%dT%H")
 
     if file_type == "png":
@@ -139,7 +138,6 @@ def generate_filename(
             + plot_info_dict["mbt"][11:13]
         )
         direction = "forward" if trajectory_direction == "F" else "backward"
-        #end_time = (start_time + timedelta(hours=hours_offset)).strftime("%Y%m%dT%H")
         return f"{product_type}~{base_time}~{direction}~{domain}~{origin}~{date}"
 
     runtime = abs(int(key[4:7]) - int(key[0:3]))

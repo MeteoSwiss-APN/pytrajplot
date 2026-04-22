@@ -6,7 +6,8 @@ from pytrajplot.generate_pdf import generate_filename
 
 PLOT_INFO = {
     "mbt": "2026-04-01 12:00 UTC",
-    "model_name": "ICON-CH1-EPS"}
+    "model_name": "ICON-CH1-EPS"
+}
 
 START_TIME_F = datetime(2026, 4, 1, 15, 0)
 START_TIME_F00 = datetime(2026, 4, 1, 12, 0)

@@ -707,11 +707,20 @@ def _filter_nan_coordinates(
     lat: pd.Series | np.ndarray
 ) -> tuple[pd.Series | np.ndarray, pd.Series | np.ndarray]:
     """Filter out NaN values from longitude and latitude arrays.
-    
+
+    Invalid trajectory coordinates are represented as NaN values in this codebase
+    (for example, negative altitude or surface height, and missing coordinates).
+    Passing these NaN values through Matplotlib/Cartopy can trigger Shapely
+    RuntimeWarnings when building LineStrings.
+
+    This helper removes any points where either longitude or latitude is NaN,
+    preserves the original input format (Series or NumPy array), and keeps only
+    valid coordinates for subsequent plotting.
+
     Args:
         lon: Longitude values
         lat: Latitude values
-        
+
     Returns:
         Tuple of (lon_filtered, lat_filtered) with NaN values removed
     """
