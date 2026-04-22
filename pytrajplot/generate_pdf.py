@@ -126,20 +126,24 @@ def generate_filename(
     """
     start_time = plot_dict["altitude_1"]["start_time"]
     trajectory_direction = plot_dict["altitude_1"]["trajectory_direction"]
-    hours_offset = int(key[0:3])
+    date = start_time.strftime("%Y%m%dT%H")
 
     if file_type == "png":
         product_type = get_product_type(plot_info_dict["model_name"])
-        base_time = start_time.strftime("%Y%m%dT%H")
+        base_time = (
+            plot_info_dict["mbt"][0:4]
+            + plot_info_dict["mbt"][5:7]
+            + plot_info_dict["mbt"][8:10] 
+            + "T"
+            + plot_info_dict["mbt"][11:13]
+        )
         direction = "forward" if trajectory_direction == "F" else "backward"
-        end_time = (start_time + timedelta(hours=hours_offset)).strftime("%Y%m%dT%H")
-        return f"{product_type}~{base_time}~{direction}~{domain}~{origin}~{end_time}"
+        return f"{product_type}~{base_time}~{direction}~{domain}~{origin}~{date}"
 
-    date = start_time.strftime("%Y%m%d")
     runtime = abs(int(key[4:7]) - int(key[0:3]))
     return (
         date
-        + f"T{int(start_time.hour):02}"
+        #+ f"T{int(start_time.hour):02}"
         + f"_{origin}_"
         + f"LAGRANTO-{plot_info_dict['model_name']}_"
         + f"Trajektorien_"
@@ -521,7 +525,7 @@ def generate_pdf(
             trajectory_df["#trajectories"].iloc[0]
         )  # number of trajectories, from given start point
 
-        if "HRES" in plot_info_dict["model_name"]:
+        if "IFS" in plot_info_dict["model_name"]:
             model = "HRES"
         else:
             model = "COSMO"

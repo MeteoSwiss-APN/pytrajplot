@@ -115,4 +115,11 @@ local/
 *.png
 *scratch
 
+# pytest output
 test/integration/output
+
+# directory for logfiles
+log
+
+# old stuff
+*.old

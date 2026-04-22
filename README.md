@@ -3,10 +3,10 @@
 PyTrajPlot is a Python tool to visualize trajectories calculated with
 [LAGRANTO](https://www.research-collection.ethz.ch/handle/20.500.11850/103598) based on
 model outputs from ECMWF's [IFS](https://www.ecmwf.int/en/forecasts/documentation-and-support)
-model (European/global domains), the [COSMO](https://www.cosmo-model.org) model, or the
+model (European/Global domains), the [COSMO](https://www.cosmo-model.org) model, or the
 [ICON](https://www.icon-model.org) model (limited domain centered over Switzerland).
 
-## Installation using Conda and Poetry
+## Installation
 
 ### Get source code
 
@@ -14,22 +14,27 @@ Create a local copy of the git repository and change working directory to it:
 
 ```bash
 git clone https://github.com/MeteoSwiss-APN/pytrajplot.git
-cd pytrajplot
 ```
 
-### Create Conda environment
+### Create virtual environment using Conda
 
-Create an environment with Conda and activate it
+Create an environment with Conda
+(if you choose a different name than pytrajplot,
+use the respective name to activate the environment later)
 
 ```bash
 conda create -n pytrajplot python=3.13 poetry=1.8
-conda activate pytrajplot
 ```
 
-### Build the project (Poetry)
-Alternative build with mchbuild see further below.
+### Build the project using Poetry
+
+For an alternative way to build using the MeteoSwiss `mchbuild` package see further below.
+
+Activate the environment and install the application into it:
 
 ```bash
+conda activate pytrajplot
+cd pytrajplot
 poetry install
 ```
 
@@ -58,7 +63,7 @@ poetry run mypy pytrajplot
 python -m sphinx -b html -W -c doc doc doc/_build/html
 ```
 
-### Build the project (mchbuild)
+### Build the project using mchbuild
 
 ```bash
 pipx install mchbuild
