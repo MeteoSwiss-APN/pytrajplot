@@ -2,10 +2,11 @@
 
 # Standard library
 import logging
+import os
 
 _PRODUCT_TYPE_MAP: dict[str, str] = {
-    "ICON-CH1-EPS": "forecast-iconch1eps-trajectories-test",
-    "IFS": "forecast-ifs-trajectories-test",
+    "ICON-CH1-EPS": "forecast-iconch1eps-trajectories",
+    "IFS": "forecast-ifs-trajectories",
 }
 
 
@@ -13,10 +14,13 @@ def get_product_type(model_name: str) -> str:
     """Derive the product_type identifier from a model name.
 
     Falls back to a generated name if the model is not in the map.
+    Appends '-test' suffix when running on AWS (S3_BUCKET is set).
     """
     product_type = _PRODUCT_TYPE_MAP.get(model_name.upper())
     if product_type is None:
         product_type = f"forecast-{model_name.lower().replace('-', '')}-trajectories"
+    if os.environ.get("S3_BUCKET"):
+        product_type += "-test"
     return product_type
 
 
