@@ -14,13 +14,14 @@ def get_product_type(model_name: str) -> str:
     """Derive the product_type identifier from a model name.
 
     Falls back to a generated name if the model is not in the map.
-    Appends '-test' suffix when running on AWS (S3_BUCKET is set).
+    Appends a suffix when PRODUCT_TYPE_SUFFIX is set (e.g. '-test').
     """
     product_type = _PRODUCT_TYPE_MAP.get(model_name.upper())
     if product_type is None:
         product_type = f"forecast-{model_name.lower().replace('-', '')}-trajectories"
-    if os.environ.get("S3_BUCKET"):
-        product_type += "-test"
+    suffix = os.environ.get("PRODUCT_TYPE_SUFFIX", "")
+    if suffix:
+        product_type += suffix
     return product_type
 
 
