@@ -109,7 +109,7 @@ class TestS3ModeCli:
         self.call(S3_ARGS)
 
         metadata = mock_upload.call_args.kwargs.get("metadata")
-        assert metadata == {"product_type": "forecast-iconch1eps-trajectories"}
+        assert metadata == {"product_type": "forecast-iconch1eps-trajectories", "run_type": "regular", "run_id": ""}
 
     @patch("pytrajplot.main.upload_dir_to_s3")
     @patch("pytrajplot.main.download_s3_prefix")
@@ -128,4 +128,4 @@ class TestS3ModeCli:
         self.call(ifs_args)
 
         metadata = mock_upload.call_args.kwargs.get("metadata")
-        assert metadata == {"product_type": "forecast-ifs-trajectories"}
+        assert metadata == {"product_type": "forecast-ifs-trajectories", "run_type": "regular", "run_id": ""}

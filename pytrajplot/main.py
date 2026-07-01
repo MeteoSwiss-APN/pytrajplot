@@ -266,7 +266,9 @@ def cli(
         s3_output_prefix = s3_output_prefix or s3_input_prefix
 
         product_type = get_product_type(model_name)
-        s3_metadata = {"product_type": product_type}
+        run_type = os.environ.get("RUN_TYPE", "regular")
+        run_id = os.environ.get("RUN_ID", "")
+        s3_metadata = {"product_type": product_type, "run_type": run_type, "run_id": run_id}
 
         s3_client = boto3.client("s3")
         with tempfile.TemporaryDirectory() as tmp_input, tempfile.TemporaryDirectory() as tmp_output:
