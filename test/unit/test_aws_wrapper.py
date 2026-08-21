@@ -76,6 +76,29 @@ class TestS3ModeCli:
     @patch("pytrajplot.main.download_s3_prefix")
     @patch("pytrajplot.main._run_pytrajplot")
     @patch("pytrajplot.main.boto3.client")
+    def test_explicit_input_prefix_replaces_derived_one(
+        self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload
+    ):
+        """--s3-input-prefix replaces the model/base-time prefix rather than prefixing it.
+
+        A caller keying its buckets by run id has no model or base-time segments to derive, but
+        still passes --model-name and --model-base-time for the product type and plot_info."""
+        mock_boto3.return_value = MagicMock()
+
+        run_id = "scheduled-lagranto-ICON-CH1-EPS-20250403-0900"
+        self.call(S3_ARGS + ["--s3-input-prefix", run_id])
+
+        _, _, prefix, _ = mock_download.call_args.args
+        assert prefix == run_id
+
+        # ...and the output prefix still defaults to it.
+        _, _, _, out_prefix = mock_upload.call_args.args
+        assert out_prefix == run_id
+
+    @patch("pytrajplot.main.upload_dir_to_s3")
+    @patch("pytrajplot.main.download_s3_prefix")
+    @patch("pytrajplot.main._run_pytrajplot")
+    @patch("pytrajplot.main.boto3.client")
     def test_output_prefix_passed_to_upload(self, mock_boto3, mock_run_pytrajplot, mock_download, mock_upload):
         mock_boto3.return_value = MagicMock()
 

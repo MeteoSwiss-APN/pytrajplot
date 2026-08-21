@@ -211,6 +211,13 @@ def _run_pytrajplot(
     help="S3 bucket for output files. Required in S3 mode.",
 )
 @click.option(
+    "--s3-input-prefix",
+    default="",
+    envvar="S3_INPUT_PREFIX",
+    help="S3 key prefix the input files are read from. Replaces the model/base-time prefix that is"
+    " otherwise derived from --model-name and --model-base-time.",
+)
+@click.option(
     "--s3-output-prefix",
     default="",
     envvar="S3_OUTPUT_PREFIX",
@@ -240,6 +247,7 @@ def cli(
     model_name: str | None,
     model_base_time: str | None,
     s3_output_bucket: str | None,
+    s3_input_prefix: str,
     s3_output_prefix: str,
 ) -> None:
     """
@@ -262,7 +270,10 @@ def cli(
         except ValueError as e:
             raise click.BadParameter(str(e), param_hint="'--model-base-time'") from e
 
-        s3_input_prefix = f"{model_name}/{base_time:%Y%m%d}_{base_time:%H%M}"
+        # An explicit prefix replaces the derived one outright: callers that key their buckets by
+        # run id have no model/base-time segments to derive, and --model-name/--model-base-time are
+        # still needed for the product type and the plot_info substitution.
+        s3_input_prefix = s3_input_prefix or f"{model_name}/{base_time:%Y%m%d}_{base_time:%H%M}"
         s3_output_prefix = s3_output_prefix or s3_input_prefix
 
         product_type = get_product_type(model_name)
