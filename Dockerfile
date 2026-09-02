@@ -38,6 +38,10 @@ LABEL ch.meteoswiss.project=pytrajplot-${VERSION}
 
 ENV VERSION=$VERSION
 
+# Writable HOME for matplotlib config cache
+ENV HOME=/home/appuser
+RUN mkdir -p "$HOME" && chown 1001:0 "$HOME"
+
 # For running outside of OpenShift, we want to make sure that the container is run without root privileges
 # uid 1001 is defined in the base-container-images for this purpose
 USER 1001
