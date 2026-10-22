@@ -22,14 +22,6 @@ default:
                 - --build-arg
                 - VERSION=${var.semanticVersion}
               pullAlways: false
-      - docs:
-          - script: mkdir -p doc/_build
-          - pythonContainerDocs:
-              imageName: ${var.containerImageName}-tester
-              imageTag: ${var.semanticVersion}
-              pullAlways: false
-              packageManager: ''
-              removeLocalImage: false
   - test:
       - unit:
           - pythonContainerTest:
@@ -56,17 +48,11 @@ default:
           - containerPublishImage:
               imageName: ${var.containerImageName}
               imageTag: ${var.semanticVersion}
-      - docs:
-          - openshiftPublishDocs:
-              docSrc: doc/_build/
-              docType: python
   - clean:
       - images:
-          script: |
-            if test -n "${var.semanticVersion}"; then
-              podman image rm -f $(podman image ls -q \
-                -f "label=ch.meteoswiss.project=${var.project}-${var.semanticVersion}") || :
-            fi
+          cleanupImages:
+            targets:
+              - label://ch.meteoswiss.project=${var.project}-${var.semanticVersion}
 
 # Alternative setup for installing and testing the service locally using the system's Python environment.
 local:
@@ -92,6 +78,6 @@ local:
 variables:
   solution: dispersionmodelling
   project: pytrajplot
-  notifyOnNightlyFailure: p_disperionmodelling@meteoswiss.ch
+  notifyOnNightlyFailure: p_dispersionmodelling@meteoswiss.ch
   semanticVersion: 0.0.0  # is overwritten in Jenkins
   containerImageName: docker-intern-nexus.meteoswiss.ch/dispersionmodelling/pytrajplot

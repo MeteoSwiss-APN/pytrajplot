@@ -12,7 +12,7 @@ class Globals {
     static String semanticVersion = ''
 
     // Pin mchbuild to stable version to avoid breaking changes
-    static String mchbuildPipPackage = 'mchbuild>=0.11.3,<0.12.0'
+    static String mchbuildPipPackage = 'mchbuild>=1.2.1,<2.0.0'
 }
 
 String rebuild_cron = env.BRANCH_NAME == "main" ? "@midnight" : ""
@@ -42,7 +42,7 @@ pipeline {
     }
 
     environment {
-        PATH = "$workspace/.venv-mchbuild/bin:$HOME/tools/openshift-client-tools:$PATH"
+        PATH = "$workspace/.venv-mchbuild/bin:$PATH"
         HTTP_PROXY = 'http://proxy.meteoswiss.ch:8080'
         HTTPS_PROXY = 'http://proxy.meteoswiss.ch:8080'
         NO_PROXY = '.meteoswiss.ch,localhost'

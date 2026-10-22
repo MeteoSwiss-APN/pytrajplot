@@ -123,3 +123,6 @@ log
 
 # old stuff
 *.old
+
+# Temporary build context created by mchbuild containerBuildImage
+.ctx/
