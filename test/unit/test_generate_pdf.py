@@ -1,13 +1,11 @@
 """Unit tests for generate_filename."""
+
 from datetime import datetime
 
 from pytrajplot.generate_pdf import generate_filename
 
 
-PLOT_INFO = {
-    "mbt": "2026-04-01 12:00 UTC",
-    "model_name": "ICON-CH1-EPS"
-}
+PLOT_INFO = {"mbt": "2026-04-01 12:00 UTC", "model_name": "ICON-CH1-EPS"}
 
 START_TIME_F = datetime(2026, 4, 1, 15, 0)
 START_TIME_F00 = datetime(2026, 4, 1, 12, 0)
@@ -67,7 +65,7 @@ class TestGenerateFilenamePng:
         assert result == "forecast-iconch1eps-trajectories~20260401T12~backward~europe~Beznau~20260402T21"
 
     def test_png_unknown_model_fallback(self):
-        plot_info = {"mbt": "2026-04-01 12:00 UTC","model_name": "ICON-CH1-CTRL"}
+        plot_info = {"mbt": "2026-04-01 12:00 UTC", "model_name": "ICON-CH1-CTRL"}
         result = generate_filename(plot_info, PLOT_DICT_F, "Beznau", "alps", "003033", "png")
         assert result == "forecast-iconch1ctrl-trajectories~20260401T12~forward~alps~Beznau~20260401T15"
 

@@ -21,16 +21,12 @@ def generate_info_header(language, plot_dict, ax=None):
     ax.axis("off")
 
     origin = plot_dict["altitude_1"]["origin"]
-    y_type = plot_dict["altitude_1"][
-        "y_type"
-    ]  # anaologous: plot_data["altitude_1"]["traj_0"]["z_type"]
+    y_type = plot_dict["altitude_1"]["y_type"]  # anaologous: plot_data["altitude_1"]["traj_0"]["z_type"]
     lon_0 = format(round(plot_dict["altitude_1"]["lon_precise"], 3), ".3f")
     lat_0 = format(round(plot_dict["altitude_1"]["lat_precise"], 3), ".3f")
     trajectory_direction = plot_dict["altitude_1"]["trajectory_direction"]
     elevation = ""
-    start_time = str(plot_dict["altitude_1"]["start_time"])[
-        :-3
-    ]  # remove the seconds from the time in the header
+    start_time = str(plot_dict["altitude_1"]["start_time"])[:-3]  # remove the seconds from the time in the header
 
     for key in plot_dict:
         if plot_dict[key]["subplot_index"] == (len(plot_dict.keys()) - 1):

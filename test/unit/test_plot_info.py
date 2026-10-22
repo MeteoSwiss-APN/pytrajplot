@@ -1,4 +1,5 @@
 """Unit tests for pytrajplot main module."""
+
 import json
 import os
 import pytest
@@ -72,15 +73,12 @@ class TestCheckPlotInfoFile:
         plot_info_file = tmp_path / "plot_info"
         plot_info_file.write_text("existing content")
 
-        result = check_plot_info_file(
-            input_dir=str(tmp_path),
-            info_name="plot_info"
-        )
+        result = check_plot_info_file(input_dir=str(tmp_path), info_name="plot_info")
 
         assert result is True
         assert plot_info_file.read_text() == "existing content"
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_create_plot_info_from_ssm_success(self, mock_boto3_client, tmp_path, monkeypatch):
         """Test successful creation of plot_info from SSM parameter."""
         monkeypatch.setenv("FORECAST_DATE", "20240101")
@@ -92,27 +90,21 @@ class TestCheckPlotInfoFile:
 
         # Mock SSM response with template content
         template_content = "Forecast: $FORECAST_DATE, Model: $MODEL"
-        mock_ssm_client.get_parameter.return_value = {
-            'Parameter': {
-                'Value': template_content
-            }
-        }
+        mock_ssm_client.get_parameter.return_value = {"Parameter": {"Value": template_content}}
 
         result = check_plot_info_file(
-            input_dir=str(tmp_path),
-            info_name="plot_info",
-            ssm_parameter_path="/test/parameter"
+            input_dir=str(tmp_path), info_name="plot_info", ssm_parameter_path="/test/parameter"
         )
 
         assert result is True
 
-        mock_boto3_client.assert_called_once_with('ssm')
+        mock_boto3_client.assert_called_once_with("ssm")
         plot_info_file = tmp_path / "plot_info"
         assert plot_info_file.exists()
         content = plot_info_file.read_text()
         assert content == "Forecast: 20240101, Model: ICON"
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_create_plot_info_template(self, mock_boto3_client, tmp_path, monkeypatch):
         """Test plot_info template and vars substitutions including MODEL_BASE_TIME formatting."""
         monkeypatch.setenv("MODEL_BASE_TIME", "202401150000")
@@ -127,7 +119,7 @@ class TestCheckPlotInfoFile:
         monkeypatch.setenv("LM_NL_JELM_C", "200")
 
         # Lagranto configuration template
-        template_content = '''
+        template_content = """
         Model base time:                            $MODEL_BASE_TIME
         Model name:                                 $LM_NL_C_TTAG
         North pole longitude:                       $LM_NL_POLLONLM_C
@@ -138,9 +130,9 @@ class TestCheckPlotInfoFile:
         Increment in latitudinal direction:         $LM_NL_DLATLM_C
         Number of points in longitudinal direction: $LM_NL_IELM_C
         Number of points in latitudinal direction:  $LM_NL_JELM_C
-        '''
+        """
 
-        expected_content = '''
+        expected_content = """
         Model base time:                            2024-01-15 00:00 UTC
         Model name:                                 ICON-CH2-EPS
         North pole longitude:                       -170.0
@@ -151,19 +143,15 @@ class TestCheckPlotInfoFile:
         Increment in latitudinal direction:         0.02
         Number of points in longitudinal direction: 250
         Number of points in latitudinal direction:  200
-        '''
+        """
 
         # Mock SSM client
         mock_ssm_client = MagicMock()
         mock_boto3_client.return_value = mock_ssm_client
-        mock_ssm_client.get_parameter.return_value = {
-            'Parameter': {'Value': template_content}
-        }
+        mock_ssm_client.get_parameter.return_value = {"Parameter": {"Value": template_content}}
 
         result = check_plot_info_file(
-            ssm_parameter_path="/test/parameter",
-            input_dir=str(tmp_path),
-            info_name="plot_info"
+            ssm_parameter_path="/test/parameter", input_dir=str(tmp_path), info_name="plot_info"
         )
 
         assert result is True
@@ -173,27 +161,25 @@ class TestCheckPlotInfoFile:
         content = plot_info_file.read_text()
         assert content == expected_content
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_create_plot_info_ssm_parameter_not_found(self, mock_boto3_client, tmp_path):
         """Test SSM parameter not found error."""
         # Mock SSM client to raise exception
         mock_ssm_client = MagicMock()
         mock_boto3_client.return_value = mock_ssm_client
         mock_ssm_client.get_parameter.side_effect = ClientError(
-            {'Error': {'Code': 'ParameterNotFound', 'Message': 'Parameter not found'}},
-            'GetParameter'
+            {"Error": {"Code": "ParameterNotFound", "Message": "Parameter not found"}}, "GetParameter"
         )
 
         result = check_plot_info_file(
-            input_dir=str(tmp_path),
-            info_name="plot_info",
-            ssm_parameter_path="/nonexistent/parameter"
+            input_dir=str(tmp_path), info_name="plot_info", ssm_parameter_path="/nonexistent/parameter"
         )
 
         assert result is False
 
         plot_info_file = tmp_path / "plot_info"
         assert not plot_info_file.exists()
+
 
 class TestCliIntegration:
     """Test CLI integration with new functionality."""
@@ -209,20 +195,21 @@ class TestCliIntegration:
         runner = CliRunner()
 
         # Mock the generate_pdf function
-        with patch('pytrajplot.main.check_input_dir') as mock_check, \
-             patch('pytrajplot.main.generate_pdf'):
-
+        with patch("pytrajplot.main.check_input_dir") as mock_check, patch("pytrajplot.main.generate_pdf"):
             mock_check.return_value = ({}, {})
 
-            result = runner.invoke(cli, [
-                str(input_dir),
-                str(output_dir),
-            ])
+            result = runner.invoke(
+                cli,
+                [
+                    str(input_dir),
+                    str(output_dir),
+                ],
+            )
 
         assert result.exit_code == 0
         assert "already exists" in result.output or result.exit_code == 0
 
-    @patch('boto3.client')
+    @patch("boto3.client")
     def test_cli_ssm_failure_causes_exit(self, mock_boto3_client, tmp_path):
         """Test CLI exits when SSM parameter fetch fails."""
         # Create input directory without plot_info
@@ -234,16 +221,11 @@ class TestCliIntegration:
         mock_ssm_client = MagicMock()
         mock_boto3_client.return_value = mock_ssm_client
         mock_ssm_client.get_parameter.side_effect = ClientError(
-            {'Error': {'Code': 'ParameterNotFound'}},
-            'GetParameter'
+            {"Error": {"Code": "ParameterNotFound"}}, "GetParameter"
         )
 
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            '--ssm-parameter-path', '/test/path',
-            str(input_dir),
-            str(output_dir)
-        ])
+        result = runner.invoke(cli, ["--ssm-parameter-path", "/test/path", str(input_dir), str(output_dir)])
 
         assert result.exit_code != 0
         assert "Missing plot_info file" in str(result.output) or result.exit_code != 0

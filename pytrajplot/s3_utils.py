@@ -1,4 +1,5 @@
 """S3 utility functions for pytrajplot AWS integration."""
+
 import logging
 import os
 from pathlib import Path
@@ -22,7 +23,7 @@ def download_s3_prefix(s3_client: Any, bucket: str, prefix: str, local_dir: str)
         for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
             for obj in page.get("Contents", []):
                 key: str = obj["Key"]
-                relative_path = key[len(prefix):].lstrip("/")
+                relative_path = key[len(prefix) :].lstrip("/")
                 if not relative_path:
                     continue
                 local_path = Path(local_dir) / relative_path

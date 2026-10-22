@@ -17,6 +17,7 @@ log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
+
 class PLOT_INFO:
     """Support plot_info files.
 
@@ -86,7 +87,7 @@ def replace_variables(template_content: str) -> str:
         env_vars["MODEL_BASE_TIME"] = _format_model_base_time(env_vars["MODEL_BASE_TIME"])
 
     for env_key, env_value in env_vars.items():
-        placeholder = f'${env_key}'
+        placeholder = f"${env_key}"
         if placeholder in result:
             result = result.replace(placeholder, env_value)
             logger.info("Replaced %s with %s", placeholder, env_value)
@@ -112,7 +113,7 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
         logger.info("Plot info file already exists: %s", plot_info_file)
         return True
     # File doesn't exist, try to create it from SSM parameter
-    ssm_param_path = ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH')
+    ssm_param_path = ssm_parameter_path or os.environ.get("SSM_PARAMETER_PATH")
     if not ssm_param_path:
         logger.error("Plot info file not found and no ssm parameter set: %s", plot_info_file)
         return False
@@ -121,21 +122,18 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
         logger.info("Fetching SSM parameter: %s", ssm_param_path)
 
         # Fetch template from SSM Parameter
-        ssm_client = boto3.client('ssm')
-        response = ssm_client.get_parameter(
-            Name=ssm_param_path,
-            WithDecryption=True
-        )
+        ssm_client = boto3.client("ssm")
+        response = ssm_client.get_parameter(Name=ssm_param_path, WithDecryption=True)
 
         # Get the template content
-        template_content = response['Parameter']['Value']
+        template_content = response["Parameter"]["Value"]
         logger.info("Template content length: %s chars", len(template_content))
 
         # Replace variables with environment variable values
         substituted_content = replace_variables(template_content)
 
         # Create the plot_info file
-        with open(plot_info_file, 'w') as f:
+        with open(plot_info_file, "w") as f:
             f.write(substituted_content)
 
         logger.info("Successfully created plot info file: %s", plot_info_file)
@@ -143,5 +141,5 @@ def check_plot_info_file(input_dir: str, info_name: str, ssm_parameter_path: str
 
     except Exception as e:
         logger.error("Failed to create plot info file from SSM parameter: %s", e)
-        logger.error("SSM parameter path: %s", ssm_parameter_path or os.environ.get('SSM_PARAMETER_PATH', 'not_set'))
+        logger.error("SSM parameter path: %s", ssm_parameter_path or os.environ.get("SSM_PARAMETER_PATH", "not_set"))
         return False

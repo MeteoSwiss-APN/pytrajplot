@@ -42,9 +42,7 @@ def _get_traj_dict(data, number_of_trajectories=None, traj_length=None) -> dict:
             sign_flip_indexes = np.where(np.sign(lon[:-1]) != np.sign(lon[1:]))[0] + 1
 
             # 2) check if the any of the sign_flips are relevant (i.e. not crossing the 0° longitude line)
-            relevant_flip_indexes = (
-                []
-            )  # here, only flip indexes which correspond to dateline crossings, not 0°-line crossings
+            relevant_flip_indexes = []  # here, only flip indexes which correspond to dateline crossings, not 0°-line crossings
             for flip_index in sign_flip_indexes:
                 if not -20 < lon[flip_index] < 20:
                     relevant_flip_indexes.append(flip_index)
@@ -121,9 +119,7 @@ def _check_dateline_crossing(
     return False, [min_lon, max_lon]
 
 
-def _get_central_longitude(
-    traj_dict, sign_flip_trajectories, eastern_longitudes, verbose=False
-):
+def _get_central_longitude(traj_dict, sign_flip_trajectories, eastern_longitudes, verbose=False):
     """Compute central longitude for dateline-crossing trajectories.
 
     Args:
@@ -148,9 +144,7 @@ def _get_central_longitude(
         sign_flip_indexes = np.where(np.sign(lon[:-1]) != np.sign(lon[1:]))[0] + 1
         # sign_flip_indexes = np.where(np.diff(np.sign(lon)) != 0)[0] + 1
 
-        relevant_flip_indexes = (
-            []
-        )  # here, only flip indexes which correspond to dateline crossings, not 0°-line crossings
+        relevant_flip_indexes = []  # here, only flip indexes which correspond to dateline crossings, not 0°-line crossings
 
         # 3) check, which sign changes refer to east-west flip @ 0° and @ ±180°. the relevant_flip_indexes are the ones, that
         # refer to crossing of ±180°, NOT the 0°-lon line.
@@ -161,14 +155,12 @@ def _get_central_longitude(
         for flip_index_position, flip_index in enumerate(relevant_flip_indexes):
             if verbose:
                 print(
-                    f"@ index {flip_index} the trajectory flips from: {lon[flip_index-1]} to {lon[flip_index]} (flip_index_position: {flip_index_position})"
+                    f"@ index {flip_index} the trajectory flips from: {lon[flip_index - 1]} to {lon[flip_index]} (flip_index_position: {flip_index_position})"
                 )
 
             value_after_flip = lon[flip_index]
 
-            if (
-                value_after_flip > 0
-            ):  # the trajectory crossed from the west to the east over the dateline
+            if value_after_flip > 0:  # the trajectory crossed from the west to the east over the dateline
                 # if there is only one crossing of the dateline, all values after the crossing need to be adjusted
                 if len(relevant_flip_indexes) == 1:
                     lon[flip_index : len(lon)] -= 360
@@ -183,15 +175,9 @@ def _get_central_longitude(
                         break
 
                     else:
-                        lon[
-                            flip_index : (
-                                relevant_flip_indexes[flip_index_position + 1]
-                            )
-                        ] -= 360
+                        lon[flip_index : (relevant_flip_indexes[flip_index_position + 1])] -= 360
 
-            if (
-                value_after_flip < 0
-            ):  # the trajectory crossed from the east to the west over the dateline
+            if value_after_flip < 0:  # the trajectory crossed from the east to the west over the dateline
                 # if there is only one crossing of the dateline, all values after the crossing need to be adjusted
                 if len(relevant_flip_indexes) == 1:
                     lon[flip_index : len(lon)] += 360
@@ -206,11 +192,7 @@ def _get_central_longitude(
                         break
 
                     else:
-                        lon[
-                            flip_index : (
-                                relevant_flip_indexes[flip_index_position + 1]
-                            )
-                        ] += 360
+                        lon[flip_index : (relevant_flip_indexes[flip_index_position + 1])] += 360
 
         # 4) append the maximum/minimum longitude to their respective list
         min_lons.append(np.nanmin(lon))
@@ -270,9 +252,7 @@ def _analyse_trajectories(
 
     dynamic_domain = longitude_expansion + latitude_expansion
     if verbose:
-        print(
-            f"latitude_expansion = {latitude_expansion}\nlongitude expansion = {longitude_expansion}"
-        )
+        print(f"latitude_expansion = {latitude_expansion}\nlongitude expansion = {longitude_expansion}")
         print(f"dynamic domain: {dynamic_domain}")
 
     return central_lontigude, dynamic_domain
@@ -304,7 +284,7 @@ def _create_plot(traj_dict, central_longitude, dynamic_domain):
             dynamic_domain[2] - offset,
             dynamic_domain[3] + offset,
         ],
-        #in the following line i substituted 0 with the second central_longitude
+        # in the following line i substituted 0 with the second central_longitude
         ccrs.PlateCarree(central_longitude=central_longitude),
     )
 
@@ -316,9 +296,7 @@ def _create_plot(traj_dict, central_longitude, dynamic_domain):
         ax.plot(lon, lat, transform=ccrs.Geodetic())
 
     plt.title(f"plate carree w/ centr. lon: {central_longitude}")
-    plt.savefig(
-        f"src/pytrajplot/plotting/analyse_trajectories/test_plots/central_longtitude_{central_longitude}.png"
-    )
+    plt.savefig(f"src/pytrajplot/plotting/analyse_trajectories/test_plots/central_longtitude_{central_longitude}.png")
     plt.close()
 
     return

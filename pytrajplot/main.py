@@ -1,4 +1,5 @@
 """Command line interface of pytrajplot."""
+
 from typing import Tuple, Dict
 import logging
 import os
@@ -28,6 +29,7 @@ def print_version(ctx: click.Context, _param: click.Parameter, value: bool) -> N
     if value:
         click.echo(__version__)
         ctx.exit(0)
+
 
 def interpret_options(start_prefix: str, traj_prefix: str, info_name: str, language: str) -> Tuple[Dict[str, str], str]:
     """Reformat command line inputs.
@@ -89,9 +91,7 @@ def _run_pytrajplot(
         info_name=info_name,
         language=language,
     )
-    trajectory_dict, plot_info_dict = check_input_dir(
-        input_dir=input_dir, prefix_dict=prefix_dict, separator=separator
-    )
+    trajectory_dict, plot_info_dict = check_input_dir(input_dir=input_dir, prefix_dict=prefix_dict, separator=separator)
     generate_pdf(
         trajectory_dict=trajectory_dict,
         plot_info_dict=plot_info_dict,
@@ -101,6 +101,7 @@ def _run_pytrajplot(
         domains=domain,
         output_types=datatype,
     )
+
 
 @click.command()
 @click.argument("input_dir", type=click.Path(), required=False, default=None)
@@ -283,11 +284,35 @@ def cli(
         with tempfile.TemporaryDirectory() as tmp_input, tempfile.TemporaryDirectory() as tmp_output:
             logger.info("Downloading input from s3://%s/%s", s3_input_bucket, s3_input_prefix)
             download_s3_prefix(s3_client, s3_input_bucket, s3_input_prefix, tmp_input)
-            _run_pytrajplot(tmp_input, tmp_output, info_name, start_prefix, traj_prefix, separator, language, domain, datatype, ssm_parameter_path)
-            logger.info("Uploading output to s3://%s/%s (metadata: %s)", s3_output_bucket, s3_output_prefix, s3_metadata)
+            _run_pytrajplot(
+                tmp_input,
+                tmp_output,
+                info_name,
+                start_prefix,
+                traj_prefix,
+                separator,
+                language,
+                domain,
+                datatype,
+                ssm_parameter_path,
+            )
+            logger.info(
+                "Uploading output to s3://%s/%s (metadata: %s)", s3_output_bucket, s3_output_prefix, s3_metadata
+            )
             upload_dir_to_s3(s3_client, tmp_output, s3_output_bucket, s3_output_prefix, metadata=s3_metadata)
         logger.info("Output files uploaded successfully!")
     else:
         if input_dir is None or output_dir is None:
             raise click.UsageError("input_dir and output_dir are required when not using S3 mode.")
-        _run_pytrajplot(input_dir, output_dir, info_name, start_prefix, traj_prefix, separator, language, domain, datatype, ssm_parameter_path)
+        _run_pytrajplot(
+            input_dir,
+            output_dir,
+            info_name,
+            start_prefix,
+            traj_prefix,
+            separator,
+            language,
+            domain,
+            datatype,
+            ssm_parameter_path,
+        )
