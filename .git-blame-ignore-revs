@@ -1,0 +1,6 @@
+# Commits ignored by git blame (formatting-only changes).
+# GitHub uses this file automatically; locally run once per clone:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# DT-245 reformat code with ruff
+0943289c35dd08b6bd6448749b3d65fe8da7c533
