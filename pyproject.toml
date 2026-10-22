@@ -31,16 +31,15 @@ pylint = "^3.3.8"
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
 recommonmark = "^0.7.1"
+ruff = ">=0.15.20,<0.16.0"
 sphinx = "^8.2.3"
 sphinx-autoapi = "^3.6.0"
-yapf = "^0.43.0"
 
 [tool.poetry.scripts]
 pytrajplot = "pytrajplot.main:cli"
 
-[tool.yapf]
-based_on_style = "pep8"
-column_limit = "120"
+[tool.ruff]
+line-length = 120
 
 [tool.pylint.master]
 disable = [

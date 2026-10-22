@@ -22,6 +22,15 @@ default:
                 - --build-arg
                 - VERSION=${var.semanticVersion}
               pullAlways: false
+  - verify:
+      - format:
+          - pythonContainerRun:
+              imageName: ${var.containerImageName}-tester
+              imageTag: ${var.semanticVersion}
+              pullAlways: false
+              packageManager: ''
+              removeLocalImage: false
+              commands: ruff format --check || { echo "Format check failed. Run 'ruff format' to fix."; exit 1; }
   - test:
       - unit:
           - pythonContainerTest:
@@ -62,8 +71,8 @@ local:
       - docs:
           - pythonLocalDocs:
       - format:
-          - pythonLocalFormat:
-              inPlace: true
+          - pythonLocalRun:
+              commands: ruff format
   - test:
       - unit:
           - pythonLocalTest:
