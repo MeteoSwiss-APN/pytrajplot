@@ -39,9 +39,7 @@ def altitude_limits(plot_dict, max_start_altitude, altitude_levels):
         unit = "hPa"  # unit for the HRES case
 
         while i <= altitude_levels:
-            max_altitude_array.append(
-                np.min(plot_dict["altitude_" + str(i)]["traj_0"]["z"])
-            )
+            max_altitude_array.append(np.min(plot_dict["altitude_" + str(i)]["traj_0"]["z"]))
             i += 1
 
         if np.min(max_altitude_array) >= max_start_altitude:
@@ -52,9 +50,7 @@ def altitude_limits(plot_dict, max_start_altitude, altitude_levels):
     else:
         unit = "m"
         while i <= altitude_levels:
-            max_altitude_array.append(
-                np.max(plot_dict["altitude_" + str(i)]["traj_0"]["z"])
-            )
+            max_altitude_array.append(np.max(plot_dict["altitude_" + str(i)]["traj_0"]["z"]))
             i += 1
 
         if np.max(max_altitude_array) <= max_start_altitude:
@@ -168,9 +164,7 @@ def generate_altitude_plot(
             xstart = x[0]
 
             linestyle = subplot_properties_dict[sub_index]
-            alpha = plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)][
-                "alpha"
-            ]
+            alpha = plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"]
 
             ax.plot(
                 x,
@@ -184,8 +178,7 @@ def generate_altitude_plot(
             # this if statement differentiates between main & side trajectories
             # alternatively: if traj==0 should also work.
             if (
-                plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"]
-                == 1
+                plot_dict["altitude_" + str(alt_index)]["traj_" + str(traj)]["alpha"] == 1
             ):  # only add legend & startpoint for the main trajectories
                 ax.plot(
                     xstart,

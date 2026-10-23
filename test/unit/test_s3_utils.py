@@ -1,4 +1,5 @@
 """Unit tests for pytrajplot.s3_utils."""
+
 import pytest
 from unittest.mock import MagicMock
 from botocore.exceptions import ClientError
@@ -15,9 +16,7 @@ class TestDownloadS3Prefix:
 
     def _make_paginator(self, pages: list[list[dict]]) -> MagicMock:
         paginator = MagicMock()
-        paginator.paginate.return_value = [
-            {"Contents": page} for page in pages
-        ]
+        paginator.paginate.return_value = [{"Contents": page} for page in pages]
         return paginator
 
     def test_downloads_files_to_local_dir(self, tmp_path):
@@ -29,19 +28,13 @@ class TestDownloadS3Prefix:
         download_s3_prefix(s3, "my-bucket", "prefix/", str(tmp_path))
 
         assert s3.download_file.call_count == 2
-        s3.download_file.assert_any_call(
-            "my-bucket", "prefix/subdir/file.txt", str(tmp_path / "subdir" / "file.txt")
-        )
-        s3.download_file.assert_any_call(
-            "my-bucket", "prefix/other.txt", str(tmp_path / "other.txt")
-        )
+        s3.download_file.assert_any_call("my-bucket", "prefix/subdir/file.txt", str(tmp_path / "subdir" / "file.txt"))
+        s3.download_file.assert_any_call("my-bucket", "prefix/other.txt", str(tmp_path / "other.txt"))
 
     def test_skips_prefix_itself(self, tmp_path):
         """Objects whose key equals the prefix (no relative path) are skipped."""
         s3 = MagicMock()
-        s3.get_paginator.return_value = self._make_paginator(
-            [[{"Key": "prefix/"}, {"Key": "prefix/file.txt"}]]
-        )
+        s3.get_paginator.return_value = self._make_paginator([[{"Key": "prefix/"}, {"Key": "prefix/file.txt"}]])
 
         download_s3_prefix(s3, "my-bucket", "prefix/", str(tmp_path))
 
@@ -71,6 +64,7 @@ class TestDownloadS3Prefix:
 
         with pytest.raises(RuntimeError, match="Access denied"):
             download_s3_prefix(s3, "my-bucket", "prefix/", str(tmp_path))
+
 
 class TestUploadDirToS3:
     """Tests for upload_dir_to_s3."""

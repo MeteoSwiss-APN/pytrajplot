@@ -1,4 +1,5 @@
 """Unit tests for S3 mode of the pytrajplot CLI."""
+
 from unittest.mock import MagicMock, patch
 from click.testing import CliRunner
 
@@ -6,10 +7,14 @@ from pytrajplot.main import cli, __version__
 
 
 S3_ARGS = [
-    "--s3-input-bucket", "input-bucket",
-    "--model-name", "ICON-CH1-EPS",
-    "--model-base-time", "202504030900",
-    "--s3-output-bucket", "output-bucket",
+    "--s3-input-bucket",
+    "input-bucket",
+    "--model-name",
+    "ICON-CH1-EPS",
+    "--model-base-time",
+    "202504030900",
+    "--s3-output-bucket",
+    "output-bucket",
 ]
 
 
@@ -36,10 +41,14 @@ class TestS3ModeCli:
 
     def test_invalid_model_base_time(self):
         args = [
-            "--s3-input-bucket", "input-bucket",
-            "--model-name", "ICON-CH1-EPS",
-            "--model-base-time", "test-date",
-            "--s3-output-bucket", "output-bucket",
+            "--s3-input-bucket",
+            "input-bucket",
+            "--model-name",
+            "ICON-CH1-EPS",
+            "--model-base-time",
+            "test-date",
+            "--s3-output-bucket",
+            "output-bucket",
         ]
         result = self.call(args)
         assert result.exit_code != 0
@@ -142,10 +151,14 @@ class TestS3ModeCli:
         """IFS model sets product_type to forecast-ifs-trajectories."""
         mock_boto3.return_value = MagicMock()
         ifs_args = [
-            "--s3-input-bucket", "input-bucket",
-            "--model-name", "IFS",
-            "--model-base-time", "202504030900",
-            "--s3-output-bucket", "output-bucket",
+            "--s3-input-bucket",
+            "input-bucket",
+            "--model-name",
+            "IFS",
+            "--model-base-time",
+            "202504030900",
+            "--s3-output-bucket",
+            "output-bucket",
         ]
 
         self.call(ifs_args)

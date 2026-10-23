@@ -22,7 +22,7 @@ import os
 import sys
 
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(".."))
 
 # -- General configuration ---------------------------------------------
 
@@ -32,22 +32,22 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'autoapi.extension', 'sphinx.ext.viewcode', 'recommonmark']
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "autoapi.extension", "sphinx.ext.viewcode", "recommonmark"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'pytrajplot'
-copyright = u"2025, MeteoSwiss"
-author = u"Victoria Cherkas"
+project = "pytrajplot"
+copyright = "2025, MeteoSwiss"
+author = "Victoria Cherkas"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -64,10 +64,10 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -77,7 +77,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'pydata_sphinx_theme'
+html_theme = "pydata_sphinx_theme"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -88,12 +88,12 @@ html_theme = 'pydata_sphinx_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pytrajplot/doc'
+htmlhelp_basename = "pytrajplot/doc"
 
 # -- Options for LaTeX output ------------------------------------------
 
@@ -101,15 +101,12 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -119,18 +116,14 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pytrajplot.tex',
-     u'pytrajplot Documentation',
-     u'Victoria Cherkas', 'manual'),
+    (master_doc, "pytrajplot.tex", "pytrajplot Documentation", "Victoria Cherkas", "manual"),
 ]
 
 # -- Options for manual page output ------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, 'pytrajplot',
-              u'pytrajplot Documentation',
-              [author], 1)]
+man_pages = [(master_doc, "pytrajplot", "pytrajplot Documentation", [author], 1)]
 
 # -- Options for Texinfo output ----------------------------------------
 
@@ -138,11 +131,15 @@ man_pages = [(master_doc, 'pytrajplot',
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'pytrajplot',
-     u'pytrajplot Documentation', author,
-     'pytrajplot',
-     'Python-based tool to visualize trajectories calculated with LAGRANTO',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "pytrajplot",
+        "pytrajplot Documentation",
+        author,
+        "pytrajplot",
+        "Python-based tool to visualize trajectories calculated with LAGRANTO",
+        "Miscellaneous",
+    ),
 ]
 
 # improve parameters description
@@ -152,5 +149,5 @@ napoleon_use_param = False
 add_module_names = False
 
 # autoapi module configuration
-autoapi_dirs = ['../pytrajplot']
-autoapi_options = ['members', 'undoc-members', 'show-inheritance', 'show-module-summary', 'imported-members']
+autoapi_dirs = ["../pytrajplot"]
+autoapi_options = ["members", "undoc-members", "show-inheritance", "show-module-summary", "imported-members"]

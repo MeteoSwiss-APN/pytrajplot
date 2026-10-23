@@ -1,4 +1,4 @@
-FROM dockerhub.apps.cp.meteoswiss.ch/mch/python-3.13:latest AS builder
+FROM dockerhub.apps.cp.meteoswiss.ch/mch/python-3.13:latest-poetry2 AS builder
 ARG VERSION
 LABEL ch.meteoswiss.project=pytrajplot-${VERSION}
 
