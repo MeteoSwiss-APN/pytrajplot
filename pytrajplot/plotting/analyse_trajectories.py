@@ -138,7 +138,8 @@ def _get_central_longitude(traj_dict, sign_flip_trajectories, eastern_longitudes
         if verbose:
             print(f"Trajectory {traj_index} crosses the dateline or prime meridian.")
         # 1) extract longitude pandas series from date-line-crossing trajectory from trajectory dict
-        lon = (traj_dict["traj_" + str(traj_index)]["lon"]).values
+        # copy: the dateline shift below is written in place, and pandas >= 3 returns read-only views
+        lon = (traj_dict["traj_" + str(traj_index)]["lon"]).to_numpy(copy=True)
 
         # 2.1) check at which indexes, the signs of the longitude values flip
         sign_flip_indexes = np.where(np.sign(lon[:-1]) != np.sign(lon[1:]))[0] + 1
