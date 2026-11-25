@@ -24,21 +24,21 @@ Quick steps to add a custom CSS file
 2. Tell Sphinx to include the CSS. Open `doc/conf.py` and ensure `html_static_path` contains `'_static'` (this is usually the default):
 
    ```py
-   html_static_path = ['_static']
+   html_static_path = ["_static"]
    ```
 
    Then add the CSS to be included in the HTML. There are two common ways:
 
    - Preferred (modern Sphinx versions): add the file name to `html_css_files`:
      ```py
-     html_css_files = ['custom.css']
+     html_css_files = ["custom.css"]
      ```
 
    - Or, in `conf.py` provide a `setup` function to register the file (useful if you need conditional logic):
      ```py
      def setup(app):
          # For Sphinx >= 1.8
-         app.add_css_file('custom.css')
+         app.add_css_file("custom.css")
 
          # If you must support older Sphinx (<= 1.7) you can use:
          # app.add_stylesheet('custom.css')
